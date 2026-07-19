@@ -59,15 +59,20 @@ def lr_at_step(step: int,
                peak: float = config.LR_PEAK,
                warmup: int = config.LR_WARMUP_STEPS,
                total: int = config.TOTAL_STEPS,
-               lr_min: float = config.LR_MIN) -> float:
-    """Linear warmup then cosine decay to `lr_min`.
+               alpha_f: float = config.LR_ALPHA_F) -> float:
+    """LMEnt's training LR: linear warmup then cosine decay to ``alpha_f * peak``.
 
-    VERIFY the schedule family and constants against LMEnt's training config;
-    only the *shape* matters for the feature, but get the family right.
+    Mirrors OLMo-core ``olmo_core.optim.scheduler.CosWithWarmup`` (the class used
+    by ``kas_config.json``): for ``t`` past warmup with horizon ``t_max``,
+        lr = alpha_f*peak + (1 - alpha_f)*peak * 0.5*(1 + cos(pi * t/t_max)).
+    Constants come from the real config (see config.py); confirm ``alpha_f`` for
+    the 1B run at checkout.  If OLMo-core is installed, prefer its scheduler
+    directly rather than this re-derivation.
     """
-    if step < warmup:
-        return peak * step / max(1, warmup)
-    progress = (step - warmup) / max(1, total - warmup)
-    progress = min(1.0, max(0.0, progress))
-    cosine = 0.5 * (1.0 + math.cos(math.pi * progress))
-    return lr_min + (peak - lr_min) * cosine
+    if warmup > 0 and step < warmup:
+        return peak * step / warmup
+    t = step - warmup
+    t_max = max(1, total - warmup)
+    frac = min(1.0, max(0.0, t / t_max))
+    cosine = 0.5 * (1.0 + math.cos(math.pi * frac))
+    return alpha_f * peak + (1.0 - alpha_f) * peak * cosine

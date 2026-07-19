@@ -12,11 +12,13 @@ Built on the [LMEnt](https://github.com/dhgottesman/LMEnt) suite
 ## Layout
 
 ```
-config.py                  # all IDs, checkpoint steps, paths, LR schedule (VERIFY tags)
+config.py                  # all IDs, checkpoint steps, paths, LR schedule, few-shot settings
 src/
-  data.py                  # load dataset + checkpoints + tokenizer, prompt templates
-  schedule.py              # batch_indices -> chunk->steps index; LR at step
-  recall.py                # per-checkpoint substring recall + gold-answer prob
+  lment_popqa.py           # SINGLE home for the olmes coupling: cloze prompts (by prop_id),
+                           #   few-shot context, exact-match scoring, generation kwargs
+  data.py                  # load dataset + checkpoints + tokenizer; prompt wrappers -> lment_popqa
+  schedule.py              # batch_indices -> chunk->steps index; LR at step (real kas_config)
+  recall.py                # per-checkpoint cloze recall (olmes scoring) + gold-answer prob
   features/
     timeline.py            # recency, spacing/burstiness, LR-at-appearance, epoch position
     competition.py         # subject/answer/shared counts; interference post-learning
@@ -52,6 +54,18 @@ loaded on demand by subfolder) and the `LMEnt-Dataset` pieces you need —
 `dataset-cache` (batch indices, ~0.6 GB) at minimum; `dataset-metadata`
 (mentions) only for the text-mention features.
 
+**Prompts & scoring come from LMEnt's olmes fork.** `src/lment_popqa.py` uses the
+real `PopQACloze` task when olmes is installed (authoritative), and otherwise a
+faithful fallback transcribed from the fork so it runs without it. To use the
+real harness:
+
+```bash
+cd LMEnt
+git submodule update --init olmes            # prompts + scoring (PopQACloze)
+git submodule update --init OLMo-core         # only to read kas_config.json / scheduler
+pip install -e olmes                          # install AFTER the env so the fork wins
+```
+
 ## Run order
 
 ```bash
@@ -80,8 +94,11 @@ fact that is never correct).
 |--------|------|----------------|---------|
 | `id` | int64 | dataset fact id | joins to `popqa-kas` |
 | `step` | int | one of `CHECKPOINT_STEPS` (0 … 109672) | checkpoint evaluated |
-| `correct` | bool | `True`/`False` | greedy decode contains an acceptable answer |
-| `gold_prob` | float | `[0, 1]` | length-normalized prob of the gold object tokens |
+| `correct` | bool | `True`/`False` | olmes `PopQACloze` exact-match on the cloze generation |
+| `excluded` | bool | `True`/`False` | olmes drops these (answer already in the query) — filter out in EDA |
+| `gold_prob` | float | `[0, 1]` | length-normalized prob of the gold object tokens (zero-shot cloze) |
+| `prompt` | str | cloze text | exact prompt fed to the model for `correct` (audit/repro) |
+| `generation` | str | model output | model's decoded answer, post stop-truncation (audit/repro) |
 
 ### `panel.parquet` — one row per (fact × checkpoint) (`scripts/build_feature_table.py`)
 
@@ -191,18 +208,35 @@ columns above (at `FINAL_STEP`) plus:
 
 ## ⚠️ Verify against the real download
 
-Everything below was inferred from the repo/dataset pages and must be confirmed
-once the data is local (all isolated in `config.py` or tagged `# VERIFY`):
+**Resolved** (from LMEnt / the paper, no longer guessed):
+- **Zero-shot cloze evaluation** — the paper (§5.1, §B.6) evaluates knowledge with
+  zero-shot cloze prompts (not instruction-tuned), and the learning-dynamics
+  analysis this project builds on uses that. `config.NUM_SHOTS = 0`. (15-shot is
+  the OLMES *benchmark* default, kept configurable for reproducing §5.1's baseline
+  table only.)
+- Prompts, cloze templates (by `prop_id`), exact-match scoring, decode length/stop
+  — all from olmes `PopQACloze` via `src/lment_popqa.py`.
+- **LR peak `5e-3`, warmup `1000`, batch `32768`** — from the paper §B.4 (the
+  authoritative 1B config; `kas_config.json` on `main` is the 170M *example*).
+- **1B = 16 layers, 2048 hidden** (§B.4) — validates the internal-features assumptions.
+- PopQA-KAS schema (`prop_id`, `possible_answers` as a list, the `*_chunks`
+  fields) — confirmed by loading the dataset (see notebook §1).
 
-- **LR schedule** constants (`LR_PEAK`, `LR_WARMUP_STEPS`, family) — read from the
-  training config; only the *shape* feeds the feature, but get the family right.
+**Still confirm at checkout** (isolated in `config.py` / tagged `# VERIFY`):
+- **`LR_PEAK` superscript** — §B.4 reads `5e-3`; superscripts are easy to misread
+  on the PDF, so eyeball it. Low-risk: the LR feature depends on the curve *shape*,
+  not absolute scale.
+- **`LR_ALPHA_F`** (cosine floor) — §B.4 omits it; OLMo-core's `CosWithWarmup`
+  defaults to `0.1`.
+- **olmes symbols** — the `TASK_REGISTRY` key (`popqa_cloze`) and
+  `fewshot_context` split, once the submodule is checked out. The fallback in
+  `lment_popqa.py` mirrors the fork's transcribed logic but the installed task is
+  authoritative.
 - **`batch_indices` path & shape** — assumed `dataset-cache/batch_indices.npy`,
   step-indexed array of chunk-ID arrays.
-- **PopQA-KAS column names** — `subject_chunks`/`shared_chunks`/etc.; check
-  `dataset.features`.
+- **Model internals** (`features/internal.py::_final_norm_and_head`) — confirmed
+  as `model.model.norm` / `model.lm_head` for HF `Olmo2ForCausalLM`; sanity-check
+  with `print(model)` on the real checkpoint.
 - **Mention schema** (`features/text.py::MentionProvider`) — ReFinED (explicit)
-  vs. Maverick (coref); token vs. char offsets.
-- **Model internals** (`features/internal.py::_final_norm_and_head`) — final norm
-  and `lm_head` attribute names for the OLMo-core architecture.
-- **Relation templates** (`data.py::RELATION_TEMPLATES`) — confirm the exact
-  `prop` strings used in the data.
+  vs. Maverick (coref); token vs. char offsets. *(Out of scope per the plan —
+  the 47 GB tokenized dataset isn't being pulled.)*

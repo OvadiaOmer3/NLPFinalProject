@@ -36,13 +36,36 @@ def checkpoint_subfolder(step: int) -> str:
 # --------------------------------------------------------------------------- #
 # Learning-rate schedule
 # --------------------------------------------------------------------------- #
-# OLMo-core style linear-warmup + cosine decay.  The exact peak LR / warmup are
-# read from the training config if available; the constants below are the
-# published OLMo-1B defaults and MUST be confirmed against LMEnt's config.
-# VERIFY: peak_lr, warmup_steps, min_lr against the checkpoint's config / paper.
-LR_PEAK = 4.0e-4          # VERIFY
-LR_WARMUP_STEPS = 2000    # VERIFY
-LR_MIN = 0.0              # VERIFY (cosine floor)
+# From the LMEnt paper's training details (§B.4), which is authoritative for the
+# 1B run -- NOT kas_config.json (that file is the OLMo2-170M *example*, lr=3e-4).
+# §B.4: "All LMEnt models were trained ... with a global batch size of 32,768,
+# rank batch size 8,192, peak learning rate of 5e-3, weight decay of 0.05, and
+# 1,000 warmup steps."  OLMo-2 architecture => linear warmup + cosine decay.
+# VERIFY the peak-LR superscript on the PDF (5e-3 vs 5e-4 is easy to misread);
+# the LR feature only depends on the curve *shape*, so absolute scale is low-risk.
+# alpha_f (cosine floor fraction) is not stated; OLMo-core CosWithWarmup defaults
+# to 0.1  ->  LR_MIN = alpha_f * LR_PEAK.
+LR_PEAK = 5.0e-3
+LR_WARMUP_STEPS = 1000
+LR_ALPHA_F = 0.1                 # VERIFY (cosine floor fraction)
+LR_MIN = LR_ALPHA_F * LR_PEAK
+
+
+# --------------------------------------------------------------------------- #
+# PopQA cloze evaluation (olmes PopQACloze)
+# --------------------------------------------------------------------------- #
+# The paper evaluates knowledge with ZERO-SHOT cloze prompts (§5.1, §B.6): models
+# are not instruction-tuned, so each question becomes a cloze whose answer is the
+# next phrase; the "learned" criterion is just completing that cloze correctly.
+# So NUM_SHOTS = 0 matches the paper's knowledge-acquisition / learning-dynamics
+# analysis (which is what this project studies).  The 15-shot setting is the
+# OLMES *benchmark* default (for leaderboard comparison in §5.1's baseline table)
+# -- switch to it only to reproduce those benchmark numbers.  The seed is held
+# FIXED across checkpoints so any demonstrations are identical at every step.
+NUM_SHOTS = 0
+FEWSHOT_SEED = 1234
+# Decode length / stop sequences come from olmes generation_kwargs
+# (max_gen_toks=15, stop=["\n\n"]) via src.lment_popqa -- no local constant.
 
 
 # --------------------------------------------------------------------------- #
@@ -72,5 +95,4 @@ for _d in (ARTIFACT_DIR, RECALL_DIR, FEATURE_DIR, INTERNAL_DIR):
 # --------------------------------------------------------------------------- #
 DEVICE = os.environ.get("LMENT_DEVICE", "cuda")
 DTYPE = "bfloat16"
-MAX_NEW_TOKENS = 16          # greedy decode length for substring-match recall
 SEED = 0

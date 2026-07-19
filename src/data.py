@@ -52,67 +52,40 @@ def load_tokenizer():
 
 
 def load_checkpoint(step: int, device: str | None = None):
-    """Load the model weights for a single checkpoint step onto `device`."""
-    device = device or config.DEVICE
-    dtype = getattr(torch, config.DTYPE)
-    model = AutoModelForCausalLM.from_pretrained(
-        config.MODEL_ID,
-        subfolder=config.checkpoint_subfolder(step),
-        torch_dtype=dtype,
-    )
+    """Load the model weights for a single checkpoint step onto `device`.
+
+    Honors LMENT_DEVICE / LMENT_DTYPE env overrides (e.g. cpu / float32 for a
+    machine without CUDA).  Uses the `dtype=` kwarg (transformers >= 5) with a
+    `torch_dtype=` fallback for older versions.
+    """
+    import os
+    device = device or os.environ.get("LMENT_DEVICE", config.DEVICE)
+    dtype = getattr(torch, os.environ.get("LMENT_DTYPE", config.DTYPE))
+    sub = config.checkpoint_subfolder(step)
+    try:
+        model = AutoModelForCausalLM.from_pretrained(config.MODEL_ID, subfolder=sub, dtype=dtype)
+    except TypeError:
+        model = AutoModelForCausalLM.from_pretrained(config.MODEL_ID, subfolder=sub, torch_dtype=dtype)
     model.to(device).eval()
     return model
 
 
 # --------------------------------------------------------------------------- #
-# Prompt construction
+# Prompt construction  (single-sourced from olmes via src.lment_popqa)
 # --------------------------------------------------------------------------- #
-# Cloze templates per PopQA relation.  The template ends exactly where the
-# answer (object) should be generated, which is what we need for gold-answer
-# probability, subject-last-token hidden states, and logit lens.
-# Keyed by the `prop` string.  VERIFY the exact relation strings in the data.
-RELATION_TEMPLATES: dict[str, str] = {
-    "occupation":      "{subj} works as a",
-    "place of birth":  "{subj} was born in the city of",
-    "genre":           "The genre of {subj} is",
-    "father":          "The father of {subj} is",
-    "country":         "{subj} is located in the country of",
-    "producer":        "The producer of {subj} is",
-    "director":        "The director of {subj} is",
-    "capital of":      "{subj} is the capital of",
-    "screenwriter":    "The screenwriter of {subj} is",
-    "composer":        "The composer of {subj} is",
-    "color":           "The color of {subj} is",
-    "religion":        "The religion of {subj} is",
-    "sport":           "{subj} plays the sport of",
-    "author":          "The author of {subj} is",
-    "mother":          "The mother of {subj} is",
-    "capital":         "The capital of {subj} is",
-}
+# Prompts follow the paper's methodology (cloze, few-shot) and are built by the
+# olmes PopQACloze task.  These thin wrappers keep call sites readable.
+def prompt_for(row) -> str:
+    """Primary recall prompt: the few-shot cloze block (olmes)."""
+    from src import lment_popqa
+    return lment_popqa.make_prompt(row)
 
 
-def cloze_prompt(subj: str, prop: str) -> str:
-    """Cloze prompt that stops right before the answer span."""
-    tmpl = RELATION_TEMPLATES.get(prop)
-    if tmpl is None:
-        # Fallback: use the natural-language question with an answer cue.
-        return None
-    return tmpl.format(subj=subj)
-
-
-def qa_prompt(question: str) -> str:
-    """Question-answer prompt used for the primary substring-match recall."""
-    return f"Q: {question}\nA:"
-
-
-def paraphrase_prompts(subj: str, prop: str, question: str) -> list[str]:
-    """A small set of phrasings for the paraphrase-stability feature."""
-    prompts = [qa_prompt(question)]
-    cloze = cloze_prompt(subj, prop)
-    if cloze is not None:
-        prompts.append(cloze)
-        prompts.append(f"{cloze} ")  # trivial surface variant
-    return prompts
+def zero_shot_cloze(row) -> str:
+    """Unconditioned cloze that stops exactly before the answer.  Used for
+    gold_prob, logit lens, and hidden-state extraction."""
+    from src import lment_popqa
+    return lment_popqa.zero_shot_cloze(row)
 
 
 def subject_last_token_index(prompt: str, subj: str, tokenizer) -> int | None:

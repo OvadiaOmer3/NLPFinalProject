@@ -11,26 +11,32 @@ the fact is represented, not just *whether* the answer is correct:
                                consecutive checkpoints
   * paraphrase stability    -- does the fact survive rephrasing?
 
-All functions take an already-loaded model.  Hidden states are extracted at the
-subject's last token (for probe/drift) or the last prompt token (for logit lens
-/ margin, i.e. the position that predicts the answer).
+Prompts are single-sourced from olmes (``src.lment_popqa`` via ``src.data``):
+the zero-shot cloze is used for probe / logit lens / hidden states so the answer
+position is unconditioned.
 """
 from __future__ import annotations
 
 import numpy as np
 import torch
 
-import config
 from src import data as D
+from src import lment_popqa
 from src import recall
 
 
 # --------------------------------------------------------------------------- #
-# Model internals accessors (OLMo-core architecture; adjust if VERIFY differs)
+# Model internals accessors (HF Olmo2ForCausalLM)
 # --------------------------------------------------------------------------- #
 def _final_norm_and_head(model):
+    """Final RMSNorm + LM head for the OLMo2 architecture LMEnt ships.
+
+    For ``transformers`` ``Olmo2ForCausalLM`` these are ``model.model.norm`` and
+    ``model.lm_head`` (kept as a getattr with a tied-embeddings fallback for the
+    head).  VERIFY once against ``print(model)`` on the real checkpoint.
+    """
     base = getattr(model, "model", model)
-    norm = getattr(base, "norm", None) or getattr(base, "final_layer_norm", None)
+    norm = getattr(base, "norm", None)
     head = getattr(model, "lm_head", None)
     if head is None:                      # tied embeddings fallback
         head = model.get_output_embeddings()
@@ -49,15 +55,13 @@ def _hidden_states(model, tokenizer, prompt):
 # Subject-token hidden states (for probing + drift)
 # --------------------------------------------------------------------------- #
 @torch.no_grad()
-def subject_hidden_states(model, tokenizer, subj, prop):
+def subject_hidden_states(model, tokenizer, row):
     """Per-layer hidden state at the subject's last token. -> [L+1, H] float32.
 
     Returns None if the subject can't be located in the cloze prompt.
     """
-    prompt = D.cloze_prompt(subj, prop)
-    if prompt is None:
-        return None
-    idx = D.subject_last_token_index(prompt, subj, tokenizer)
+    prompt = D.zero_shot_cloze(row)
+    idx = D.subject_last_token_index(prompt, row["subj"], tokenizer)
     if idx is None:
         return None
     _, hs, _ = _hidden_states(model, tokenizer, prompt)
@@ -69,14 +73,11 @@ def subject_hidden_states(model, tokenizer, subj, prop):
 # Logit lens: resolution depth + margin
 # --------------------------------------------------------------------------- #
 @torch.no_grad()
-def logit_lens_features(model, tokenizer, subj, prop, obj):
+def logit_lens_features(model, tokenizer, row):
     """First layer whose top-1 (at the answer position) is the gold token, plus
     the final-layer margin between the gold token and the runner-up."""
-    prompt = D.cloze_prompt(subj, prop)
-    if prompt is None:
-        return {"resolution_depth": np.nan, "answer_margin": np.nan,
-                "resolution_depth_frac": np.nan}
-    gold_ids = D.answer_token_ids(obj, tokenizer)
+    prompt = D.zero_shot_cloze(row)
+    gold_ids = D.answer_token_ids(row["obj"], tokenizer)
     if not gold_ids:
         return {"resolution_depth": np.nan, "answer_margin": np.nan,
                 "resolution_depth_frac": np.nan}
@@ -131,19 +132,32 @@ def representation_drift(vecs_t, vecs_tp1):
 # --------------------------------------------------------------------------- #
 # Paraphrase stability
 # --------------------------------------------------------------------------- #
+def paraphrase_prompts(row) -> list[str]:
+    """A small set of surface phrasings of the same fact for the stability test:
+    the olmes template cloze plus 1-2 natural-language variants from the PopQA
+    question.  (olmes ships one template per relation, so the alternates come
+    from the dataset's question field.)"""
+    prompts = [D.zero_shot_cloze(row)]
+    q = row.get("question")
+    if isinstance(q, str) and q:
+        prompts.append(q.rstrip(" ?") + " is")    # declarative variant
+        prompts.append(q if q.endswith(" ") else q + " ")
+    return prompts
+
+
 @torch.no_grad()
 def paraphrase_stability(model, tokenizer, row):
-    """Run 2-3 phrasings; report gold-prob spread and correctness agreement.
+    """Run the phrasings; report gold-prob spread and correctness agreement.
 
     A fact that only works under one exact phrasing is likely a memorized
     surface pattern -- the guess is that those die first.
     """
-    prompts = D.paraphrase_prompts(row["subj"], row["prop"], row["question"])
-    answers = recall.acceptable_answers(row)
+    prompts = paraphrase_prompts(row)
     probs, corrects = [], []
     for p in prompts:
         probs.append(recall.gold_answer_logprob(model, tokenizer, p, row["obj"]))
-        corrects.append(recall.greedy_correct(model, tokenizer, p, answers))
+        gen = recall.greedy_generation(model, tokenizer, p)
+        corrects.append(lment_popqa.is_correct(row, gen))
     probs = np.array(probs, dtype=float)
     return {
         "paraphrase_n": len(prompts),
