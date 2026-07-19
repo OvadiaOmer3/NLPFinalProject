@@ -1,0 +1,8 @@
+check in LMEnt code:
+1. popqa questions: is there a dataset with cloze questios or they used in the code the same RELATION_TEMPLATES?
+2. acceptable_answers: how they did in their code? 
+3. greedy_correct: what is max_new_tokens in their code?
+4. infer features: add hidden state, active neurons etc (more info about inner states), "distance" of correct logit from highest logit.
+5. context features: add what was the mose seen proerty in the checkpoint.. what else was learned that might caused the forgetting of cpecific fact.
+** check all occuranced o VERIFY in the code!
+
