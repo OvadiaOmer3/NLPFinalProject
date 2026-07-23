@@ -1,7 +1,6 @@
 check in LMEnt code:
-** look at C:\Users\rotem\master\nlp\NLPFinalProject\src\features internal and text.py arent used.
-1. infer features: add hidden state, active neurons etc (more info about inner states), "distance" of correct logit from highest logit.
-2. context features: add what was the most seen property in the checkpoint.. what else was learned that might caused the forgetting of cpecific fact.
-3. maybe check if fact hasn't seen yet (until this checkpoint) than dont do inference.
-** check all occuranced o VERIFY in the code!
+1. context features: add what was the most seen property in the checkpoint.. what else was learned that might caused the forgetting of cpecific fact.
+2. maybe check if fact hasn't seen yet (until this checkpoint) than dont do inference.
+3. a lot of facts have shared_chunks=0 (~2k). maybe we can filter them out in our large scale run? Do they have any meaningful info? I added --min-shared-chunks arg for eval_checkpoints
+** check all occuranced of VERIFY in the code!
 

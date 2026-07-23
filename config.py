@@ -79,6 +79,11 @@ DATASET_DIR = DATA_ROOT / "LMEnt-Dataset"
 BATCH_INDICES_PATH = DATASET_DIR / "dataset-cache" / "batch_indices.npy"  # VERIFY name
 MENTIONS_DIR = DATASET_DIR / "dataset-metadata"      # ReFinED + Maverick mentions
 TOKENIZED_DIR = DATASET_DIR / "dataset-tokenized"    # *.csv.gz tokenized chunks
+# Glob of the tokenized *.npy files that back the OLMo-core dataset used for the
+# mention features (chunk text + per-chunk entity annotations).  Only needed if
+# you downloaded the full corpus; override with LMENT_TOKENIZED_GLOB.  When no
+# file matches (PopQA-only setup), mention features are skipped.
+TOKENIZED_GLOB = os.environ.get("LMENT_TOKENIZED_GLOB", str(TOKENIZED_DIR / "*.npy"))
 
 # Where we write derived artifacts (Step A/B/C outputs).
 ARTIFACT_DIR = DATA_ROOT / "artifacts"
@@ -96,3 +101,22 @@ for _d in (ARTIFACT_DIR, RECALL_DIR, FEATURE_DIR, INTERNAL_DIR):
 DEVICE = os.environ.get("LMENT_DEVICE", "cuda")
 DTYPE = "bfloat16"
 SEED = 0
+
+# --------------------------------------------------------------------------- #
+# Internal-state extraction (scripts/eval_checkpoints.py --features)
+# --------------------------------------------------------------------------- #
+# Which token positions to dump the full per-layer hidden state for.  "answer"
+# is the cloze's last token (predicts the object); "subject_last" feeds the
+# linear probe + representation drift.  Storage per position ~= n_facts *
+# (n_layers+1) * hidden * 2 bytes (f16); for LMEnt-1B (17 x 2048) that's ~68 KB
+# per fact per checkpoint per position.  Add "all" handling in the script only if
+# you really need every token (blows up ~10-15x).
+HIDDEN_POSITIONS = ("answer", "subject_last")
+# |activation| threshold for counting an MLP neuron as "active".
+NEURON_EPS = 1e-3
+# If set to an int k, also dump the indices of the top-k active MLP neurons per
+# (fact, layer, position) as uint16 -> artifacts/internal/neurons_step{N}_*.npy.
+# Enables neuron-overlap / circuit-churn analysis.  Storage ~= n_facts * n_layers
+# * n_positions * k * 2 bytes (~4 KB per fact per checkpoint at k=64, both
+# positions -- ~3% of the hidden dump).  None = off.  Override per-run with --top-k.
+NEURON_TOPK = None

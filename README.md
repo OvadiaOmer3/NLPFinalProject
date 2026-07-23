@@ -11,9 +11,13 @@ Built on the [LMEnt](https://github.com/dhgottesman/LMEnt) suite
 
 ## Layout
 
+The repo is organized around two phases: **feature_extraction/** runs the model
+to *produce* artifacts, **analysis/** *consumes* them. `src/` is the shared
+library both phases import.
+
 ```
 config.py                  # all IDs, checkpoint steps, paths, LR schedule, few-shot settings
-src/
+src/                       # shared library (imported by both phases)
   lment_popqa.py           # SINGLE home for the olmes coupling: cloze prompts (by prop_id),
                            #   few-shot context, exact-match scoring, generation kwargs
   data.py                  # load dataset + checkpoints + tokenizer; prompt wrappers -> lment_popqa
@@ -24,12 +28,15 @@ src/
     competition.py         # subject/answer/shared counts; interference post-learning
     text.py                # answer length, relation, mention explicitness, phrasing variety
     learning.py            # first-learned step, confidence, learning speed (+ leaky_* target-likes)
-    internal.py            # logit-lens depth, answer margin, hidden-state probe, drift, paraphrase
-scripts/
-  eval_checkpoints.py      # Step A.1: recall sweep over all checkpoints  -> artifacts/recall/
+    internal.py            # one-pass extractor: logit-lens depth, next-token geometry,
+                           #   MLP activity, hidden-state probe/drift/paraphrase (+ f16 dump)
+feature_extraction/        # PRODUCES artifacts (run on GPU)
+  eval_checkpoints.py      # Step A.1: recall + internal-state sweep  -> artifacts/recall/ (+ internal/)
   build_feature_table.py   # Step A.2/B: assemble panel.parquet + facts.parquet
-notebooks/
-  01_explore_and_load.ipynb  # end-to-end demo on a single fact
+analysis/                  # CONSUMES artifacts (CPU / notebooks)
+  README.md                # how to load & analyze the artifacts (start here)
+  notebooks/
+    01_explore_and_load.ipynb  # end-to-end demo on a single fact
 ```
 
 ## Feature groups (mapped to the proposal)
@@ -40,7 +47,7 @@ notebooks/
 | Competition from other facts | `features/competition.py` | subject & answer counts **separately**; interference *after* first-learned |
 | What the text looks like | `features/text.py` | answer token length, explicit (EL) vs. coref mentions, phrasing variety, subj–answer distance |
 | How the fact was learned | `features/learning.py` | first-learned step, confidence there, learning speed. `leaky_*` = forgetting/oscillation counts — **EDA only, drop before modeling** |
-| Inside the model | `features/internal.py` | logit-lens resolution depth, answer margin, linear probe, representation drift, paraphrase stability |
+| Inside the model | `features/internal.py` | **one forward pass per (fact, checkpoint)**: logit-lens depth, next-token geometry (margin, top-logit gap, rank, entropy), per-layer residual/MLP-neuron activity (active fraction + participation ratio, at answer & subject), plus f16 hidden-state and optional top-k neuron-index dumps for offline probe / drift / circuit-overlap |
 
 ## Setup
 
@@ -69,14 +76,36 @@ pip install -e olmes                          # install AFTER the env so the for
 ## Run order
 
 ```bash
-# Step A.1 — recall + gold_prob at every checkpoint (GPU; one per checkpoint)
-python scripts/eval_checkpoints.py            # or --steps 0 10000 ... as a Slurm array
+# Step A.1 — recall + internal states at every checkpoint (GPU; one per checkpoint)
+python feature_extraction/eval_checkpoints.py            # or --steps 0 10000 ... as a Slurm array
+#   --no-hidden            skip the f16 hidden-state dump (scalar features only)
+#   --positions answer     dump fewer positions (default: answer subject_last)
+#   --top-k 64             also dump top-k active-neuron indices (off by default)
+#   --limit 100            smoke test on the first 100 facts
+#   --output-dir D:/out    write to an explicit root instead of $LMENT_DATA_ROOT/artifacts
+#                          (cwd-independent -- avoids output landing in the wrong
+#                          place if you run the script from outside the repo root)
+#   --min-shared-chunks 1  drop facts whose subject & answer never co-occur in a
+#                          shared_chunk (~17% of PopQA-KAS, 2,450/14,267) -- they can
+#                          never get a first_learned_step or timeline features since
+#                          there's no exposure to track. Default 0 = keep everything.
+# -> artifacts/recall/recall_step{N}.parquet   (recall + internal scalar/per-layer features)
+# -> artifacts/internal/hidden_step{N}_*.npy   (f16 [n_facts, n_layers+1, hidden] per position)
+# -> artifacts/internal/neurons_step{N}_*.npy  (uint16 [n_facts, n_layers, k]; only with --top-k)
 
 # Step A.2 / B — assemble feature tables
-python scripts/build_feature_table.py         # -> artifacts/features/{panel,facts}.parquet
+python feature_extraction/build_feature_table.py         # -> artifacts/features/{panel,facts}.parquet
 
 # Step C — fit interpretable model on facts.parquet (drop leaky_* columns first)
 ```
+
+**One inference per (fact, checkpoint).** `eval_checkpoints.py` touches the model
+exactly twice per fact: once for the greedy decode `correct` needs, and once for a
+teacher-forced forward that yields *everything else* — `gold_prob`, logit-lens
+depth, next-token geometry, per-layer residual/MLP activity, and the hidden-state
+dump. (A true single pass is possible only if you redefine `correct` as
+"first answer token is top-1", i.e. the `is_top1` column — but that changes the
+paper's metric, so the decode is kept.)
 
 The prediction target: a fact that is **ever** correct and still correct at the
 final checkpoint = *retained* (1); ever correct but wrong at the end =
@@ -88,7 +117,10 @@ final checkpoint = *retained* (1); ever correct but wrong at the end =
 (e.g. temporal features before the fact has appeared, or learning features for a
 fact that is never correct).
 
-### `recall_step{N}.parquet` — one row per fact, per checkpoint (`src/recall.py`)
+### `recall_step{N}.parquet` — one row per fact, per checkpoint (`feature_extraction/eval_checkpoints.py`)
+
+Recall columns (from the greedy decode) **+** internal-state columns (from the
+single teacher-forced forward in `internal.extract_fact`).
 
 | column | type | range / values | meaning |
 |--------|------|----------------|---------|
@@ -96,14 +128,91 @@ fact that is never correct).
 | `step` | int | one of `CHECKPOINT_STEPS` (0 … 109672) | checkpoint evaluated |
 | `correct` | bool | `True`/`False` | olmes `PopQACloze` exact-match on the cloze generation |
 | `excluded` | bool | `True`/`False` | olmes drops these (answer already in the query) — filter out in EDA |
-| `gold_prob` | float | `[0, 1]` | length-normalized prob of the gold object tokens (zero-shot cloze) |
+| `gold_prob` | float | `[0, 1]` | **length-normalized** prob over **all** gold object tokens (zero-shot cloze) |
 | `prompt` | str | cloze text | exact prompt fed to the model for `correct` (audit/repro) |
 | `generation` | str | model output | model's decoded answer, post stop-truncation (audit/repro) |
 
-### `panel.parquet` — one row per (fact × checkpoint) (`scripts/build_feature_table.py`)
+**Internal-state scalars** (`internal.extract_fact`) — read at the *answer
+position* (the cloze's last token, which predicts the object):
 
-Contains `id`, `step`, `correct`, `gold_prob` (above) **+** all *timeline* and
-*competition* columns below, recomputed relative to that checkpoint's `step`.
+| column | type | range / values | meaning |
+|--------|------|----------------|---------|
+| `gold_ntokens` | int | `≥ 0` | how many tokens the gold answer spans (see the ⚠️ below) |
+| `is_top1` | bool | — | the **first** gold token is the greedy top-1 |
+| `gold_rank` | int | `≥ 0` (`-1` if no gold) | rank of the first gold token in the vocab (`0` = top-1) |
+| `logit_gap_top` | float / NaN | `≥ 0` (logit units) | max logit − first-gold logit — the "distance" of the correct logit from the top (`0` ⇔ top-1) |
+| `answer_margin` | float / NaN | ℝ (logit units) | first-gold logit − runner-up logit (`>0` ⇔ top-1) |
+| `gold_prob_first` | float / NaN | `[0, 1]` | prob of the **first** gold token (unconditioned) |
+| `top1_prob` | float | `[0, 1]` | prob of the greedy top token |
+| `gold_surprisal` | float / NaN | `≥ 0` (nats) | −log p(first gold token) |
+| `pred_entropy` | float | `≥ 0` (nats) | entropy of the next-token distribution (how peaked the guess is) |
+| `resolution_depth` | int / NaN | `0 … n_layers` | first layer where the logit lens makes the first gold token top-1 |
+| `resolution_depth_frac` | float / NaN | `[0, 1]` | `resolution_depth` normalized by layer count |
+| `resid_norm_last` | float | `≥ 0` | L2 norm of the final-layer residual at the answer position |
+| `mlp_active_frac_mean` | float | `[0, 1]` | mean fraction of MLP neurons with `|activation| > NEURON_EPS`, averaged over layers |
+| `mlp_participation_mean` | float | `≥ 1` | **participation ratio** `(Σa²)²/Σa⁴` = effective # of active neurons, averaged over layers (near `1` = concentrated/specialized, high = spread out) |
+| `subject_found` | bool | — | the subject's last token was locatable (else hidden-state / probe rows are NaN) |
+
+The same MLP-activity columns are also emitted at the **subject** token with a
+`_subj` suffix (`mlp_active_frac_mean_subj`, `mlp_participation_mean_subj`), all
+NaN when `subject_found` is false.
+
+> ⚠️ **Multi-token answers.** `is_top1`, `gold_rank`, `logit_gap_top` and
+> `answer_margin` describe the single next-token distribution at the answer
+> position, so they look at the **first** gold token only. For a two-token answer
+> like "New York" they concern " New", not the whole span. Use `gold_prob`
+> (length-normalized over all tokens) for the full answer, and filter on
+> `gold_ntokens == 1` when you want the first-token metrics to be unambiguous.
+
+**Internal-state per-layer arrays** (`list[float]`, length `n_layers+1`; for
+depth-trajectory / geometry EDA, not for the flat modeling table):
+`gold_rank_by_layer`, `gold_logit_by_layer`, `resid_norm_by_layer`, and the MLP
+per-layer arrays (length `n_layers`, each with a `_subj` twin):
+`mlp_active_frac_by_layer`, `mlp_l1_by_layer`, `mlp_participation_by_layer`.
+
+### `hidden_step{N}_{position}.npy` — f16 hidden-state dump (`artifacts/internal/`)
+
+Written unless `--no-hidden`. One memmap-friendly `float16` array per position,
+shape `[n_facts, n_layers+1, hidden]` (row `i` ↔ `hidden_step{N}_ids.npy[i]`;
+positions that couldn't be located are `NaN`). A sidecar `hidden_step{N}_meta.json`
+records shape/positions. Reload lazily with `np.load(path, mmap_mode="r")`.
+
+- **`answer`** *(default)* — the cloze's last token, i.e. the position whose
+  next-token prediction *is* the object. This is where all the logit features
+  above are read, so it's the natural state for "how/where is the answer formed".
+- **`subject_last`** *(default)* — the subject's final token; feeds
+  `train_layer_probes` (is the answer linearly readable from the subject?) and
+  `representation_drift` (cosine movement of that token between checkpoints).
+- **`all`** *(not enabled by default)* — every prompt token, not just one. It
+  multiplies the dump by the prompt length (~10–15×, tens of GB per checkpoint),
+  so it's left out; add it in the script only if you truly need per-token states.
+
+Size per default position ≈ `n_facts × (n_layers+1) × hidden × 2` bytes
+(≈ 68 KB/fact/checkpoint for LMEnt-1B). `config.HIDDEN_POSITIONS` / `--positions`
+control which are dumped.
+
+### `neurons_step{N}_{position}.npy` — top-k active-neuron indices (`artifacts/internal/`)
+
+Written **only** with `--top-k K` (`config.NEURON_TOPK`). One `uint16` array per
+position (`answer`, `subject_last`), shape `[n_facts, n_layers, k]`, holding the
+indices of the k most active MLP neurons per layer (descending `|activation|`).
+Row `i` ↔ `neurons_step{N}_ids.npy[i]`; rows for a position that wasn't located
+are filled with `65535` (the `missing_sentinel` in `neurons_step{N}_meta.json`,
+never a valid index). Unlike the `mlp_*` scalars ("how much" machinery), this is
+*which* neurons — it enables the **circuit-overlap / churn** analyses (does a fact
+reuse the same neurons across checkpoints, or share them with other facts?). See
+[analysis/README.md](analysis/README.md) for recipes.
+
+Size ≈ `n_facts × n_layers × n_positions × k × 2` bytes (~4 KB/fact/checkpoint at
+k=64 over both positions — ~3% of the hidden dump).
+
+### `panel.parquet` — one row per (fact × checkpoint) (`feature_extraction/build_feature_table.py`)
+
+Contains `id`, `step`, `correct`, `gold_prob` (above), the **internal-state
+scalar columns** at that step (`is_top1`, `gold_rank`, `logit_gap_top`,
+`answer_margin`, `pred_entropy`, `resolution_depth`, `mlp_active_frac_mean`, …
+whichever were produced by the sweep) **+** all *timeline* and *competition*
+columns below, recomputed relative to that checkpoint's `step`.
 
 **Timeline** (`features/timeline.py`) — all relative to the checkpoint step:
 
@@ -178,33 +287,55 @@ columns above (at `FINAL_STEP`) plus:
 > Drop every `leaky_*` column before fitting the Step C model — they encode the
 > answer you're predicting.
 
-### Mention & internal features (computed on demand, not in the parquets by default)
+**Internal state at first-learned** (`atlearn_*`, from `internal.extract_fact`) —
+the internal-state scalars (above) snapshotted at the fact's `first_learned_step`,
+i.e. *how the fact looked in the model the moment it was first acquired*
+(`atlearn_logit_gap_top`, `atlearn_resolution_depth`, `atlearn_pred_entropy`,
+`atlearn_mlp_active_frac_mean`, …). `NaN` for never-learned facts. These are
+**non-leaky** — measured before the end of training — so they're usable as Step C
+predictors (the research question: does *how* a fact is first stored predict
+whether it's retained?).
 
-**Mention-based text** (`features/text.py::mention_features`, needs `dataset-metadata`):
+> ⚠️ Do **not** substitute the *final*-checkpoint internal state here: because
+> `retained` is defined by final-checkpoint correctness, final-step internals
+> (e.g. is the answer top-1 at the end) would leak the target, like `leaky_*`.
+> `build_feature_table.py` deliberately reads the first-learned step instead.
+
+**Mention-based text** (`features/text.py::mention_features`) — also in
+`facts.parquet`. These need LMEnt's tokenized corpus + `olmo_core` to read each
+chunk's aggregated ReFinED + Maverick mentions; when the corpus isn't present
+(PopQA-only setup) the columns are still emitted, as `NaN`. Entities are matched
+by **Wikidata QID** (`s_uri` / `o_uri`, e.g. `"Q42"` — *not* `subj_id`/`obj_id`).
 
 | column | type | range / values | meaning |
 |--------|------|----------------|---------|
-| `frac_explicit_subject` | float / NaN | `[0, 1]` | fraction of subject mentions that are entity-links (explicit) |
-| `frac_coref_subject` | float / NaN | `[0, 1]` | fraction that are coreference (indirect, weaker signal) |
-| `n_subject_mentions` | int | `≥ 0` | subject mentions across shared chunks |
-| `subj_answer_distance` | float / NaN | `≥ 0` | mean token distance between subject and answer in-chunk |
+| `frac_explicit_subject` | float / NaN | `[0, 1]` | fraction of subject mentions that are hyperlink / entity-link evidence (explicit) |
+| `frac_coref_subject` | float / NaN | `[0, 1]` | fraction that are coreference / pronoun (indirect, weaker signal) |
+| `n_subject_mentions` | int | `≥ 0` | subject mentions across shared chunks (score ≥ `MIN_CANDIDATE_SCORE`) |
+| `subj_answer_distance` | float / NaN | `≥ 0` | mean **character** distance (mention midpoints) between subject & answer in-chunk |
 | `phrasing_variety` | float / NaN | `(0, 1]` | distinct chunk texts / total (1 = all different) |
 
-**Inside the model** (`features/internal.py`, per fact per checkpoint, GPU):
+> Explicit vs. coref comes from each matched candidate's `scores_by_source`
+> (`hyperlinks`/`entity_linking` = explicit; `coref`/`coref_cluster` = indirect);
+> a pronoun surface form is always counted as coref. Provider access follows
+> LMEnt's `retrieval-index/create_es_index.py` (`OlmoCoreMentionProvider`);
+> `DictMentionProvider` backs the tests in `tests/test_mention_features.py`.
+
+**Inside the model** (`features/internal.py`). The per-(fact, checkpoint) internal
+features now ship **in `recall_step{N}.parquet`** (via `extract_fact`, documented
+above) plus the f16 hidden-state dump. The functions below are the *offline /
+notebook* utilities that consume the dump or run extra passes:
 
 | function → column | type | range / values | meaning |
 |-------------------|------|----------------|---------|
-| `logit_lens_features` → `resolution_depth` | int / NaN | `0 … n_layers` | first layer where gold answer is top-1 |
-| `logit_lens_features` → `resolution_depth_frac` | float / NaN | `[0, 1]` | depth normalized by layer count |
-| `logit_lens_features` → `answer_margin` | float / NaN | ℝ (logit units) | gold logit − runner-up logit at final layer |
-| `representation_drift` → `drift_cos_mean` | float / NaN | `[-1, 1]` | mean per-layer cosine sim of subject token between checkpoints |
+| `representation_drift` → `drift_cos_mean` | float / NaN | `[-1, 1]` | mean per-layer cosine sim of the `subject_last` state between two checkpoints (feed the dumped arrays) |
 | `representation_drift` → `drift_cos_last` | float / NaN | `[-1, 1]` | same at the final layer |
-| `paraphrase_stability` → `paraphrase_n` | int | `1 … 3` | number of phrasings tried |
-| `paraphrase_stability` → `paraphrase_prob_mean` | float / NaN | `[0, 1]` | mean gold prob across phrasings |
-| `paraphrase_stability` → `paraphrase_prob_std` | float / NaN | `≥ 0` | spread across phrasings (high = phrasing-sensitive) |
-| `paraphrase_stability` → `paraphrase_correct_frac` | float | `[0, 1]` | fraction of phrasings answered correctly |
-| `paraphrase_stability` → `paraphrase_all_correct` | bool | — | correct under every phrasing |
-| `train_layer_probes` → (array) | float[] | each `[0, 1]` | per-layer linear-probe accuracy for the answer from the subject hidden state |
+| `train_layer_probes` → (array) | float[] | each `[0, 1]` | per-layer linear-probe accuracy for the answer from the `subject_last` hidden state (offline, CPU) |
+| `paraphrase_stability` → `paraphrase_*` | int/float/bool | see code | rephrasing-robustness of the fact — **extra forward passes**, so run it selectively, not in the main sweep |
+
+Single-fact helpers `logit_lens_features`, `subject_hidden_states` and
+`_hidden_states` remain for notebook use; the sweep uses `extract_fact` instead so
+each fact is only run once.
 
 ## ⚠️ Verify against the real download
 
@@ -237,6 +368,11 @@ columns above (at `FINAL_STEP`) plus:
 - **Model internals** (`features/internal.py::_final_norm_and_head`) — confirmed
   as `model.model.norm` / `model.lm_head` for HF `Olmo2ForCausalLM`; sanity-check
   with `print(model)` on the real checkpoint.
-- **Mention schema** (`features/text.py::MentionProvider`) — ReFinED (explicit)
-  vs. Maverick (coref); token vs. char offsets. *(Out of scope per the plan —
-  the 47 GB tokenized dataset isn't being pulled.)*
+**Resolved** (from LMEnt's code, no longer guessed):
+- **Mention schema** (`features/text.py`) — read from LMEnt's own reader
+  (`retrieval-index/create_es_index.py`): per-chunk `metadata["entities"]`, each
+  mention having **char** offsets, `text_mention`, and `candidates[{qid,
+  aggregated_score, scores_by_source{hyperlinks, entity_linking, coref,
+  coref_cluster}}]`. Entities are Wikidata QIDs (`s_uri`/`o_uri`). `mention_features`
+  is implemented + unit-tested against this schema; it only *runs* when the 47 GB
+  tokenized corpus + `olmo_core` are present (else NaN columns).
