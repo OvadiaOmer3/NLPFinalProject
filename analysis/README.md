@@ -27,8 +27,9 @@ config.CHECKPOINT_STEPS  # [0, 10000, ..., 109672]
 | `artifacts/recall/recall_step{N}.parquet` | one row per **(fact, checkpoint)** | recall (`correct`, `gold_prob`) **+** internal scalars (`logit_gap_top`, `is_top1`, `resolution_depth`, `mlp_active_frac_mean`, …) **+** per-layer lists (`*_by_layer`) | `eval_checkpoints.py` |
 | `artifacts/internal/hidden_step{N}_{pos}.npy` | one **[L+1, H]** stack per fact | full per-layer hidden states, `float16`, `[n_facts, n_layers+1, hidden]`; `pos ∈ {answer, subject_last}` | `eval_checkpoints.py` (unless `--no-hidden`) |
 | `artifacts/internal/neurons_step{N}_{pos}.npy` | one **[n_layers, k]** stack per fact | indices of the top-k active MLP neurons per layer, `uint16`; `65535` = position not located | `eval_checkpoints.py` (only with `--top-k`) |
-| `artifacts/features/panel.parquet` | one row per **(fact, checkpoint)** | timeline + competition + internal scalars, all as-of that step | `build_feature_table.py` |
-| `artifacts/features/facts.parquet` | one row per **fact** | static content + learning-dynamics summary + `atlearn_*` internal snapshot + the `retained` **target** | `build_feature_table.py` |
+| `artifacts/features/panel.parquet` | one row per **(fact, checkpoint)** | timeline + competition + **`propmix_*` property-background** + internal scalars, all as-of that step | `build_feature_table.py` |
+| `artifacts/features/facts.parquet` | one row per **fact** | static content + learning-dynamics summary + `atlearn_*` internal snapshot + **`atlearn_propmix_postlearn_*`** + the `retained` **target** | `build_feature_table.py` |
+| `artifacts/features/prop_composition.parquet` | one row per **(property, checkpoint)** | cumulative training composition (`cum_count`, `cum_share`) — a run **descriptor / control**, not a fact-level predictor | `build_feature_table.py` |
 
 **Join keys.** Everything keys on `id` (the PopQA fact id). Time-varying tables
 also carry `step` (one of `config.CHECKPOINT_STEPS`). The hidden dumps are
@@ -259,6 +260,53 @@ X = facts.drop(columns=[c for c in facts if c.startswith("leaky_")]
 y = facts["retained"]           # 1 retained / 0 forgotten / NaN never-learned
 mask = y.notna()                # keep only ever-learned facts for the binary task
 ```
+
+### 8. Property-background — does *what else was being trained* affect forgetting?
+
+The `propmix_*` columns (`features/context.py`) ask: within a fact-anchored window,
+does the property mix of the *other* facts trained nearby predict whether this fact
+is forgotten? Step 0 (`feature_extraction/variance_diagnostic.py`) cleared the GO
+gate — the signal is ~30× iid-noise and genuinely temporal — **but** traced its
+source to LMEnt's length-bucket VSL curriculum, so the mix is **not as-if-random**:
+it is confounded with training time *and document length*. Design the analysis
+accordingly.
+
+- **Unit = per-interval transition, not per-fact.** For each `(fact, interval
+  (S,S+1])`: a **forgetting** hazard (given `correct` at S, still correct at S+1?)
+  and a **re-acquisition** hazard (given wrong at S, correct at S+1?). This turns
+  "learned → forgotten → relearned" into proper censoring instead of collapsing it
+  into `retained`. Per-step `correct` lives in the panel; `retained.notna()` is the
+  "ever learned" filter.
+- **Treatment = the fact-anchored window** (`propmix_local500_*` primary — with
+  `local250`/`local1000` for sensitivity; `propmix_sincelast_*` secondary) —
+  **never** the interval's own composition (that
+  span is identical for every fact, so it's a global quantity absorbed by interval
+  fixed effects).
+- **Headline restriction:** among facts `correct` at S that got **no rehearsal** in
+  the interval (`rehearsed == 0`), does the window mix predict forgetting? Dropping
+  rehearsed transitions removes the fact's own rehearsal, which otherwise swamps any
+  background effect.
+- **Model raw counts, not shares.** Poisson/NB on `count_<prop>` with `log(total)`
+  as offset — sidesteps the sum-to-1 simplex and the zeros of narrow windows.
+- **Controls (mandatory, not optional):** property dummies + `first_learned` (or
+  interval) dummies **+ a document-length / length-bucket control**
+  (`*_mean_bucket`). By Frisch–Waugh–Lovell the dummies demean within stratum, so β
+  is identified from facts of the same relation learned at the same time; the length
+  control closes the curriculum backdoor. Causal language is **"conditional on
+  training time and document length,"** not as-if-random.
+- **Inference:** permutation test shuffling fact→window assignment **within
+  (property, first_learned[, length-bucket]) strata** (overlapping windows make
+  ordinary SEs too small, and 16 property clusters are too few for CRVE); BH-FDR
+  across property/group pairs.
+- **Resolution:** report the grouped **4×4** families (`gshare_*`, better power,
+  lighter FDR) as the headline, the full **16×16** relation matrix as exploratory —
+  both are already emitted, so it's a reporting choice.
+
+> If the deliverable is a *predictor* rather than this effect estimate, decide the
+> train/test split **first** and do all of the above (and any global-prevalence
+> normalization) on the training fold only — the extracted `propmix_*` columns are
+> within-row and leakage-safe, but a permutation test run on all data is inference,
+> not a substitute for held-out evaluation.
 
 ---
 

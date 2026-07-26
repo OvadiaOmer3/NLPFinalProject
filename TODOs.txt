@@ -1,5 +1,10 @@
 check in LMEnt code:
-1. context features: add what was the most seen property in the checkpoint.. what else was learned that might caused the forgetting of cpecific fact.
+1. [DONE] context features: add what was the most seen property in the checkpoint.. what else was learned that might caused the forgetting of cpecific fact.
+   -> src/features/context.py (propmix): per-fact background property mix over local/
+      since_last/postlearn windows, self-excluded, per-relation (16) + per-family (4),
+      wired into panel.parquet (propmix_*) and facts.parquet (atlearn_propmix_postlearn_*),
+      plus prop_composition.parquet descriptor. Step 0 variance gate = GO (variance_diagnostic.py).
+      Tests: tests/test_context_features.py.
 2. maybe check if fact hasn't seen yet (until this checkpoint) than dont do inference.
 3. a lot of facts have shared_chunks=0 (~2k). maybe we can filter them out in our large scale run? Do they have any meaningful info? I added --min-shared-chunks arg for eval_checkpoints
 ** check all occuranced of VERIFY in the code!

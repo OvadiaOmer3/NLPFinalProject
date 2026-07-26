@@ -91,6 +91,12 @@ RECALL_DIR = ARTIFACT_DIR / "recall"          # per-checkpoint recall / gold pro
 FEATURE_DIR = ARTIFACT_DIR / "features"       # per-fact feature tables
 INTERNAL_DIR = ARTIFACT_DIR / "internal"      # hidden states / probes / logit lens
 CHUNK_INDEX_PATH = ARTIFACT_DIR / "chunk_to_steps.pkl"  # inverted index cache
+STEP_BUCKET_PATH = ARTIFACT_DIR / "step_bucket.npy"     # per-step VSL length bucket
+
+# VSL curriculum: each global batch is a fixed TOKEN budget drawn from a single
+# length bucket, so bucket(step) = GLOBAL_BATCH_TOKENS // batch_size(step).  From
+# the training config (dhgottesman/OLMo-core kas_config.json: global_batch_size).
+GLOBAL_BATCH_TOKENS = 32768
 
 for _d in (ARTIFACT_DIR, RECALL_DIR, FEATURE_DIR, INTERNAL_DIR):
     _d.mkdir(parents=True, exist_ok=True)

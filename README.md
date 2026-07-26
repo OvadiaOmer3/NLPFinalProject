@@ -45,6 +45,7 @@ analysis/                  # CONSUMES artifacts (CPU / notebooks)
 |-------|--------|-------|
 | When the fact showed up | `features/timeline.py` | `steps_since_last` (recency) is likely the strongest; plus spacing/burstiness, LR at appearance, epoch position |
 | Competition from other facts | `features/competition.py` | subject & answer counts **separately**; interference *after* first-learned |
+| What else was being trained | `features/context.py` | **property-background (`propmix`)**: in a fact-anchored window, the property mix of the *other* facts trained nearby (self-excluded, over `shared_chunks`). Counts + shares + entropy + length-bucket, per relation (16) and per type-family (4). No GPU |
 | What the text looks like | `features/text.py` | answer token length, explicit (EL) vs. coref mentions, phrasing variety, subj–answer distance |
 | How the fact was learned | `features/learning.py` | first-learned step, confidence there, learning speed. `leaky_*` = forgetting/oscillation counts — **EDA only, drop before modeling** |
 | Inside the model | `features/internal.py` | **one forward pass per (fact, checkpoint)**: logit-lens depth, next-token geometry (margin, top-logit gap, rank, entropy), per-layer residual/MLP-neuron activity (active fraction + participation ratio, at answer & subject), plus f16 hidden-state and optional top-k neuron-index dumps for offline probe / drift / circuit-overlap |
@@ -250,6 +251,32 @@ columns below, recomputed relative to that checkpoint's `step`.
 | `subject_interference_post_learn` | int / NaN | `≥ 0` | subject-only appearances **after** first-learned (overwriting pressure) |
 | `answer_interference_post_learn` | int / NaN | `≥ 0` | answer-only appearances after first-learned |
 
+**Property-background / `propmix`** (`features/context.py`) — for each panel row,
+fact-anchored windows, each **clipped at that row's `step`** (a feature never sees
+past the checkpoint its outcome is measured at). Prefixes: `propmix_local250_`,
+`propmix_local500_`, `propmix_local1000_` (union of `[a−W, a+W]` around the fact's
+appearances — **primary**; `W` here is the *radius*, so window size = 2W; the
+`{250,500,1000}` band was picked from the Step-0 diagnostic), and
+`propmix_sincelast_` (`(last_seen, step]` — mechanistic secondary). Each prefix
+carries the same bundle:
+
+| column (per `<prefix>`) | type | range / values | meaning |
+|--------|------|----------------|---------|
+| `count_<prop>` (×16) | float / NaN | `≥ 0` | self-excluded (fact, step) exposures of each relation in the window |
+| `share_<prop>` (×16) | float / NaN | `[0,1]`, Σ=1 | that relation's share of the window (NaN if `total=0`) |
+| `gcount_<group>` / `gshare_<group>` (×4) | float / NaN | `≥ 0` / `[0,1]` | same, collapsed to the 4 type-families (`person`, `creative_work`, `place`, `misc`) |
+| `total` | float | `≥ 0` | total background exposures in the window (the count-model `log` **offset**) |
+| `entropy_prop` / `entropy_grp` | float / NaN | `≥ 0` | Shannon entropy of the share vector (how mixed the neighborhood is) |
+| `efflen` | float | `≥ 0` | effective window length in steps (clipped windows are shorter) |
+| `own_appearances` | float | `≥ 0` | the fact's **own** exposures inside the window (excluded from counts) |
+| `rehearsed` | float | `{0,1}` | whether the fact itself appeared in the window |
+| `window_mean_bucket` | float / NaN | seq-len | mean VSL length bucket of the window's background exposures (curriculum/length control) |
+| `own_mean_bucket` | float / NaN | seq-len | mean length bucket of the fact's own exposures ≤ step |
+
+> All `propmix_*` are within-row normalized (shares from the fact's own window) —
+> no cross-fact / global-prevalence statistic — so they stay leakage-safe under any
+> later train/test split. Facts with no `shared_chunks` (~17%) get an all-NaN bundle.
+
 ### `facts.parquet` — one row per fact; Step C trains on this
 
 Static identifiers + content features (evaluated at the **final** checkpoint) +
@@ -301,6 +328,13 @@ whether it's retained?).
 > (e.g. is the answer top-1 at the end) would leak the target, like `leaky_*`.
 > `build_feature_table.py` deliberately reads the first-learned step instead.
 
+**Property-background at first-learned** (`atlearn_propmix_postlearn_*`,
+`features/context.py`) — the same `propmix` bundle (see `panel.parquet` above) over
+the **`postlearn`** window `(first_learned_step, FINAL_STEP]`: *what else was
+trained after this fact was acquired* — the cross-property generalization of
+`competition.py`'s post-learn interference. Snapshotted at first-learned, so it's
+**non-leaky**; `NaN` for never-learned facts (their `first_learned_step` is NaN).
+
 **Mention-based text** (`features/text.py::mention_features`) — also in
 `facts.parquet`. These need LMEnt's tokenized corpus + `olmo_core` to read each
 chunk's aggregated ReFinED + Maverick mentions; when the corpus isn't present
@@ -320,6 +354,23 @@ by **Wikidata QID** (`s_uri` / `o_uri`, e.g. `"Q42"` — *not* `subj_id`/`obj_id
 > a pronoun surface form is always counted as coref. Provider access follows
 > LMEnt's `retrieval-index/create_es_index.py` (`OlmoCoreMentionProvider`);
 > `DictMentionProvider` backs the tests in `tests/test_mention_features.py`.
+
+### `prop_composition.parquet` — checkpoint-level run descriptor (`features/context.py`)
+
+One row per **(property, checkpoint)** — 16 × 12 = 192 rows — holding the
+cumulative-from-step-0 property composition of training (`cum_count`, `cum_share`).
+It is a **run descriptor / control, not a fact-level predictor**: a function of
+`(property, checkpoint)` only, so it has zero within-(property, checkpoint) variance
+and would be fully absorbed by property + time fixed effects. Kept in its own
+artifact deliberately — do **not** merge it into `facts.parquet`. Sanity: `cum_share`
+sums to 1 per checkpoint and stabilizes across later checkpoints.
+
+| column | type | meaning |
+|--------|------|---------|
+| `property` | str | PopQA relation |
+| `checkpoint` | int | one of `config.CHECKPOINT_STEPS` |
+| `cum_count` | int | exposures of that property at steps ≤ checkpoint |
+| `cum_share` | float | its share of all exposures so far |
 
 **Inside the model** (`features/internal.py`). The per-(fact, checkpoint) internal
 features now ship **in `recall_step{N}.parquet`** (via `extract_fact`, documented

@@ -53,6 +53,38 @@ def steps_for_chunks(chunk_ids, chunk_to_steps: dict[int, list[int]]) -> list[in
 
 
 # --------------------------------------------------------------------------- #
+# step -> VSL length bucket
+# --------------------------------------------------------------------------- #
+def build_step_bucket(batch_indices_path=None, cache_path=None) -> np.ndarray:
+    """Implied VSL sequence-length bucket for each optimizer step.
+
+    LMEnt trains with a variable-sequence-length "Grow-P2" curriculum where every
+    global batch is a fixed *token* budget (``config.GLOBAL_BATCH_TOKENS``) packed
+    from a **single** length bucket.  So the number of instances in a step's batch
+    determines the bucket exactly:  ``bucket = GLOBAL_BATCH_TOKENS // batch_size``.
+    Because the released run is a single epoch, every chunk appears in exactly one
+    batch, so this per-step value also pins down each chunk's length bucket (verified
+    against ``batch_indices``: batch sizes are all powers of two in {16..512} -> valid
+    seq-lens {2048..64}, with zero inconsistency across chunk appearances).  This
+    matches ``olmo_core``'s ``NumpyVSLDataset.get_instance_lengths()`` but needs no
+    corpus, no ``olmo_core``, and no GPU.
+
+    Returns an int32 array of shape ``(num_steps,)``.
+    """
+    batch_indices_path = batch_indices_path or config.BATCH_INDICES_PATH
+    cache_path = cache_path or config.STEP_BUCKET_PATH
+    if cache_path.exists():
+        return np.load(cache_path)
+
+    batch_indices = np.load(batch_indices_path, allow_pickle=True)
+    sizes = np.fromiter((len(np.asarray(b).ravel()) for b in batch_indices),
+                        dtype=np.int64, count=len(batch_indices))
+    bucket = (config.GLOBAL_BATCH_TOKENS // sizes).astype(np.int32)
+    np.save(cache_path, bucket)
+    return bucket
+
+
+# --------------------------------------------------------------------------- #
 # Learning rate at a given step
 # --------------------------------------------------------------------------- #
 def lr_at_step(step: int,

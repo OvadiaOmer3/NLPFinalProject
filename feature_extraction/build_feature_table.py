@@ -28,7 +28,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import config
 from src import data as D
 from src import schedule
-from src.features import timeline, competition, text, learning
+from src.features import timeline, competition, text, learning, context
+
+# Property-background ("what else was being trained") windows emitted per panel row.
+# `local` (both W) is primary for identification; `since_last` is the mechanistic
+# secondary check (Step 0).  All clipped at the row's checkpoint.
+# W sweep chosen from the Step-0 diagnostic: {250,500,1000} is the healthy band --
+# strong within-property structure (phi 8-23x) with clean enough per-fact S/N
+# (sqrt(phi)=2.9-4.8x), while smaller W buys more absolute identifying variation.
+# W=100 (noisier per fact) and W=2000 (over-smoothed) are kept only as sensitivity
+# endpoints in variance_diagnostic.py, not extracted.  500 is the primary window.
+PROPMIX_PANEL_WINDOWS = [
+    ("local250", dict(window="local", W=250)),
+    ("local500", dict(window="local", W=500)),
+    ("local1000", dict(window="local", W=1000)),
+    ("sincelast", dict(window="since_last")),
+]
 
 
 # Scalar internal-state columns produced by eval_checkpoints.py (internal.extract_fact).
@@ -95,6 +110,13 @@ def main():
         for fid, row in df.iterrows()
     }
 
+    # Property-background schedule: per-property prefix sums + per-step length bucket,
+    # so any window's property mix is O(1) per property.  CPU/corpus only.
+    step_bucket = schedule.build_step_bucket()
+    prop_sched = context.build_property_schedule(df, chunk_to_steps, step_bucket)
+    print(f"[propmix] schedule built: {prop_sched.K} properties, "
+          f"{prop_sched.G} groups, {len(prop_sched.app_steps):,} facts with shared_chunks")
+
     # --- per-fact learning summary (needs the full trajectory) ---------------
     learn_rows, targets = {}, {}
     for fid, row in df.iterrows():
@@ -116,10 +138,21 @@ def main():
         r.update(timeline.timeline_features(appearances[fid], step))
         r.update(competition.competition_features(row, chunk_to_steps, step,
                                                   first_learned_step=first_learned))
+        # Property-background windows, clipped at this row's checkpoint (never look
+        # past the step the outcome is measured at).
+        for wname, kw in PROPMIX_PANEL_WINDOWS:
+            feats = context.property_mix_features(prop_sched, fid, clip_at=step, **kw)
+            r.update({f"propmix_{wname}_{k}": v for k, v in feats.items()})
         panel_records.append(r)
     panel = pd.DataFrame(panel_records)
     panel.to_parquet(config.FEATURE_DIR / "panel.parquet")
     print(f"[write] panel.parquet  {panel.shape}")
+
+    # Checkpoint-level cumulative property composition -- a run descriptor / control,
+    # NOT a fact-level predictor (decision 2).  Its own artifact.
+    prop_comp = context.checkpoint_property_composition(prop_sched)
+    prop_comp.to_parquet(config.FEATURE_DIR / "prop_composition.parquet")
+    print(f"[write] prop_composition.parquet  {prop_comp.shape}")
 
     # Mention features need LMEnt's tokenized corpus + olmo_core; None if absent
     # (PopQA-only setup) -> we emit NaN placeholders so the columns still exist.
@@ -142,6 +175,14 @@ def main():
                  if mention_provider is not None else text.empty_mention_features())
         r.update(timeline.timeline_features(appearances[fid], config.FINAL_STEP))
         r.update(learn_rows[fid])
+        # Property background over (first_learned, FINAL] -- "what else was trained
+        # after this fact was acquired".  Snapshotted at first-learned (atlearn_
+        # convention, non-leaky per the note at build_feature_table.py:79); all-NaN
+        # for never-learned facts (first_learned_step is NaN).
+        pm = context.property_mix_features(
+            prop_sched, fid, window="postlearn", clip_at=config.FINAL_STEP,
+            anchor=learn_rows[fid]["first_learned_step"])
+        r.update({f"atlearn_propmix_postlearn_{k}": v for k, v in pm.items()})
         # internal state at the FIRST-LEARNED checkpoint ("how was it stored when it
         # was first acquired") -- a non-leaky snapshot; NaN for never-learned facts.
         sl = learn_rows[fid]["first_learned_step"]
