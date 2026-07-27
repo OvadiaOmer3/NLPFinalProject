@@ -81,10 +81,14 @@ def load_checkpoint(step: int, device: str | None = None):
 # --------------------------------------------------------------------------- #
 # Prompts follow the paper's methodology (cloze, few-shot) and are built by the
 # olmes PopQACloze task.  These thin wrappers keep call sites readable.
-def prompt_for(row) -> str:
-    """Primary recall prompt: the few-shot cloze block (olmes)."""
+def prompt_for(row, prefix: str = "") -> str:
+    """Primary recall prompt: demonstration block + this fact's cloze.
+
+    ``prefix`` comes from ``src.fewshot.FewShot.prefix``; the default ""  gives
+    the bare zero-shot cloze.
+    """
     from src import lment_popqa
-    return lment_popqa.make_prompt(row)
+    return lment_popqa.make_prompt(row, prefix=prefix)
 
 
 def zero_shot_cloze(row) -> str:

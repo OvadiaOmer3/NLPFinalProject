@@ -78,6 +78,14 @@ pip install -e olmes                          # install AFTER the env so the for
 ```bash
 # Step A.1 — recall + internal states at every checkpoint (GPU; one per checkpoint)
 python feature_extraction/eval_checkpoints.py            # or --steps 0 10000 ... as a Slurm array
+#   --num-shots N          in-context demos (default 15; 0 = bare cloze). Demos come from a
+#                          held-out pool of one fact per relation, never the eval set, and a
+#                          fact is never shown its OWN relation -- hence 15 of 16. The pool's
+#                          16 subjects are dropped at EVERY shot count, so 0-shot and n-shot
+#                          score an identical fact set. Output is suffixed `_{N}shot` so runs
+#                          at different N don't overwrite each other.
+#   --fewshot-keep-same-prop    one fixed block incl. the query's own relation (upstream)
+#   --fewshot-source upstream   use LMEnt's verbatim demos (leaky; parity runs only)
 #   --no-hidden            skip the f16 hidden-state dump (scalar features only)
 #   --positions answer     dump fewer positions (default: answer subject_last)
 #   --top-k 64             also dump top-k active-neuron indices (off by default)
@@ -340,11 +348,34 @@ each fact is only run once.
 ## ⚠️ Verify against the real download
 
 **Resolved** (from LMEnt / the paper, no longer guessed):
-- **Zero-shot cloze evaluation** — the paper (§5.1, §B.6) evaluates knowledge with
-  zero-shot cloze prompts (not instruction-tuned), and the learning-dynamics
-  analysis this project builds on uses that. `config.NUM_SHOTS = 0`. (15-shot is
-  the OLMES *benchmark* default, kept configurable for reproducing §5.1's baseline
-  table only.)
+- **Few-shot cloze evaluation, demonstrations held out** — verified against olmes
+  commit `1f0568f` (the SHA LMEnt pins): `PopQACloze` defaults to `num_shots=15`,
+  as does the registered `popqa_cloze_sitelinks`, and the fork has *no* zero-shot
+  cloze config. An earlier note here claimed 15-shot was the benchmark-only
+  setting — that was wrong. `config.NUM_SHOTS = 15`, overridable with
+  `--num-shots`, and `--num-shots 0` for the bare cloze.
+  - `PopQACloze` sets no `fewshot_source` and reports no train/validation split,
+    so upstream's `fewshot_examples` falls to `rnd.sample(self.test_docs(), k*2)`
+    — **demonstrations sampled from the set being scored**. We instead select a
+    held-out pool by the documented rule in `src/fewshot.py`; measured on
+    popqa-kas that takes eval facts sharing a demo's answer from 769 to 0.
+  - Upstream's own curated `FEWSHOT_SOURCES["popqa"]` is not the default either:
+    16 hand-pasted rows with no generating script, one of which has its answer
+    inside its question. Available as `--fewshot-source upstream` for parity runs.
+  - The pool holds one fact per relation (16), and each fact is shown the pool
+    **minus its own relation** — exactly 15 demonstrations, with the relation under
+    test never demonstrated. A same-relation demo would hand over the answer *type*
+    ("The color of … is *black*"), which is in-context scaffolding for the very
+    thing this project measures. Every pool fact still gets used somewhere, unlike
+    upstream's `_fewshot_docs[:15]` of 16, which drops the last entry outright so
+    `prop_id` 422 is evaluated but demonstrated by nothing.
+    `--fewshot-keep-same-prop` restores upstream's single fixed block.
+  - Measured on popqa-kas: eval facts that could be answered by copying a demo's
+    answer — **0** (ours) vs **773** (upstream). Facts with their gold anywhere in
+    the context — 305 / 2.1% (ours) vs 1083 / 7.6% (upstream). The residual 2.1% is
+    structural, not a pool defect: a relation's *template* contains words that are
+    other relations' answers ("The composer of … is" vs an occupation fact whose
+    answer is "composer").
 - Prompts, cloze templates (by `prop_id`), exact-match scoring, decode length/stop
   — all from olmes `PopQACloze` via `src/lment_popqa.py`.
 - **LR peak `5e-3`, warmup `1000`, batch `32768`** — from the paper §B.4 (the
@@ -359,10 +390,13 @@ each fact is only run once.
   not absolute scale.
 - **`LR_ALPHA_F`** (cosine floor) — §B.4 omits it; OLMo-core's `CosWithWarmup`
   defaults to `0.1`.
-- **olmes symbols** — the `TASK_REGISTRY` key (`popqa_cloze`) and
-  `fewshot_context` split, once the submodule is checked out. The fallback in
-  `lment_popqa.py` mirrors the fork's transcribed logic but the installed task is
-  authoritative.
+- ~~**olmes symbols**~~ — verified against commit `1f0568f`: `PopQACloze` in
+  `oe_eval/tasks/oe_eval_tasks/popqa_cloze.py`, `doc_to_text` → `doc["query"]`,
+  `doc_to_target` → `" " + gold`, and `Task.fewshot_context`'s layout
+  (`"\n\n".join(text + target) + "\n\n" + text`). One template still differs
+  deliberately: upstream maps `prop_id` 97 *and* 422 both to `"The capital of {} is"`
+  even though 97 is the inverse relation, so we use `"{} is the capital of"` for 97
+  — our prompts are therefore **not** byte-identical to upstream for 97's facts.
 - **`batch_indices` path & shape** — assumed `dataset-cache/batch_indices.npy`,
   step-indexed array of chunk-ID arrays.
 - **Model internals** (`features/internal.py::_final_norm_and_head`) — confirmed

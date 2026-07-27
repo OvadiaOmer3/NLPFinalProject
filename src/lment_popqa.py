@@ -8,8 +8,9 @@ Prompt construction and scoring are single-sourced from LMEnt's olmes fork
 ``oe_eval/tasks/oe_eval_tasks/popqa_cloze.py``):
 
   * cloze prompts (models are not instruction-tuned) keyed by ``prop_id``;
-  * few-shot context (default 15-shot) with a FIXED seed so every checkpoint
-    sees identical demonstrations;
+  * few-shot context (default 15-shot): this module only *renders* the block (see
+    ``render_fewshot_block``); which facts to demonstrate is ``src.fewshot``'s job,
+    and deliberately is NOT upstream's sampling from the eval set;
   * exact-match scoring: labels = ``possible_answers`` with ``len > 3``, the
     example is *excluded* if a label is already in the query, otherwise correct
     iff any label substring-matches the generation (case-insensitive variants);
@@ -20,14 +21,19 @@ olmes``) we defer to the real ``PopQACloze`` task -- that path is authoritative.
 Otherwise we use the faithful fallback below, transcribed from the fork, so the
 prompt/scoring-parity checks in the plan run without installing olmes.
 
-# VERIFY at checkout: the exact olmes symbols (registry key, method signatures)
-# against the on-disk fork -- these were read from the repo over the web.
+VERIFIED against commit 1f0568fb047b71651193dc832625e6f5697ba777 (the SHA LMEnt
+pins for the olmes submodule): ``PopQACloze.TASK_CONFIG_DEFAULTS`` (num_shots=15,
+split=test, the generation kwargs below), ``doc_to_text`` -> ``doc["query"]``,
+``doc_to_target`` -> ``" " + gold``, and ``Task.fewshot_context`` /
+``Task.fewshot_examples``.  One divergence is deliberate and documented in
+``config`` / ``src.fewshot``: demonstrations come from a held-out pool instead of
+``rnd.sample(self.test_docs(), k * 2)``, which would leak gold answers from the
+set being scored.
 """
 from __future__ import annotations
 
 import functools
 import json
-import random
 
 import config
 
@@ -121,13 +127,34 @@ def process_doc(row) -> dict:
 # --------------------------------------------------------------------------- #
 # Public API
 # --------------------------------------------------------------------------- #
-def zero_shot_cloze(row) -> str:
-    """The unconditioned cloze that stops exactly before the answer (== olmes
-    doc_to_text).  Used for gold_prob / logit-lens / hidden-states."""
+def cloze_query(row) -> str:
+    """The cloze that stops exactly before the answer (== olmes ``doc_to_text``).
+
+    This is the *query*, not a whole prompt: it is the tail of an n-shot prompt as
+    much as it is the entirety of a 0-shot one.  Use it when you mean "this fact
+    rendered as a cloze" (e.g. building a demonstration, or the query at the end of
+    a few-shot block).
+
+    When you specifically mean "the prompt with NOTHING conditioning the answer
+    position" -- gold_prob, logit lens, hidden states -- call ``zero_shot_cloze``
+    below instead.  Same string, but the name records which property you rely on,
+    so a later change to few-shot prompting doesn't silently alter a measurement
+    that was meant to stay unconditioned.
+    """
     task = _olmes_task()
     if task is not None:
         return task.doc_to_text(process_doc(row))
     return process_doc(row)["query"]
+
+
+def zero_shot_cloze(row) -> str:
+    """The cloze with no demonstrations conditioning the answer position.
+
+    Deliberately a separate name from ``cloze_query`` (same value): call sites that
+    use THIS one depend on the prompt being unconditioned, not merely on it being
+    the cloze.  See ``cloze_query``'s docstring.
+    """
+    return cloze_query(row)
 
 
 def doc_target(row) -> str:
@@ -135,35 +162,43 @@ def doc_target(row) -> str:
     return " " + str(row["obj"])
 
 
-def make_prompt(row, num_shots: int | None = None, seed: int | None = None) -> str:
-    """The primary recall prompt.
+def render_fewshot_block(demos) -> str:
+    """Render demonstrations into the prefix that precedes a fact's cloze.
 
-    The paper evaluates knowledge zero-shot (``config.NUM_SHOTS = 0``), and for
-    zero-shot the prompt is exactly the cloze query -- verified byte-identical to
-    olmes ``fewshot_context``/``doc_to_text`` (base model, non-chat).
+    Layout transcribed from the fork's ``Task.fewshot_context`` (non-chat, no
+    description), which builds::
 
-    Few-shot (``num_shots > 0``, only for reproducing the OLMES *benchmark* table)
-    is delegated to the real olmes task, which applies the demonstration
-    alias-safety filtering we would otherwise have to re-implement.  We do NOT
-    approximate it locally: if olmes isn't installed, we raise rather than emit a
-    subtly-different prompt.
+        labeled_examples = "\\n\\n".join(doc_to_text(ex) + doc_to_target(ex)
+                                        for ex in fewshotex) + "\\n\\n"
+        prompt           = labeled_examples + doc_to_text(doc)
+
+    For PopQACloze ``doc_to_text`` is ``doc["query"]`` -- the bare cloze, with no
+    ``Q:``/``A:`` wrapper (that's the *other* task, ``popqa.py``) -- and
+    ``doc_to_target`` is ``" " + gold``.  Going through ``cloze_query`` /
+    ``doc_target`` means demo text comes from the real olmes task when olmes is
+    installed, and from the transcribed cloze templates otherwise.
+
+    ``demos`` is any iterable of row-likes (dicts or pandas Series).  Empty ->
+    ``""``, which makes ``make_prompt`` collapse to the bare cloze.
+
+    *Which* facts to demonstrate is not decided here -- see ``src.fewshot``, which
+    deliberately does not use upstream's eval-set sampling.
     """
-    num_shots = config.NUM_SHOTS if num_shots is None else num_shots
-    seed = config.FEWSHOT_SEED if seed is None else seed
+    demos = list(demos)
+    if not demos:
+        return ""
+    return "\n\n".join(cloze_query(d) + doc_target(d) for d in demos) + "\n\n"
 
-    if num_shots <= 0:
-        return zero_shot_cloze(row)          # exact zero-shot cloze == olmes
 
-    task = _olmes_task()
-    if task is None:
-        raise RuntimeError(
-            f"num_shots={num_shots} requires the olmes package (authoritative "
-            "few-shot context). Install it (pip install -e LMEnt/olmes) or set "
-            "config.NUM_SHOTS = 0 for the paper's zero-shot evaluation."
-        )
-    return task.fewshot_context(process_doc(row),
-                                num_fewshot=num_shots,
-                                rnd=random.Random(seed))
+def make_prompt(row, prefix: str = "") -> str:
+    """The primary recall prompt: demonstration block + this fact's cloze.
+
+    With the default empty ``prefix`` this is exactly the cloze query --
+    byte-identical to olmes ``doc_to_text`` and to what this function returned
+    before few-shot support existed.  Build a prefix with
+    ``src.fewshot.FewShot.build(...)`` and prefer ``FewShot.prompt(row)``.
+    """
+    return prefix + cloze_query(row)
 
 
 def gen_kwargs() -> dict:

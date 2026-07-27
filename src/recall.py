@@ -2,10 +2,11 @@
 
 For each (fact, checkpoint) we record:
   * ``correct``   -- olmes PopQACloze exact-match on a greedy generation from the
-                     cloze prompt.  Zero-shot by default (``config.NUM_SHOTS=0``),
-                     matching the paper's knowledge eval; scoring + prompt +
-                     decode length all come from ``src.lment_popqa``, not from
-                     locally guessed constants.
+                     cloze prompt.  15-shot by default (``config.NUM_SHOTS``, the
+                     upstream PopQACloze default), with demonstrations from the
+                     fork's curated ``FEWSHOT_SOURCES["popqa"]``; pass 0 for the
+                     bare cloze.  Scoring + prompt + decode length all come from
+                     ``src.lment_popqa``, not from locally guessed constants.
   * ``excluded``  -- olmes drops facts whose answer already appears in the query;
                      we flag them so EDA can filter them out.
   * ``gold_prob`` -- probability mass on the gold object tokens right after the
@@ -53,8 +54,12 @@ def greedy_generation(model, tokenizer, prompt: str) -> str:
 
 
 @torch.no_grad()
-def eval_checkpoint(model, tokenizer, df) -> "pd.DataFrame":
+def eval_checkpoint(model, tokenizer, df, fewshot=None) -> "pd.DataFrame":
     """Evaluate every fact at a single loaded checkpoint.
+
+    ``fewshot`` is a ``src.fewshot.FewShot`` (or None for the bare cloze).  Note
+    ``gold_prob`` is always measured on the *zero-shot* cloze regardless, so it
+    stays comparable across shot counts (see below).
 
     Returns a DataFrame with columns:
     id, correct, excluded, gold_prob, prompt, generation.
@@ -62,8 +67,8 @@ def eval_checkpoint(model, tokenizer, df) -> "pd.DataFrame":
     import pandas as pd
     rows = []
     for _, r in df.iterrows():
-        # Primary recall: cloze prompt (zero-shot by default), olmes scoring.
-        prompt = D.prompt_for(r)
+        # Primary recall: cloze prompt (few-shot block prepended), olmes scoring.
+        prompt = D.prompt_for(r, prefix=fewshot.prefix_for(r) if fewshot else "")
         gen = greedy_generation(model, tokenizer, prompt)
         # gold_prob: zero-shot cloze so the answer position is unconditioned.
         zcloze = D.zero_shot_cloze(r)

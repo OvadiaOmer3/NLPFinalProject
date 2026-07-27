@@ -54,16 +54,61 @@ LR_MIN = LR_ALPHA_F * LR_PEAK
 # --------------------------------------------------------------------------- #
 # PopQA cloze evaluation (olmes PopQACloze)
 # --------------------------------------------------------------------------- #
-# The paper evaluates knowledge with ZERO-SHOT cloze prompts (§5.1, §B.6): models
-# are not instruction-tuned, so each question becomes a cloze whose answer is the
-# next phrase; the "learned" criterion is just completing that cloze correctly.
-# So NUM_SHOTS = 0 matches the paper's knowledge-acquisition / learning-dynamics
-# analysis (which is what this project studies).  The 15-shot setting is the
-# OLMES *benchmark* default (for leaderboard comparison in §5.1's baseline table)
-# -- switch to it only to reproduce those benchmark numbers.  The seed is held
-# FIXED across checkpoints so any demonstrations are identical at every step.
-NUM_SHOTS = 0
-FEWSHOT_SEED = 1234
+# VERIFIED against dhgottesman/olmes (the fork LMEnt uses as its eval harness):
+# `PopQACloze.TASK_CONFIG_DEFAULTS["num_shots"] = 15`, and the registered config
+# `popqa_cloze_sitelinks` (task_name="popqa_cloze", the sitelink-stratified one
+# matching the paper's popularity split) ALSO sets num_shots=15.  There is no
+# zero-shot cloze config anywhere in the fork.  So 15 is the harness default for
+# the *cloze* task, not just the benchmark table -- an earlier note here claimed
+# otherwise and was wrong.
+#
+# We keep it a knob rather than a constant: n-shot reproduces LMEnt's process, 0 is
+# the cleaner probe of purely parametric knowledge (no in-context answers at all).
+# Override per run with `--num-shots`.
+#
+# 15, but for a different reason than upstream's 15.
+#
+# The pool holds one fact per relation (16), and a fact of relation p is shown the
+# pool MINUS relation p -- so every query gets exactly 15 demonstrations and the
+# relation under test is never demonstrated.  See `src.fewshot.FewShot`.
+#
+# That matters because a same-relation demonstration hands over the answer *type*:
+# with "The color of FC Internazionale Milano is black" in context, "The color of X
+# is" only has to produce some colour.  That is in-context scaffolding for exactly
+# what an acquisition study wants to read out of the weights.  Dropping it keeps
+# every fact symmetric (15 demos, none sharing its relation) and uses all 16 pool
+# facts across the eval -- unlike upstream's `_fewshot_docs[:15]` of 16, which
+# silently drops the last entry so `prop_id` 422 is evaluated but never
+# demonstrated by anything.
+#
+# `--fewshot-keep-same-prop` restores a single fixed block (upstream's behaviour),
+# in which case 16 is the natural setting.
+NUM_SHOTS = 15
+
+# Demonstrations come from a HELD-OUT pool, never from the eval set.
+#
+# Upstream would sample them from the data it scores: `PopQA` sets
+# `fewshot_source: "popqa"` and reads the curated FEWSHOT_SOURCES list, but
+# `PopQACloze` does NOT set it (while still importing FEWSHOT_SOURCES, unused --
+# it looks dropped when the file was derived from popqa.py).  With
+# `has_training_docs()` and `has_validation_docs()` both False, PopQACloze lands on
+# `rnd.sample(self.test_docs(), k * 2)` (base_task.py:597) -- demonstrations drawn
+# from the eval set with only the doc under evaluation filtered out.  Other eval
+# facts still appear in context *with their gold answers*, so `correct` partly
+# measures in-context copying rather than parametric recall.
+#
+# The fork's curated FEWSHOT_SOURCES["popqa"] is not a fix either: it is 16
+# hand-pasted facts with no generating script, and measured against popqa-kas one
+# has its answer inside its own question (prop 257) while two prime answers shared
+# by 284 and 327 eval facts (props 182, 560).  All 16 are popqa-kas rows.  It is
+# vendored in `src/fewshot_source.py` and reachable via `--fewshot-source upstream`
+# for parity runs, but is not the default.
+#
+# So: cloze prompts + scoring from PopQACloze (upstream), demonstrations selected
+# by the documented rule in `src/fewshot.py`.  The pool's subjects are dropped from
+# the eval set at EVERY shot count -- 16 facts, ~0.1% -- so 0-shot and n-shot score
+# an identical fact set and are directly comparable.
+
 # Decode length / stop sequences come from olmes generation_kwargs
 # (max_gen_toks=15, stop=["\n\n"]) via src.lment_popqa -- no local constant.
 

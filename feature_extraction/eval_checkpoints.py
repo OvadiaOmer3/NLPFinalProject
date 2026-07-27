@@ -22,6 +22,10 @@ Usage:
     python feature_extraction/eval_checkpoints.py --steps 0 10000 # a subset
     python feature_extraction/eval_checkpoints.py --no-hidden     # scalars only, no dump
     python feature_extraction/eval_checkpoints.py --limit 100     # smoke test on 100 facts
+    python feature_extraction/eval_checkpoints.py --num-shots 0   # bare zero-shot cloze
+    python feature_extraction/eval_checkpoints.py --fewshot-source upstream
+                                                                  # LMEnt's verbatim demos
+                                                                  # (leaky; for parity only)
     python feature_extraction/eval_checkpoints.py --output-dir D:/lment_out  # explicit output root
                                                                   # (cwd-independent; overrides
                                                                   # $LMENT_DATA_ROOT/artifacts)
@@ -44,6 +48,7 @@ from src import data as D
 from src import lment_popqa
 from src import recall
 from src.features import internal
+from src.fewshot import FewShot
 
 
 def _checkpoint_rows(rows, partial_path, dump, ndump):
@@ -62,7 +67,7 @@ def _checkpoint_rows(rows, partial_path, dump, ndump):
 
 
 def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
-             internal_dir=None, write_every=0, partial_path=None):
+             internal_dir=None, write_every=0, partial_path=None, fewshot=None):
     """Full single-checkpoint pass -> a DataFrame (one row per fact).
 
     Also streams the f16 hidden-state dump (when ``dump_hidden``) and the top-k
@@ -101,7 +106,9 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
         if r["id"] in done_ids:
             continue                             # already in the partial
         # (1) greedy decode -> substring-match correctness (paper's `correct`).
-        prompt = D.prompt_for(r)                 # zero-shot: == the cloze
+        # The demo block excludes this fact's own relation, so it varies by
+        # prop_id (one cached prefix per relation), not per fact.
+        prompt = D.prompt_for(r, prefix=fewshot.prefix_for(r) if fewshot else "")
         gen = recall.greedy_generation(model, tokenizer, prompt)
         # (2) one teacher-forced forward -> gold_prob + all internal features.
         feats, hidden, neurons = internal.extract_fact(
@@ -114,6 +121,7 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
         rows.append({
             "id": r["id"],
             "step": step,
+            "num_shots": fewshot.num_shots if fewshot is not None else 0,
             "correct": lment_popqa.is_correct(r, gen),
             "excluded": lment_popqa.is_excluded(r),
             "prompt": prompt,
@@ -157,6 +165,30 @@ def main():
     ap.add_argument("--top-k", type=int, default=config.NEURON_TOPK,
                     help="also dump the indices of the top-k active MLP neurons "
                          "per (fact, layer) -> neurons_step{N}_*.npy (off by default)")
+    ap.add_argument("--num-shots", type=int, default=config.NUM_SHOTS,
+                    help="in-context demonstrations prepended to the cloze "
+                         f"(default {config.NUM_SHOTS}). 0 = bare zero-shot cloze. "
+                         "Demonstrations come from a held-out pool, never from the "
+                         "eval set -- see src/fewshot.py. The pool's subjects are "
+                         "dropped from the eval set at EVERY shot count, so 0-shot "
+                         "and n-shot score the identical fact set.")
+    ap.add_argument("--fewshot-keep-same-prop", action="store_true",
+                    help="show every fact the same fixed demo block, including a "
+                         "demonstration of its OWN relation (upstream's behaviour). "
+                         "Default is to drop the query's relation from its context, "
+                         "so the answer type isn't handed to the model; with a "
+                         "one-per-relation pool that leaves exactly 15 demos. Pair "
+                         "this with --num-shots 16 to use the whole pool.")
+    ap.add_argument("--fewshot-source", choices=("ours", "upstream"), default="ours",
+                    help="'ours' selects demonstrations by the rule in "
+                         "src/fewshot.py. 'upstream' uses the fork's verbatim "
+                         'FEWSHOT_SOURCES["popqa"] -- for reproducing LMEnt\'s '
+                         "numbers as-is, including its answer-in-question demo "
+                         "and its frequent-answer demos.")
+    ap.add_argument("--fewshot-per-prop", type=int, default=1,
+                    help="demonstrations to select per prop_id (default 1 -> a "
+                         "16-fact pool, one per relation). Only affects "
+                         "--fewshot-source ours.")
     ap.add_argument("--output-dir", type=str, default=None,
                     help="artifacts root to write into (gets recall/ and internal/ "
                          "subdirs); defaults to config.ARTIFACT_DIR, i.e. "
@@ -175,6 +207,15 @@ def main():
     print(f"[dirs] internal -> {internal_dir}")
 
     df = D.load_popqa_df()
+    # Demonstrations are chosen from the FULL dataset, before the filters below,
+    # so the pool doesn't shift when --limit / --min-shared-chunks change.  Their
+    # subjects then leave the eval set at every shot count (0 included) so runs
+    # remain comparable.
+    fewshot = FewShot.build(df, num_shots=args.num_shots,
+                            source=args.fewshot_source,
+                            per_prop=args.fewshot_per_prop,
+                            drop_same_prop=not args.fewshot_keep_same_prop)
+    df = fewshot.drop_subjects(df)
     if args.min_shared_chunks > 0:
         n_before = len(df)
         n_shared = df["shared_chunks"].apply(lambda c: len(c) if c is not None else 0)
@@ -185,18 +226,29 @@ def main():
         df = df.head(args.limit)
     tokenizer = D.load_tokenizer()
 
+    # `correct` / `generation` / `prompt` depend on the shot count, so the filename
+    # must too -- otherwise the `exists -> skip` guard below would hand a 0-shot
+    # run the 15-shot parquet.  0-shot keeps the original bare name so existing
+    # artifacts and downstream globs are untouched.
+    tag = "" if args.num_shots == 0 else f"_{args.num_shots}shot"
+    if args.num_shots > 0 and args.fewshot_source != "ours":
+        tag += f"_{args.fewshot_source}"
+    if args.num_shots > 0 and args.fewshot_keep_same_prop:
+        tag += "_sameprop"
+
     for step in args.steps:
-        out_path = recall_dir / f"recall_step{step}.parquet"
+        out_path = recall_dir / f"recall_step{step}{tag}.parquet"
         if out_path.exists():
             print(f"[skip] {out_path.name} exists")
             continue
-        partial_path = recall_dir / f"recall_step{step}.partial.parquet"
+        partial_path = recall_dir / f"recall_step{step}{tag}.partial.parquet"
         print(f"[load] checkpoint step{step}")
         model = D.load_checkpoint(step)
         res = eval_step(model, tokenizer, df, step,
                         dump_hidden=not args.no_hidden, positions=args.positions,
                         top_k=args.top_k, internal_dir=internal_dir,
-                        write_every=args.write_every, partial_path=partial_path)
+                        write_every=args.write_every, partial_path=partial_path,
+                        fewshot=fewshot)
         res.to_parquet(out_path)
         partial_path.unlink(missing_ok=True)
         print(f"[write] {out_path}  ({res['correct'].mean():.3f} correct, "
