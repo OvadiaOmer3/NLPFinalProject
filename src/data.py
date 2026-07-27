@@ -34,8 +34,14 @@ def load_popqa(split: str = "train"):
 
 
 def load_popqa_df(split: str = "train"):
-    """Same data as a pandas DataFrame (convenient for feature joins)."""
-    return load_popqa(split).to_pandas()
+    """Same data as a pandas DataFrame (convenient for feature joins).
+
+    Three rows have a null ``subj`` (ids 305622, 1703675, 1227912).  They render
+    as "The author of nan is" and crash the subject-span lookup in
+    ``subject_last_token_index``; the fact is unmeasurable either way, so drop
+    them here -> 14264 rows.
+    """
+    return load_popqa(split).to_pandas().dropna(subset=["subj", "obj"]).reset_index(drop=True)
 
 
 # --------------------------------------------------------------------------- #

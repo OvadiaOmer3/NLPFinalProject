@@ -422,7 +422,8 @@ class HiddenDump:
     for a fact are left as NaN.  Reload later with ``np.load(path, mmap_mode='r')``.
     """
 
-    def __init__(self, step, ids, n_layers_plus1, hidden_size, positions, out_dir):
+    def __init__(self, step, ids, n_layers_plus1, hidden_size, positions, out_dir,
+                 resume=False):
         out_dir = Path(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
         self.step = step
@@ -431,10 +432,19 @@ class HiddenDump:
         self.paths = {}
         for name in positions:
             path = out_dir / f"hidden_step{step}_{name}.npy"
-            arr = np.lib.format.open_memmap(
-                path, mode="w+", dtype=np.float16,
-                shape=(n, n_layers_plus1, hidden_size))
-            arr[:] = np.nan
+            shape = (n, n_layers_plus1, hidden_size)
+            if resume and path.exists():
+                # Reopen in place so rows written before a crash / preemption
+                # survive; w+ would truncate them back to NaN.
+                arr = np.lib.format.open_memmap(path, mode="r+")
+                if arr.shape != shape:
+                    raise ValueError(
+                        f"{path.name} has shape {arr.shape}, expected {shape}; "
+                        "delete the partial artifacts for this step and rerun.")
+            else:
+                arr = np.lib.format.open_memmap(
+                    path, mode="w+", dtype=np.float16, shape=shape)
+                arr[:] = np.nan
             self.arrs[name] = arr
             self.paths[name] = path
         np.save(out_dir / f"hidden_step{step}_ids.npy", np.asarray(ids))
@@ -474,7 +484,7 @@ class NeuronDump:
 
     MISSING = int(np.iinfo(np.uint16).max)      # 65535
 
-    def __init__(self, step, ids, n_layers, k, positions, out_dir):
+    def __init__(self, step, ids, n_layers, k, positions, out_dir, resume=False):
         out_dir = Path(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
         self.step = step
@@ -484,9 +494,17 @@ class NeuronDump:
         self.paths = {}
         for name in positions:
             path = out_dir / f"neurons_step{step}_{name}.npy"
-            arr = np.lib.format.open_memmap(
-                path, mode="w+", dtype=np.uint16, shape=(n, n_layers, int(k)))
-            arr[:] = self.MISSING
+            shape = (n, n_layers, int(k))
+            if resume and path.exists():
+                arr = np.lib.format.open_memmap(path, mode="r+")
+                if arr.shape != shape:
+                    raise ValueError(
+                        f"{path.name} has shape {arr.shape}, expected {shape}; "
+                        "delete the partial artifacts for this step and rerun.")
+            else:
+                arr = np.lib.format.open_memmap(
+                    path, mode="w+", dtype=np.uint16, shape=shape)
+                arr[:] = self.MISSING
             self.arrs[name] = arr
             self.paths[name] = path
         np.save(out_dir / f"neurons_step{step}_ids.npy", np.asarray(ids))
