@@ -148,7 +148,7 @@ def main():
                          "have no exposure to be tracked. Default 0 = keep everything.")
     ap.add_argument("--no-hidden", action="store_true",
                     help="skip the f16 hidden-state dump (scalar features only)")
-    ap.add_argument("--write-every", type=int, default=500,
+    ap.add_argument("--write-every", type=int, default=1000,
                     help="checkpoint progress to recall_step{N}.partial.parquet "
                          "every N facts; a rerun resumes from it instead of "
                          "redoing the step. 0 = only write at the end.")
