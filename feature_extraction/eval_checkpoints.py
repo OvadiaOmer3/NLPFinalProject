@@ -179,7 +179,7 @@ def main():
                          "calls per fact and avoids running the LM head once per "
                          "layer. Note build_feature_table.py needs the dropped "
                          "columns, so such runs are for recall inspection only.")
-    ap.add_argument("--write-every", type=int, default=500,
+    ap.add_argument("--write-every", type=int, default=1000,
                     help="checkpoint progress to recall_step{N}.partial.parquet "
                          "every N facts; a rerun resumes from it instead of "
                          "redoing the step. 0 = only write at the end.")
