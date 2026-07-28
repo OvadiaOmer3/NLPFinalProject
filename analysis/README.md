@@ -5,6 +5,12 @@ runs the model and writes artifacts; everything here just loads and analyzes
 them (CPU is fine — no model needed). Start with this file, then the notebook
 [`notebooks/01_explore_and_load.ipynb`](notebooks/01_explore_and_load.ipynb).
 
+The one exception is [`notebooks/02_prompt_playground.ipynb`](notebooks/02_prompt_playground.ipynb),
+which *does* load a checkpoint: a debug console for prompts (string in, model's answer
+out) at any step, temperature, and decoding setting. Use it when a `generation` in the
+artifacts looks wrong and you want to poke at the prompt by hand. It imports nothing
+from this repo — just `torch` + `transformers` — so it also runs on its own anywhere.
+
 All paths below are the defaults from [`config.py`](../config.py) (root
 `DATA_ROOT = ./data`, override with `LMENT_DATA_ROOT`). Prefer importing the
 constants over hard-coding paths:

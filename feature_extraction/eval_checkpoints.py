@@ -25,6 +25,10 @@ Usage:
                                                                   # generation, one pass/fact
     python feature_extraction/eval_checkpoints.py --limit 100     # smoke test on 100 facts
     python feature_extraction/eval_checkpoints.py --num-shots 0   # bare zero-shot cloze
+    python feature_extraction/eval_checkpoints.py --fewshot-mode only-same-prop
+                                                                  # demos of the query's OWN
+                                                                  # relation, none sharing its
+                                                                  # answer (see src/fewshot.py)
     python feature_extraction/eval_checkpoints.py --fewshot-source upstream
                                                                   # LMEnt's verbatim demos
                                                                   # (leaky; for parity only)
@@ -50,6 +54,7 @@ from src import data as D
 from src import lment_popqa
 from src import recall
 from src.features import internal
+from src import fewshot as fewshot_mod
 from src.fewshot import FewShot
 
 
@@ -113,8 +118,8 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
         if r["id"] in done_ids:
             continue                             # already in the partial
         # (1) greedy decode -> substring-match correctness (paper's `correct`).
-        # The demo block excludes this fact's own relation, so it varies by
-        # prop_id (one cached prefix per relation), not per fact.
+        # Which demos the block holds is the mode's business (--fewshot-mode); it is
+        # cached per distinct demo set, so it is not re-rendered per fact.
         prompt = D.prompt_for(r, prefix=fewshot.prefix_for(r) if fewshot else "")
         gen = recall.greedy_generation(model, tokenizer, prompt)
         # (2) one teacher-forced forward -> gold_prob + all internal features.
@@ -134,7 +139,10 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
         rows.append({
             "id": r["id"],
             "step": step,
-            "num_shots": fewshot.num_shots if fewshot is not None else 0,
+            # The count this fact actually got, not the requested one: under
+            # --fewshot-mode only-same-prop a fact whose answer knocks out part of
+            # its relation's bench can end up with fewer.
+            "num_shots": fewshot.shots_for(r) if fewshot is not None else 0,
             "correct": lment_popqa.is_correct(r, gen),
             "excluded": lment_popqa.is_excluded(r),
             "prompt": prompt,
@@ -195,29 +203,50 @@ def main():
                          "eval set -- see src/fewshot.py. The pool's subjects are "
                          "dropped from the eval set at EVERY shot count, so 0-shot "
                          "and n-shot score the identical fact set.")
+    ap.add_argument("--fewshot-mode", choices=fewshot_mod.MODES, default=None,
+                    help="which demonstrations a fact is shown -- the knob for "
+                         "comparing few-shot methods. 'drop-same-prop' (default): "
+                         "the pool minus the query's own relation, so the answer "
+                         "type is never handed over (15 of a 16-fact pool). "
+                         "'fixed-block': one constant block including the query's "
+                         "relation (upstream's behaviour; pair with --num-shots 16 "
+                         "to use the whole pool). 'only-same-prop': every demo "
+                         "shares the query's relation and none has an answer that "
+                         "would be scored as the query's answer -- the answer type "
+                         "for free, copying impossible. That mode selects its own "
+                         "larger pool (num-shots+5 facts per relation by default) "
+                         "and therefore holds out ~300 eval facts instead of 16, so "
+                         "compare it against other modes on the id intersection.")
     ap.add_argument("--fewshot-keep-same-prop", action="store_true",
-                    help="show every fact the same fixed demo block, including a "
-                         "demonstration of its OWN relation (upstream's behaviour). "
-                         "Default is to drop the query's relation from its context, "
-                         "so the answer type isn't handed to the model; with a "
-                         "one-per-relation pool that leaves exactly 15 demos. Pair "
-                         "this with --num-shots 16 to use the whole pool.")
+                    help="deprecated alias for --fewshot-mode fixed-block.")
     ap.add_argument("--fewshot-source", choices=("ours", "upstream"), default="ours",
                     help="'ours' selects demonstrations by the rule in "
                          "src/fewshot.py. 'upstream' uses the fork's verbatim "
                          'FEWSHOT_SOURCES["popqa"] -- for reproducing LMEnt\'s '
                          "numbers as-is, including its answer-in-question demo "
                          "and its frequent-answer demos.")
-    ap.add_argument("--fewshot-per-prop", type=int, default=1,
-                    help="demonstrations to select per prop_id (default 1 -> a "
-                         "16-fact pool, one per relation). Only affects "
-                         "--fewshot-source ours.")
+    ap.add_argument("--fewshot-per-prop", type=int, default=None,
+                    help="demonstrations to select per prop_id. Only affects "
+                         "--fewshot-source ours. Default depends on the mode: 1 "
+                         "(-> a 16-fact pool, one per relation), or --num-shots + "
+                         f"{fewshot_mod.SAME_PROP_MARGIN} under --fewshot-mode "
+                         "only-same-prop, which shows a fact its own relation only "
+                         "and so needs a bench per relation.")
     ap.add_argument("--output-dir", type=str, default=None,
                     help="artifacts root to write into (gets recall/ and internal/ "
                          "subdirs); defaults to config.ARTIFACT_DIR, i.e. "
                          "$LMENT_DATA_ROOT/artifacts (./data/artifacts if unset). "
                          "Use this to avoid surprises from running from the wrong cwd.")
     args = ap.parse_args()
+
+    # --fewshot-keep-same-prop predates --fewshot-mode and means fixed-block; keep it
+    # working, but refuse to guess when the two disagree.
+    if args.fewshot_keep_same_prop:
+        if args.fewshot_mode not in (None, "fixed-block"):
+            ap.error(f"--fewshot-keep-same-prop conflicts with --fewshot-mode "
+                     f"{args.fewshot_mode} (it is an alias for fixed-block)")
+        args.fewshot_mode = "fixed-block"
+    args.fewshot_mode = args.fewshot_mode or "drop-same-prop"
 
     if args.output_dir:
         out_root = Path(args.output_dir).resolve()
@@ -237,7 +266,7 @@ def main():
     fewshot = FewShot.build(df, num_shots=args.num_shots,
                             source=args.fewshot_source,
                             per_prop=args.fewshot_per_prop,
-                            drop_same_prop=not args.fewshot_keep_same_prop)
+                            mode=args.fewshot_mode)
     df = fewshot.drop_subjects(df)
     if args.min_shared_chunks > 0:
         n_before = len(df)
@@ -256,8 +285,14 @@ def main():
     tag = "" if args.num_shots == 0 else f"_{args.num_shots}shot"
     if args.num_shots > 0 and args.fewshot_source != "ours":
         tag += f"_{args.fewshot_source}"
-    if args.num_shots > 0 and args.fewshot_keep_same_prop:
+    # The mode changes the prompt too, so it also has to reach the filename.  Keep
+    # "_sameprop" for fixed-block: that is the suffix its artifacts already carry
+    # (from when --fewshot-keep-same-prop was the only alternative), and renaming it
+    # would make the `exists -> skip` guard rerun them.
+    if args.num_shots > 0 and args.fewshot_mode == "fixed-block":
         tag += "_sameprop"
+    elif args.num_shots > 0 and args.fewshot_mode == "only-same-prop":
+        tag += "_onlysameprop"
     # A --no-internal parquet has strictly fewer columns, so it must not land on
     # the filename a full run uses -- otherwise the `exists -> skip` guard would
     # feed build_feature_table.py a table with no gold_prob / internal features.

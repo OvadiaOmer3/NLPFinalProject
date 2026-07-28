@@ -37,6 +37,8 @@ analysis/                  # CONSUMES artifacts (CPU / notebooks)
   README.md                # how to load & analyze the artifacts (start here)
   notebooks/
     01_explore_and_load.ipynb  # end-to-end demo on a single fact
+    02_prompt_playground.ipynb # debug console: string in -> model's answer out, at any
+                               #   checkpoint. Standalone (torch + transformers only)
 ```
 
 ## Feature groups (mapped to the proposal)
@@ -84,7 +86,16 @@ python feature_extraction/eval_checkpoints.py            # or --steps 0 10000 ..
 #                          16 subjects are dropped at EVERY shot count, so 0-shot and n-shot
 #                          score an identical fact set. Output is suffixed `_{N}shot` so runs
 #                          at different N don't overwrite each other.
-#   --fewshot-keep-same-prop    one fixed block incl. the query's own relation (upstream)
+#   --fewshot-mode M       which demonstrations a fact sees -- the knob for comparing
+#                          few-shot methods. drop-same-prop (default) = the pool minus the
+#                          query's own relation; fixed-block = one constant block incl. its
+#                          own relation (upstream, pair with --num-shots 16);
+#                          only-same-prop = ONLY its own relation, with every demo whose
+#                          answer would be scored as the query's answer removed. That mode
+#                          selects its own bigger pool (num-shots+5 per relation) and so
+#                          holds out ~305 eval facts instead of 16 -- compare it to the
+#                          other modes on the id intersection. Output suffix `_onlysameprop`.
+#   --fewshot-keep-same-prop    deprecated alias for --fewshot-mode fixed-block
 #   --fewshot-source upstream   use LMEnt's verbatim demos (leaky; parity runs only)
 #   --no-hidden            skip the f16 hidden-state dump (scalar features only)
 #   --positions answer     dump fewer positions (default: answer subject_last)
@@ -369,7 +380,24 @@ each fact is only run once.
     thing this project measures. Every pool fact still gets used somewhere, unlike
     upstream's `_fewshot_docs[:15]` of 16, which drops the last entry outright so
     `prop_id` 422 is evaluated but demonstrated by nothing.
-    `--fewshot-keep-same-prop` restores upstream's single fixed block.
+    `--fewshot-mode fixed-block` restores upstream's single fixed block.
+  - **`--fewshot-mode only-same-prop`** is the deliberate opposite, so the value of
+    that answer-type information can be measured instead of assumed: every demo
+    shares the query's relation, and every demo whose answer would be *scored* as the
+    query's answer is dropped (`fewshot.answers_clash`, olmes' substring rule in both
+    directions plus shared `obj_id`). Type for free, copying impossible. It needs
+    ~20 demos per relation rather than one, so the global answer-uniqueness filter is
+    replaced by that per-fact rule (see the `SAME_PROP_*` comments in
+    `src/fewshot.py`) and the held-out pool grows to 305 facts — its eval set is a
+    subset of the other modes', so compare on the `id` intersection.
+    Measured on popqa-kas at `--num-shots 15`: facts answerable by copying a demo's
+    answer **0**, gold string anywhere in context **144 / 1.0%** (vs 2.1% for
+    `drop-same-prop`), and 13,733 of 13,959 facts get the full 15 demos. The
+    remainder are relations with a narrow answer range — most sharply prop 472 ("The
+    color of X is", four distinct answers among all candidates, 21 of 24 being "red"),
+    whose facts get 3–4. Demos per answer are capped at 2 for exactly that reason: an
+    uncapped colour bench is 17× "red", which is a legal block and a useless one. The
+    per-fact count is recorded in the output's `num_shots` column.
   - Measured on popqa-kas: eval facts that could be answered by copying a demo's
     answer — **0** (ours) vs **773** (upstream). Facts with their gold anywhere in
     the context — 305 / 2.1% (ours) vs 1083 / 7.6% (upstream). The residual 2.1% is

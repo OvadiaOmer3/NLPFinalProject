@@ -216,6 +216,19 @@ def truncate_at_stop(text: str) -> str:
     return text
 
 
+def answer_labels(row) -> list[str]:
+    """The strings olmes accepts as this fact's answer: ``possible_answers`` with
+    ``len > 3``.
+
+    This is the *scoring* notion of "the answer" -- both ``is_excluded`` and
+    ``is_correct`` below match against exactly this list, so anything that wants to
+    reason about answer identity (e.g. ``src.fewshot``'s same-relation mode, which
+    must not demonstrate a fact whose answer would be scored correct for the query)
+    should go through here rather than re-deriving the rule.
+    """
+    return [l for l in process_doc(row)["alias"] if len(l) > 3]
+
+
 def is_excluded(row) -> bool:
     """olmes drops examples whose answer already appears in the query."""
     doc = process_doc(row)
