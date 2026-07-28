@@ -21,6 +21,8 @@ Usage:
     python feature_extraction/eval_checkpoints.py                 # all checkpoints
     python feature_extraction/eval_checkpoints.py --steps 0 10000 # a subset
     python feature_extraction/eval_checkpoints.py --no-hidden     # scalars only, no dump
+    python feature_extraction/eval_checkpoints.py --no-internal   # recall only: correct +
+                                                                  # generation, one pass/fact
     python feature_extraction/eval_checkpoints.py --limit 100     # smoke test on 100 facts
     python feature_extraction/eval_checkpoints.py --num-shots 0   # bare zero-shot cloze
     python feature_extraction/eval_checkpoints.py --fewshot-source upstream
@@ -67,7 +69,8 @@ def _checkpoint_rows(rows, partial_path, dump, ndump):
 
 
 def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
-             internal_dir=None, write_every=0, partial_path=None, fewshot=None):
+             internal_dir=None, write_every=0, partial_path=None, fewshot=None,
+             internal_feats=True):
     """Full single-checkpoint pass -> a DataFrame (one row per fact).
 
     Also streams the f16 hidden-state dump (when ``dump_hidden``) and the top-k
@@ -80,6 +83,10 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
     instead of redoing the whole checkpoint.
     """
     internal_dir = internal_dir or config.INTERNAL_DIR
+    # Without the internal features there is no second forward pass at all, so
+    # neither dump has anything to write.
+    if not internal_feats:
+        dump_hidden, top_k = False, None
     ids = df["id"].tolist()
 
     rows, done_ids = [], set()
@@ -111,13 +118,19 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
         prompt = D.prompt_for(r, prefix=fewshot.prefix_for(r) if fewshot else "")
         gen = recall.greedy_generation(model, tokenizer, prompt)
         # (2) one teacher-forced forward -> gold_prob + all internal features.
-        feats, hidden, neurons = internal.extract_fact(
-            model, tokenizer, r, positions=positions,
-            neuron_eps=config.NEURON_EPS, top_k=top_k)
-        if dump is not None:
-            dump.write(i, hidden)
-        if ndump is not None:
-            ndump.write(i, neurons)
+        # Skipped entirely with --no-internal: that forward asks for every layer's
+        # hidden state, hooks every mlp.down_proj, and runs the LM head once per
+        # layer for the logit lens.  None of it is needed for correct/generation.
+        if internal_feats:
+            feats, hidden, neurons = internal.extract_fact(
+                model, tokenizer, r, positions=positions,
+                neuron_eps=config.NEURON_EPS, top_k=top_k)
+            if dump is not None:
+                dump.write(i, hidden)
+            if ndump is not None:
+                ndump.write(i, neurons)
+        else:
+            feats = {}
         rows.append({
             "id": r["id"],
             "step": step,
@@ -155,7 +168,17 @@ def main():
                          "get a first_learned_step or timeline features since they "
                          "have no exposure to be tracked. Default 0 = keep everything.")
     ap.add_argument("--no-hidden", action="store_true",
-                    help="skip the f16 hidden-state dump (scalar features only)")
+                    help="skip WRITING the f16 hidden-state dump. Note the states "
+                         "are still computed -- use --no-internal to skip the work.")
+    ap.add_argument("--no-internal", action="store_true",
+                    help="skip the internal-feature forward pass entirely: output "
+                         "keeps only id/step/num_shots/correct/excluded/prompt/"
+                         "generation. Drops gold_prob, logit-lens depth, next-token "
+                         "geometry, per-layer MLP activity and both dumps. Use this "
+                         "when you only care about recall -- it halves the model "
+                         "calls per fact and avoids running the LM head once per "
+                         "layer. Note build_feature_table.py needs the dropped "
+                         "columns, so such runs are for recall inspection only.")
     ap.add_argument("--write-every", type=int, default=500,
                     help="checkpoint progress to recall_step{N}.partial.parquet "
                          "every N facts; a rerun resumes from it instead of "
@@ -235,6 +258,11 @@ def main():
         tag += f"_{args.fewshot_source}"
     if args.num_shots > 0 and args.fewshot_keep_same_prop:
         tag += "_sameprop"
+    # A --no-internal parquet has strictly fewer columns, so it must not land on
+    # the filename a full run uses -- otherwise the `exists -> skip` guard would
+    # feed build_feature_table.py a table with no gold_prob / internal features.
+    if args.no_internal:
+        tag += "_recallonly"
 
     for step in args.steps:
         out_path = recall_dir / f"recall_step{step}{tag}.parquet"
@@ -248,11 +276,13 @@ def main():
                         dump_hidden=not args.no_hidden, positions=args.positions,
                         top_k=args.top_k, internal_dir=internal_dir,
                         write_every=args.write_every, partial_path=partial_path,
-                        fewshot=fewshot)
+                        fewshot=fewshot, internal_feats=not args.no_internal)
         res.to_parquet(out_path)
         partial_path.unlink(missing_ok=True)
-        print(f"[write] {out_path}  ({res['correct'].mean():.3f} correct, "
-              f"{res['is_top1'].mean():.3f} top-1)")
+        msg = f"[write] {out_path}  ({res['correct'].mean():.3f} correct"
+        if "is_top1" in res.columns:            # absent under --no-internal
+            msg += f", {res['is_top1'].mean():.3f} top-1"
+        print(msg + ")")
         del model
         try:
             import torch
