@@ -48,14 +48,14 @@ POPQA_TEMPLATES: dict[int, str] = {
     91:  "The genre of {} is",
     257: "The father of {} is",
     182: "The country {} is in is",
-    164: "The producer of {} is",
-    526: "The director of {} is",
+    164: "The producer of '{}' is",
+    526: "The director of '{}' is",
     # 97 is "capital of" (subj=city, obj=the polity it is capital of) -- the
     # INVERSE of 422 ("capital", subj=polity, obj=city).  Both were once mapped
     # to "The capital of {} is", which asked 97's 363 facts the wrong question.
     97:  "{} is the capital of",
-    533: "The screenwriter for {} is",
-    639: "The composer of {} is",
+    533: "The screenwriter for '{}' is",
+    639: "The composer of '{}' is",
     472: "The color of {} is",
     106: "The religion of {} is",
     560: "The sport {} plays is",
