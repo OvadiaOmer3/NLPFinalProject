@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+
+# Large hidden-state arrays (>100MB, exceed GitHub 100MB limit; regenerable via feature_extraction/eval_checkpoints.py)
+data/artifacts/expermints/15shot_trajectory_top10_internal_with_hidden/internal/

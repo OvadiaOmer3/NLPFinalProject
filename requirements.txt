@@ -12,6 +12,9 @@ tqdm>=4.66
 jupyter
 matplotlib
 seaborn
+itables
+plotly
+pyarrow
 
 # Optional: interpretable prediction model (Step C) + SHAP
 xgboost>=2.0
