@@ -37,6 +37,9 @@ Usage:
                                                                   # $LMENT_DATA_ROOT/artifacts)
     python feature_extraction/eval_checkpoints.py --min-shared-chunks 1  # drop facts that can
                                                                   # never be "seen" (see below)
+    python feature_extraction/eval_checkpoints.py --top-shared-chunks-pct 10
+                                                                  # keep only the top decile of
+                                                                  # facts by num_shared_chunks
 """
 from __future__ import annotations
 
@@ -174,7 +177,16 @@ def main():
                     help="drop facts whose subject and answer never co-occur in a "
                          "shared_chunk (len(shared_chunks) < N); such facts can never "
                          "get a first_learned_step or timeline features since they "
-                         "have no exposure to be tracked. Default 0 = keep everything.")
+                         "have no exposure to be tracked. Default 0 = keep everything. "
+                         "Mutually exclusive with --top-shared-chunks-pct.")
+    ap.add_argument("--top-shared-chunks-pct", type=float, default=None,
+                    help="keep only the top N%% of facts by num_shared_chunks (e.g. 10 "
+                         "for the top decile -- the facts with the most exposure to "
+                         "learn from). The cutoff is a quantile of the FULL dataset "
+                         "(before --limit / fewshot subject-drop), so it stays the same "
+                         "count regardless of --fewshot-mode or --num-shots, and is "
+                         "resolved to an equivalent --min-shared-chunks. Mutually "
+                         "exclusive with --min-shared-chunks.")
     ap.add_argument("--no-hidden", action="store_true",
                     help="skip WRITING the f16 hidden-state dump. Note the states "
                          "are still computed -- use --no-internal to skip the work.")
@@ -248,6 +260,13 @@ def main():
         args.fewshot_mode = "fixed-block"
     args.fewshot_mode = args.fewshot_mode or "drop-same-prop"
 
+    if args.top_shared_chunks_pct is not None:
+        if args.min_shared_chunks > 0:
+            ap.error("--top-shared-chunks-pct and --min-shared-chunks are mutually "
+                     "exclusive")
+        if not (0 < args.top_shared_chunks_pct <= 100):
+            ap.error("--top-shared-chunks-pct must be in (0, 100]")
+
     if args.output_dir:
         out_root = Path(args.output_dir).resolve()
         recall_dir, internal_dir = out_root / "recall", out_root / "internal"
@@ -259,6 +278,16 @@ def main():
     print(f"[dirs] internal -> {internal_dir}")
 
     df = D.load_popqa_df()
+    if args.top_shared_chunks_pct is not None:
+        # Quantile of the FULL dataset, before any subject-drop / --limit, so the
+        # resulting count threshold means the same thing (and selects the same
+        # facts) no matter which --fewshot-mode or --num-shots is in play.
+        n_shared_full = df["shared_chunks"].apply(lambda c: len(c) if c is not None else 0)
+        args.min_shared_chunks = int(n_shared_full.quantile(1 - args.top_shared_chunks_pct / 100))
+        print(f"[filter] --top-shared-chunks-pct {args.top_shared_chunks_pct:g} -> "
+              f"--min-shared-chunks {args.min_shared_chunks} "
+              f"({(n_shared_full >= args.min_shared_chunks).sum()}/{len(df)} facts, "
+              "full dataset)")
     # Demonstrations are chosen from the FULL dataset, before the filters below,
     # so the pool doesn't shift when --limit / --min-shared-chunks change.  Their
     # subjects then leave the eval set at every shot count (0 included) so runs
@@ -298,6 +327,13 @@ def main():
     # feed build_feature_table.py a table with no gold_prob / internal features.
     if args.no_internal:
         tag += "_recallonly"
+    # The population changes with the filter, so it has to reach the filename too --
+    # otherwise the `exists -> skip` guard would hand a filtered run the unfiltered
+    # parquet (or vice versa).
+    if args.top_shared_chunks_pct is not None:
+        tag += f"_top{args.top_shared_chunks_pct:g}pct"
+    elif args.min_shared_chunks > 0:
+        tag += f"_minshared{args.min_shared_chunks}"
 
     for step in args.steps:
         out_path = recall_dir / f"recall_step{step}{tag}.parquet"
