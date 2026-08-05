@@ -13,7 +13,7 @@ from pathlib import Path
 # --------------------------------------------------------------------------- #
 # HuggingFace identifiers
 # --------------------------------------------------------------------------- #
-MODEL_ID = "dhgottesman/LMEnt-1B-6E"          # 1B model, single epoch
+MODEL_ID = "dhgottesman/LMEnt-170M-1E"          # 1B model, single epoch
 POPQA_DATASET_ID = "dhgottesman/popqa-kas"    # entity-annotated PopQA
 LMENT_DATASET_ID = "dhgottesman/LMEnt-Dataset"  # corpus + batch indices + mentions
 
@@ -26,7 +26,7 @@ CHECKPOINT_STEPS = [
     60000, 70000, 80000, 90000, 100000
 ]
 FINAL_STEP = CHECKPOINT_STEPS[-1]              # total training steps (1 epoch)
-TOTAL_STEPS = 658032
+TOTAL_STEPS = 109672
 
 
 def checkpoint_subfolder(step: int) -> str:

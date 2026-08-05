@@ -1,0 +1,7 @@
+sbatch slurm/train.sbatch /home/morg/NLP_2526b/shaharmayo/explicit_mentions_data/runs/explicit_170M_1E/config.json
+
+sbatch slurm/train.sbatch /home/morg/NLP_2526b/shaharmayo/explicit_mentions_data/runs/explicit_600M_1E/config.json
+
+python make_train_config.py --run-name explicit_600M_1E --corpus explicit_all --model olmo2_600M --gpus 4 --wandb --wandb-group explicit-mentions-600M --metrics-interval 500
+
+python make_train_config.py --run-name explicit_170M_1E --corpus explicit_all --model olmo2_170M --gpus 1 --wandb --wandb-group explicit-mentions-170M --metrics-interval 500
