@@ -13,7 +13,11 @@ from pathlib import Path
 # --------------------------------------------------------------------------- #
 # HuggingFace identifiers
 # --------------------------------------------------------------------------- #
-MODEL_ID = "dhgottesman/LMEnt-1B-6E"          # 1B model, single epoch
+# Override with LMENT_MODEL_ID to evaluate a different LMEnt release (e.g.
+# dhgottesman/LMEnt-170M-6E).  All the 6E repos publish the same checkpoint grid
+# -- step0, step10000 ... step650000, step658032 -- so CHECKPOINT_STEPS and the
+# --steps grids in the launch scripts stay valid across model sizes.
+MODEL_ID = os.environ.get("LMENT_MODEL_ID", "dhgottesman/LMEnt-1B-6E")  # 6-epoch 1B
 POPQA_DATASET_ID = "dhgottesman/popqa-kas"    # entity-annotated PopQA
 LMENT_DATASET_ID = "dhgottesman/LMEnt-Dataset"  # corpus + batch indices + mentions
 
