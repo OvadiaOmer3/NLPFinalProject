@@ -159,9 +159,19 @@ SEED = 0
 HIDDEN_POSITIONS = ("answer", "subject_last")
 # |activation| threshold for counting an MLP neuron as "active".
 NEURON_EPS = 1e-3
-# If set to an int k, also dump the indices of the top-k active MLP neurons per
-# (fact, layer, position) as uint16 -> artifacts/internal/neurons_step{N}_*.npy.
-# Enables neuron-overlap / circuit-churn analysis.  Storage ~= n_facts * n_layers
-# * n_positions * k * 2 bytes (~4 KB per fact per checkpoint at k=64, both
-# positions -- ~3% of the hidden dump).  None = off.  Override per-run with --top-k.
+# If set to an int k, also dump the top-k active MLP neurons per (fact, layer,
+# position) -> artifacts/internal/neurons_step{N}_{pos}_idx.npy (uint16 indices,
+# ranked by |activation|) and _val.npy (float16 *signed* activations).  Enables
+# neuron-overlap / circuit-churn analysis; the values additionally enable
+# magnitude-weighted overlap and knowledge-entropy-style measures.
+# Storage ~= n_facts * n_layers * n_positions * k * (2 + 2) bytes with values,
+# half that with --no-neuron-values.  For the 1452-fact x 13-checkpoint sweep at
+# k=128 that is ~348 MB, ~6% of the hidden dump; k=64 -> ~174 MB.
+# Choosing k: the measured participation ratio (effective neuron count, the
+# mlp_participation_by_layer column) is p50 ~8, p99 ~45, p99.9 ~58 at both
+# positions with intermediate_size=5632, so k=128 covers the tail with 2x
+# headroom while staying clear of the ~600-1100 generically-active neurons per
+# mid-stack layer.  Prefer erring high: top-32 can be derived from a top-128
+# dump, but not the reverse, and re-running costs a full GPU sweep.
+# None = off.  Override per-run with --top-k.
 NEURON_TOPK = None

@@ -40,6 +40,9 @@ Usage:
     python feature_extraction/eval_checkpoints.py --top-shared-chunks-pct 10
                                                                   # keep only the top decile of
                                                                   # facts by num_shared_chunks
+    python feature_extraction/eval_checkpoints.py --top-k 128      # also dump the top-k active
+                                                                  # MLP neurons per (fact, layer):
+                                                                  # indices + signed activations
 """
 from __future__ import annotations
 
@@ -66,11 +69,9 @@ def _checkpoint_rows(rows, partial_path, dump, ndump):
     parquet.  Written to a temp file and ``os.replace``d so a kill mid-write
     leaves the previous partial intact rather than a truncated file."""
     if dump is not None:
-        for arr in dump.arrs.values():
-            arr.flush()
+        dump.flush()
     if ndump is not None:
-        for arr in ndump.arrs.values():
-            arr.flush()
+        ndump.flush()          # flushes the value memmaps too, not just the indices
     tmp = partial_path.with_suffix(".tmp.parquet")
     pd.DataFrame(rows).to_parquet(tmp)
     os.replace(tmp, partial_path)
@@ -78,12 +79,13 @@ def _checkpoint_rows(rows, partial_path, dump, ndump):
 
 def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
              internal_dir=None, write_every=0, partial_path=None, fewshot=None,
-             internal_feats=True):
+             internal_feats=True, neuron_values=True):
     """Full single-checkpoint pass -> a DataFrame (one row per fact).
 
     Also streams the f16 hidden-state dump (when ``dump_hidden``) and the top-k
-    active-neuron index dump (when ``top_k``) to ``internal_dir`` (defaults to
-    ``config.INTERNAL_DIR``, i.e. ``artifacts/internal/``).
+    active-neuron dump (when ``top_k``) to ``internal_dir`` (defaults to
+    ``config.INTERNAL_DIR``, i.e. ``artifacts/internal/``).  The neuron dump
+    writes indices and, unless ``neuron_values=False``, their signed activations.
 
     With ``write_every > 0``, a partial parquet is written to ``partial_path``
     every N facts.  If that file already exists on entry its facts are skipped
@@ -114,7 +116,8 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
         # neurons are captured at answer + subject_last (both slots the hook sees).
         ndump = internal.NeuronDump(
             step, ids, model.config.num_hidden_layers, top_k,
-            ("answer", "subject_last"), internal_dir, resume=bool(done_ids))
+            ("answer", "subject_last"), internal_dir, resume=bool(done_ids),
+            store_values=neuron_values)
 
     n_new = 0
     for i, (_, r) in enumerate(df.iterrows()):
@@ -206,8 +209,20 @@ def main():
     ap.add_argument("--positions", nargs="*", default=list(config.HIDDEN_POSITIONS),
                     help="token positions to dump hidden states for")
     ap.add_argument("--top-k", type=int, default=config.NEURON_TOPK,
-                    help="also dump the indices of the top-k active MLP neurons "
-                         "per (fact, layer) -> neurons_step{N}_*.npy (off by default)")
+                    help="also dump the top-k active MLP neurons per (fact, layer) "
+                         "-> neurons_step{N}_{pos}_idx.npy (uint16 indices) and "
+                         "_val.npy (float16 signed activations). Off by default. "
+                         "k=128 is the recommended setting: the measured "
+                         "participation ratio (effective neuron count) is p99.9 "
+                         "~58 at both positions, so 128 gives 2x headroom, and the "
+                         "whole dump is still only ~6%% of the hidden-state dump. "
+                         "k is a truncation you cannot undo -- top-32 can be "
+                         "derived from a top-128 dump, not the reverse.")
+    ap.add_argument("--no-neuron-values", action="store_true",
+                    help="with --top-k, dump only the neuron indices and skip the "
+                         "signed-activation values (halves the neuron dump). "
+                         "Set-overlap analyses still work; magnitude-weighted "
+                         "overlap and knowledge-entropy measures do not.")
     ap.add_argument("--num-shots", type=int, default=config.NUM_SHOTS,
                     help="in-context demonstrations prepended to the cloze "
                          f"(default {config.NUM_SHOTS}). 0 = bare zero-shot cloze. "
@@ -347,7 +362,8 @@ def main():
                         dump_hidden=not args.no_hidden, positions=args.positions,
                         top_k=args.top_k, internal_dir=internal_dir,
                         write_every=args.write_every, partial_path=partial_path,
-                        fewshot=fewshot, internal_feats=not args.no_internal)
+                        fewshot=fewshot, internal_feats=not args.no_internal,
+                        neuron_values=not args.no_neuron_values)
         res.to_parquet(out_path)
         partial_path.unlink(missing_ok=True)
         msg = f"[write] {out_path}  ({res['correct'].mean():.3f} correct"
