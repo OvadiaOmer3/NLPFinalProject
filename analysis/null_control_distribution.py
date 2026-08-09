@@ -28,7 +28,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 warnings.filterwarnings("ignore")
 
-from analysis.report_token_strain import BASE, LR  # noqa: E402
+from analysis.strain_models import BASE, LR, NAMELEN  # noqa: E402
 from analysis.strain_models import MIN_EVENTS, MIN_ROWS, fit  # noqa: E402
 from feature_extraction.build_strain_panel import load_popqa  # noqa: E402
 from src.features import strain as S  # noqa: E402
@@ -80,6 +80,11 @@ def main():
     ap.add_argument("--n", type=int, default=20, help="permutations to draw")
     ap.add_argument("--out", default="data/artifacts/features/null_control.json",
                     help="where to cache the distribution for the report")
+    ap.add_argument("--control-namelen", action="store_true",
+                    help="put name length in the baseline, so the test asks whether "
+                         "token identity carries anything BEYOND how long the names "
+                         "are -- the sharper question, since strain is largely a "
+                         "count of a name's tokens")
     args = ap.parse_args()
 
     raw = pd.read_parquet(args.panel)
@@ -91,15 +96,21 @@ def main():
     keep = raw.groupby("prop")["forgot"].agg(["size", "sum"])
     keep = keep[(keep["size"] >= MIN_ROWS) & (keep["sum"] >= MIN_EVENTS)].index
     panel = raw[raw["prop"].isin(keep)].reset_index(drop=True)
-    for c in ("evidence_w", "evidence_static", "s_pop", "o_pop"):
+    cols = ["evidence_w", "evidence_static", "s_pop", "o_pop"]
+    if args.control_namelen:
+        cols += ["s_ntok", "o_ntok", "s_charlen", "o_charlen"]
+    for c in cols:
         panel["l_" + c] = np.log1p(panel[c].astype(float))
-    baseline = fit(BASE, panel)
-    print(f"panel: {len(panel):,} rows, {int(panel['forgot'].sum()):,} events\n")
+    base_formula = BASE + (NAMELEN if args.control_namelen else "")
+    baseline = fit(base_formula, panel)
+    print(f"panel: {len(panel):,} rows, {int(panel['forgot'].sum()):,} events")
+    print(f"baseline: exposure"
+          f"{' + NAME LENGTH' if args.control_namelen else ''}\n")
 
     def chi2_for(idx) -> float:
         p = panel.copy()
         p["ss"], p["os"] = strain_columns(idx, p["id"], meta)
-        return LR.between(fit(BASE + " + ss + os", p), baseline).chi2
+        return LR.between(fit(base_formula + " + ss + os", p), baseline).chi2
 
     observed = chi2_for(real)
     print(f"real token index      chi2 = {observed:.1f}\n")

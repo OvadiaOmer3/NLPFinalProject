@@ -169,6 +169,15 @@ def build(traj_path: str, out_path: str, df_cutoff: int | None,
             "s_own_rare": s_own["own_rare"], "o_own_rare": o_own["own_rare"],
             "s_rivals_rare": s_own["rivals_rare"],
             "o_rivals_rare": o_own["rivals_rare"],
+            # Two length measures, deliberately.  `ntok` is the POST-cutoff token
+            # count ("United States of America" -> 3, `of` dropped), so it is
+            # partly a property of DF_CUTOFF and it shares its input with strain
+            # (spearman 0.70).  `charlen` is independent of the tokenizer and the
+            # cutoff, so if the name-length effect were an artifact of how tokens
+            # are cut it would not survive in charlen -- it does (chi2 244 alone
+            # vs 268 for ntok).  They are collinear (spearman 0.88 / 0.84), so
+            # treat "name length matters" as the finding and NOT which of the two
+            # wins in a joint fit.
             "s_ntok": len(index.qid_to_tokens.get(r.s_uri, ())),
             "o_ntok": len(index.qid_to_tokens.get(r.o_uri, ())),
             "s_charlen": len(str(r.subj)),

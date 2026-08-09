@@ -222,10 +222,26 @@ class TokenIndex:
         return self._rivals[qid]
 
     def strain(self, qid, exclude=()) -> float:
-        """Number of competing entities (or IDF-weighted mass) for ``qid``.
+        """Competitor count for ``qid``.  ``exclude`` is the fact's *other*
+        endpoint -- when scoring a subject, its own object is not a distractor.
 
-        ``exclude`` is the fact's *other* endpoint: when scoring a fact's
-        subject, its own object is not a distractor.
+        Unweighted (the default, and what every reported result uses) this is the
+        **cardinality of the union** over the entity's tokens -- a DISTINCT count,
+        neither a sum nor a mean.  An entity sharing "buffalo" with 2 rivals and
+        "bills" with 3, one rival in both, scores 4: not 5 (sum) and not 2.5
+        (mean).  Two consequences worth knowing:
+
+          * it is monotone non-decreasing in token count -- another token can only
+            add rivals -- which is the structural reason strain tracks name length;
+          * it saturates, because rival sets of common tokens overlap heavily, so
+            the union grows sub-linearly in the number of tokens.
+
+        WARNING -- the ``idf_weighted`` branch is a **sum over tokens and does not
+        deduplicate**: a rival reachable through two of the entity's tokens is
+        counted twice, once per token weight.  So the two modes measure different
+        things (distinct rival entities vs. weighted token-rival mass) and their
+        magnitudes are not comparable.  Nothing reported uses the weighted mode;
+        fix the double-counting before relying on it.
         """
         ex = set(exclude) | {qid}
         if not self.idf_weighted:
