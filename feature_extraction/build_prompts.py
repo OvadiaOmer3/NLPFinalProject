@@ -10,10 +10,10 @@ Usage:
         --fewshot-mode only-same-prop            # -> prompts_5shot_onlysameprop.parquet
     python feature_extraction/build_prompts.py --num-shots 0        # bare cloze
     python feature_extraction/build_prompts.py --num-shots 15 --min-shared-chunks 1
-    python feature_extraction/build_prompts.py --inspect data/artifacts/prompts/prompts_15shot.parquet
+    python feature_extraction/build_prompts.py --inspect data/prompts/prompts_15shot.parquet
 
 Then:
-    python feature_extraction/eval_checkpoints.py --prompts data/artifacts/prompts/prompts_15shot.parquet
+    python feature_extraction/eval_checkpoints.py --prompts data/prompts/prompts_15shot.parquet
 """
 from __future__ import annotations
 

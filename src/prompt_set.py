@@ -59,13 +59,17 @@ COLUMNS = ("id", "prop_id", "num_shots", "demo_ids", "prompt")
 
 
 def prompt_dir() -> Path:
-    """Default output directory: ``<artifacts>/prompts``.
+    """Default output directory: ``<data root>/prompts``.
 
-    The main repo's config spells the artifact root ``ARTIFACT_DIR`` and the
-    explicit-mentions copy spells it ``ARTIFACTS_DIR``; this module is mirrored
-    into both trees, so accept either.
+    The two trees spell the root differently -- the main pipeline's config has
+    ``DATA_ROOT``, the explicit-mentions copy has ``EXPLICIT_ROOT`` plus a
+    ready-made ``PROMPTS_DIR`` -- and this module is mirrored into both, so
+    accept any of them.  (Both now resolve to the same NLPFinalProject/data.)
     """
-    root = getattr(config, "ARTIFACT_DIR", None) or config.ARTIFACTS_DIR
+    explicit = getattr(config, "PROMPTS_DIR", None)
+    if explicit is not None:
+        return Path(explicit)
+    root = getattr(config, "DATA_ROOT", None) or config.EXPLICIT_ROOT
     return Path(root) / "prompts"
 
 
@@ -313,7 +317,7 @@ def build_argparser(prog: str | None = None) -> argparse.ArgumentParser:
     ap.add_argument("--limit", type=int, default=None,
                     help="keep only the first N facts (smoke test)")
     ap.add_argument("--out", type=str, default=None,
-                    help="output parquet path (default: <artifacts>/prompts/"
+                    help="output parquet path (default: <data>/prompts/"
                          "prompts{tag}.parquet)")
     ap.add_argument("--out-dir", type=str, default=None,
                     help="directory for the default filename (default: "

@@ -9,7 +9,7 @@ Usage:
     python build_prompts.py --num-shots 5           # -> prompts_5shot_onlysameprop.parquet
     python build_prompts.py --num-shots 5 --fewshot-mode drop-same-prop
     python build_prompts.py --num-shots 0           # bare cloze
-    python build_prompts.py --inspect <EXPLICIT_ROOT>/artifacts/prompts/prompts_5shot_onlysameprop.parquet
+    python build_prompts.py --inspect <EXPLICIT_ROOT>/prompts/prompts_5shot_onlysameprop.parquet
 
 Then, for every model:
     python eval_explicit.py --model dhgottesman/LMEnt-170M-1E --steps 109672 \

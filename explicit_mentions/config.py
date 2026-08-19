@@ -2,7 +2,8 @@
 
 Everything in this directory is self-contained: it reads the LMEnt corpus
 straight from the authors' lab directory (read-only) and writes a rewritten
-corpus + trained models + eval artifacts under EXPLICIT_ROOT.
+corpus + trained models + eval outputs under EXPLICIT_ROOT (the shared
+NLPFinalProject/data tree).
 
 Override any path with the environment variables noted below.
 """
@@ -36,12 +37,14 @@ PART_TEMPLATE = "part-{part}-00000"
 # --------------------------------------------------------------------------- #
 # Output layout (everything we produce)
 # --------------------------------------------------------------------------- #
-# Defaults to explicit_mentions_data/ next to this file, so the tree stays
-# valid wherever the package is moved. Override with $EXPLICIT_ROOT to point
-# at a copy elsewhere.
+# The shared NLPFinalProject/data tree -- the same root the main pipeline's
+# config.DATA_ROOT points at, so corpora/ hf/ runs/ and the eval outputs all
+# live in one place instead of a separate explicit_mentions_data/ tree.
+# Anchored to this file's location (../data) so it survives the package being
+# moved; override with $EXPLICIT_ROOT to point at a copy elsewhere.
 EXPLICIT_ROOT = Path(os.environ.get(
     "EXPLICIT_ROOT",
-    str(Path(__file__).resolve().parent / "explicit_mentions_data"))).resolve()
+    str(Path(__file__).resolve().parent.parent / "data"))).resolve()
 
 # The rewritten corpus, mirroring the source layout so OLMo-core's
 # NumpyKASVSLDataset consumes it unchanged:
@@ -51,7 +54,11 @@ EXPLICIT_ROOT = Path(os.environ.get(
 CORPORA_DIR = EXPLICIT_ROOT / "corpora"
 RUNS_DIR = EXPLICIT_ROOT / "runs"          # OLMo-core save_folders
 HF_DIR = EXPLICIT_ROOT / "hf"              # converted HF checkpoints
-ARTIFACTS_DIR = EXPLICIT_ROOT / "artifacts"  # eval outputs
+# Eval outputs.  There is no longer an artifacts/ level: everything the eval
+# scripts produce goes under recall/, matching the main pipeline's
+# config.RECALL_DIR so both trees write to the same directory.
+RECALL_DIR = EXPLICIT_ROOT / "recall"
+PROMPTS_DIR = EXPLICIT_ROOT / "prompts"    # few-shot prompt parquets
 
 
 def corpus_dir(tag: str) -> Path:

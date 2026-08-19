@@ -5,9 +5,9 @@ Sweep every checkpoint and, for every fact, record:
   * internal-state features from a single forward pass    -> how the fact is stored
   * (optional) the full per-layer hidden states in f16    -> probes / drift offline
 
-Writes one enriched parquet per checkpoint to ``artifacts/recall/`` and, unless
+Writes one enriched parquet per checkpoint to ``recall/`` and, unless
 ``--no-hidden`` is passed, one f16 hidden-state dump per checkpoint to
-``artifacts/internal/``.  The recall parquet keeps its original columns (so
+``internal/``.  The recall parquet keeps its original columns (so
 ``build_feature_table.py`` is unaffected) and gains the internal-feature columns.
 
 Cost model: we touch the model exactly twice per (checkpoint, fact) -- once for
@@ -48,7 +48,7 @@ Usage:
                                                                   # (leaky; for parity only)
     python feature_extraction/eval_checkpoints.py --output-dir D:/lment_out  # explicit output root
                                                                   # (cwd-independent; overrides
-                                                                  # $LMENT_DATA_ROOT/artifacts)
+                                                                  # $LMENT_DATA_ROOT)
     python feature_extraction/eval_checkpoints.py --min-shared-chunks 1  # drop facts that can
                                                                   # never be "seen" (see below)
 """
@@ -95,7 +95,7 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
 
     Also streams the f16 hidden-state dump (when ``dump_hidden``) and the top-k
     active-neuron index dump (when ``top_k``) to ``internal_dir`` (defaults to
-    ``config.INTERNAL_DIR``, i.e. ``artifacts/internal/``).
+    ``config.INTERNAL_DIR``, i.e. ``internal/``).
 
     With ``write_every > 0``, a partial parquet is written to ``partial_path``
     every N facts.  If that file already exists on entry its facts are skipped
@@ -268,8 +268,9 @@ def main():
                          "and so needs a bench per relation.")
     ap.add_argument("--output-dir", type=str, default=None,
                     help="artifacts root to write into (gets recall/ and internal/ "
-                         "subdirs); defaults to config.ARTIFACT_DIR, i.e. "
-                         "$LMENT_DATA_ROOT/artifacts (./data/artifacts if unset). "
+                         "subdirs); defaults to config.RECALL_DIR and "
+                         "config.INTERNAL_DIR, i.e. $LMENT_DATA_ROOT/{recall,internal} "
+                         "(NLPFinalProject/data/... if unset). "
                          "Use this to avoid surprises from running from the wrong cwd.")
     args = ap.parse_args()
 

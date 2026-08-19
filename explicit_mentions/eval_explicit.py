@@ -91,7 +91,7 @@ def main():
     ap.add_argument("--model", required=True,
                     help="local converted-checkpoints dir or an HF repo id")
     ap.add_argument("--run-tag", required=True,
-                    help="output name: artifacts/<run-tag>/recall_step{N}*.parquet")
+                    help="output name: recall/<run-tag>/recall_step{N}*.parquet")
     ap.add_argument("--steps", type=int, nargs="*", default=None,
                     help="checkpoint steps to evaluate (default: all local "
                          "steps, or required for HF repos)")
@@ -147,7 +147,7 @@ def main():
             steps = D._available_steps(args.model)
         else:
             ap.error("--steps is required when --model is an HF repo id")
-    out_dir = config.ARTIFACTS_DIR / args.run_tag
+    out_dir = config.RECALL_DIR / args.run_tag
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"[model] {args.model}\n[steps] {steps}\n[out] {out_dir}")
 

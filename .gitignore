@@ -4,7 +4,6 @@ __pycache__/
 # Generated training data, checkpoints and converted models (~291G, way over
 # GitHub's 100MB/file limit). Rebuild with explicit_mentions/build_explicit_corpus.py
 # and train_explicit.py / convert_checkpoints.py.
-explicit_mentions/explicit_mentions_data/
-explicit_mentions/logs/
-explicit_mentions/slurm/*.out
-explicit_mentions/slurm/*.err
+/data/corpora
+/data/hf
+/data/runs
