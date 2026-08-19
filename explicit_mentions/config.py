@@ -36,9 +36,12 @@ PART_TEMPLATE = "part-{part}-00000"
 # --------------------------------------------------------------------------- #
 # Output layout (everything we produce)
 # --------------------------------------------------------------------------- #
+# Defaults to explicit_mentions_data/ next to this file, so the tree stays
+# valid wherever the package is moved. Override with $EXPLICIT_ROOT to point
+# at a copy elsewhere.
 EXPLICIT_ROOT = Path(os.environ.get(
     "EXPLICIT_ROOT",
-    "/home/morg/NLP_2526b/shaharmayo/explicit_mentions_data")).resolve()
+    str(Path(__file__).resolve().parent / "explicit_mentions_data"))).resolve()
 
 # The rewritten corpus, mirroring the source layout so OLMo-core's
 # NumpyKASVSLDataset consumes it unchanged:

@@ -10,11 +10,19 @@ The model can be:
     output): --model <EXPLICIT_ROOT>/hf/explicit_170M_1E --steps 10000 ...
   * a published LMEnt repo (baseline):  --model dhgottesman/LMEnt-170M-1E
 
+Prompts are best built once with build_prompts.py and passed in with --prompts, so
+every model is scored on byte-identical inputs; without it they are rendered from
+the --num-shots / --fewshot-* flags at run time, as before.
+
 Usage:
+    python build_prompts.py --num-shots 5      # once, shared by all models below
+    python eval_explicit.py --model .../hf/explicit_170M_1E --steps 109672 \
+        --run-tag explicit_170M_1E --prompts .../prompts_5shot_onlysameprop.parquet
+    python eval_explicit.py --model dhgottesman/LMEnt-170M-1E --steps 109672 \
+        --run-tag baseline_170M_1E --prompts .../prompts_5shot_onlysameprop.parquet
+
     python eval_explicit.py --model .../hf/explicit_170M_1E --steps 109672 \
         --num-shots 5 --fewshot-mode only-same-prop --run-tag explicit_170M_1E
-    python eval_explicit.py --model dhgottesman/LMEnt-170M-1E --steps 109672 \
-        --num-shots 5 --fewshot-mode only-same-prop --run-tag baseline_170M_1E
 """
 from __future__ import annotations
 
@@ -32,6 +40,7 @@ from emlib import data as D
 from emlib import fewshot as fewshot_mod
 from emlib import lment_popqa, recall
 from emlib.fewshot import FewShot
+from emlib.prompt_set import PromptSet, fewshot_tag
 
 
 def _checkpoint_rows(rows, partial_path):
@@ -41,7 +50,7 @@ def _checkpoint_rows(rows, partial_path):
 
 
 def eval_step(model, tokenizer, df, step, *, write_every=0, partial_path=None,
-              fewshot=None):
+              prompts=None):
     ids = df["id"].tolist()
     rows, done_ids = [], set()
     if partial_path is not None and partial_path.exists():
@@ -53,12 +62,13 @@ def eval_step(model, tokenizer, df, step, *, write_every=0, partial_path=None,
     for _, r in df.iterrows():
         if r["id"] in done_ids:
             continue
-        prompt = D.prompt_for(r, prefix=fewshot.prefix_for(r) if fewshot else "")
+        # Pre-rendered (emlib/prompt_set.py) so every model sees identical strings.
+        prompt = prompts.prompt(r["id"]) if prompts is not None else D.prompt_for(r)
         gen = recall.greedy_generation(model, tokenizer, prompt)
         rows.append({
             "id": r["id"],
             "step": step,
-            "num_shots": fewshot.shots_for(r) if fewshot is not None else 0,
+            "num_shots": prompts.shots(r["id"]) if prompts is not None else 0,
             "correct": lment_popqa.is_correct(r, gen),
             "excluded": lment_popqa.is_excluded(r),
             "prompt": prompt,
@@ -88,12 +98,33 @@ def main():
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--min-shared-chunks", type=int, default=0)
     ap.add_argument("--write-every", type=int, default=1000)
-    ap.add_argument("--num-shots", type=int, default=config.NUM_SHOTS)
-    ap.add_argument("--fewshot-mode", choices=fewshot_mod.MODES,
-                    default="only-same-prop")
+    ap.add_argument("--prompts", type=str, default=None,
+                    help="parquet of pre-built prompts (build_prompts.py); fixes "
+                         "the prompts, the fact set and its order so models are "
+                         "comparable. Incompatible with the --num-shots / "
+                         "--fewshot-* / --min-shared-chunks flags below.")
+    ap.add_argument("--num-shots", type=int, default=None)
+    ap.add_argument("--fewshot-mode", choices=fewshot_mod.MODES, default=None)
     ap.add_argument("--fewshot-source", choices=("ours", "upstream"), default="ours")
     ap.add_argument("--fewshot-per-prop", type=int, default=None)
     args = ap.parse_args()
+
+    # A prompt file already answers every prompt-shaping question; honouring one of
+    # these flags on top of it would silently contradict the file.
+    if args.prompts:
+        conflicting = [name for name, val in (
+            ("--num-shots", args.num_shots),
+            ("--fewshot-mode", args.fewshot_mode),
+            ("--fewshot-per-prop", args.fewshot_per_prop),
+            ("--min-shared-chunks", args.min_shared_chunks or None),
+        ) if val is not None] + (
+            ["--fewshot-source"] if args.fewshot_source != "ours" else [])
+        if conflicting:
+            ap.error(f"--prompts is incompatible with {', '.join(conflicting)}: the "
+                     "prompt file was built with its own settings (inspect them with "
+                     "build_prompts.py --inspect). Rebuild the file to change them.")
+    args.num_shots = config.NUM_SHOTS if args.num_shots is None else args.num_shots
+    args.fewshot_mode = args.fewshot_mode or "only-same-prop"
 
     # A path-like --model that is not an existing directory would otherwise be
     # sent to the HF Hub as a repo id, failing with an opaque HFValidationError.
@@ -121,23 +152,37 @@ def main():
     print(f"[model] {args.model}\n[steps] {steps}\n[out] {out_dir}")
 
     df = D.load_popqa_df()
-    fewshot = FewShot.build(df, num_shots=args.num_shots,
-                            source=args.fewshot_source,
-                            per_prop=args.fewshot_per_prop,
-                            mode=args.fewshot_mode)
-    df = fewshot.drop_subjects(df)
-    if args.min_shared_chunks > 0:
-        n_shared = df["shared_chunks"].apply(lambda c: len(c) if c is not None else 0)
-        df = df[n_shared >= args.min_shared_chunks].reset_index(drop=True)
-    if args.limit:
-        df = df.head(args.limit)
+    if args.prompts:
+        # The file IS the eval set: the demonstration pool's subjects are already
+        # gone and its filters already applied, so `df` is only reordered to match.
+        prompts = PromptSet.load(args.prompts)
+        print(f"[prompts] {args.prompts}")
+        print(prompts.describe())
+        if args.limit:
+            prompts = prompts.head(args.limit)
+        df = prompts.select(df)
+    else:
+        fewshot = FewShot.build(df, num_shots=args.num_shots,
+                                source=args.fewshot_source,
+                                per_prop=args.fewshot_per_prop,
+                                mode=args.fewshot_mode)
+        df = fewshot.drop_subjects(df)
+        if args.min_shared_chunks > 0:
+            n_shared = df["shared_chunks"].apply(lambda c: len(c) if c is not None else 0)
+            df = df[n_shared >= args.min_shared_chunks].reset_index(drop=True)
+        if args.limit:
+            df = df.head(args.limit)
+        # Rendered up front rather than inside the loop, so the demo selection is
+        # paid for once instead of once per checkpoint.
+        prompts = PromptSet.build(df, fewshot, source=args.fewshot_source)
     tokenizer = D.load_tokenizer()
 
-    tag = "" if args.num_shots == 0 else f"_{args.num_shots}shot"
-    if args.num_shots > 0 and args.fewshot_mode == "fixed-block":
-        tag += "_sameprop"
-    elif args.num_shots > 0 and args.fewshot_mode == "only-same-prop":
-        tag += "_onlysameprop"
+    # With --prompts the tag comes from the file's metadata, so the same settings
+    # land on the same filenames whichever way the prompts were produced.  Note
+    # --fewshot-source now reaches the tag (it did not before): an upstream-demo run
+    # and an ours run are different prompts and must not share an output filename.
+    tag = (prompts.tag if args.prompts else
+           fewshot_tag(args.num_shots, args.fewshot_mode, args.fewshot_source))
     tag += "_recallonly"
 
     for step in steps:
@@ -150,7 +195,7 @@ def main():
         model = D.load_checkpoint(step)
         res = eval_step(model, tokenizer, df, step,
                         write_every=args.write_every, partial_path=partial_path,
-                        fewshot=fewshot)
+                        prompts=prompts)
         res.to_parquet(out_path)
         partial_path.unlink(missing_ok=True)
         print(f"[write] {out_path}  ({res['correct'].mean():.3f} correct)")

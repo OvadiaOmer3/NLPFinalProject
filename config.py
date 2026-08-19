@@ -13,24 +13,73 @@ from pathlib import Path
 # --------------------------------------------------------------------------- #
 # HuggingFace identifiers
 # --------------------------------------------------------------------------- #
-MODEL_ID = "dhgottesman/LMEnt-170M-1E"          # 1B model, single epoch
+# Which LMEnt release we evaluate.  Pick it per run with `--model`
+# (feature_extraction/eval_checkpoints.py) or process-wide with $LMENT_MODEL_ID;
+# the env var is the safer of the two because it applies before any import (see
+# `use_model` below).
+MODEL_ID = os.environ.get("LMENT_MODEL_ID", "dhgottesman/LMEnt-1B-6E")  # 1B, 6 epochs
 POPQA_DATASET_ID = "dhgottesman/popqa-kas"    # entity-annotated PopQA
 LMENT_DATASET_ID = "dhgottesman/LMEnt-Dataset"  # corpus + batch indices + mentions
 
 # --------------------------------------------------------------------------- #
 # Checkpoints  (subfolders inside MODEL_ID)
 # --------------------------------------------------------------------------- #
-# From the model repo tree: step0, step10000 ... step100000, step109672 (final).
-CHECKPOINT_STEPS = [
-    0, 10000, 20000, 30000, 40000, 50000,
-    60000, 70000, 80000, 90000, 100000
-]
-FINAL_STEP = CHECKPOINT_STEPS[-1]              # total training steps (1 epoch)
-TOTAL_STEPS = 109672
+# Every release stores a checkpoint every 10k steps plus the final, uneven one:
+# step0, step10000, ..., step{total}.  The totals differ per release, so the grid
+# MUST follow MODEL_ID: asking LMEnt-1B-6E for step109672 (the *1E* final) 404s
+# the subfolder, and transformers then falls back to guessing the model type from
+# the repo name -- "dhgottesman" contains "esm" -- and dies with an unrelated
+# "EsmConfig is not supported by AutoModelForCausalLM".  Hence the guard in
+# src/data.py:load_checkpoint.  Verified against the repo trees on the Hub.
+CHECKPOINT_INTERVAL = 10000
+MODEL_TOTAL_STEPS = {
+    "6E": 658032,
+    "1E": 109672,
+    "4E": 438688,
+    "2E": 219344,
+}
+
+def total_steps(model_id: str | None = None) -> int | None:
+    """Training steps of ``model_id``; None for a repo we haven't catalogued."""
+    model = model_id or MODEL_ID
+    epochs = model.split("-")[-1]
+    return MODEL_TOTAL_STEPS.get(epochs)
+
+def checkpoint_steps(model_id: str | None = None) -> list[int] | None:
+    """Every checkpoint published for ``model_id``; None if it isn't catalogued
+    (then the caller has to name the steps itself, e.g. `--steps`)."""
+    total = total_steps(model_id)
+    if total is None:
+        return None
+    return list(range(0, total, CHECKPOINT_INTERVAL)) + [total]
 
 
 def checkpoint_subfolder(step: int) -> str:
     return f"step{step}"
+
+
+def use_model(model_id: str) -> None:
+    """Repoint MODEL_ID and the checkpoint grid at ``model_id``.
+
+    Call before the first tokenizer / checkpoint load.  Anything that captured
+    CHECKPOINT_STEPS / TOTAL_STEPS as a *default argument* at import time
+    (src/features/learning.py, src/features/timeline.py, src/schedule.py) keeps
+    the old values, so pass those explicitly -- or use $LMENT_MODEL_ID, which
+    lands before any import and needs no such care.
+    """
+    global MODEL_ID, CHECKPOINT_STEPS, FINAL_STEP, TOTAL_STEPS
+    MODEL_ID = model_id
+    CHECKPOINT_STEPS = checkpoint_steps(model_id)
+    FINAL_STEP = CHECKPOINT_STEPS[-1] if CHECKPOINT_STEPS else None
+    TOTAL_STEPS = FINAL_STEP
+
+
+CHECKPOINT_STEPS = checkpoint_steps()
+# Last published checkpoint == the last training step, so these coincide; both
+# names are kept because they mean different things downstream (a subfolder to
+# load vs. the horizon of the LR schedule / timeline features).
+FINAL_STEP = CHECKPOINT_STEPS[-1] if CHECKPOINT_STEPS else None
+TOTAL_STEPS = FINAL_STEP
 
 
 # --------------------------------------------------------------------------- #

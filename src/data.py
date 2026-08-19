@@ -60,17 +60,42 @@ def load_popqa_df(split: str = "train"):
 # --------------------------------------------------------------------------- #
 # Model / tokenizer
 # --------------------------------------------------------------------------- #
-@functools.lru_cache(maxsize=1)
-def load_tokenizer():
-    # Tokenizer is identical across checkpoints; load from the final one.
-    return AutoTokenizer.from_pretrained(
-        config.MODEL_ID,
-        subfolder=config.checkpoint_subfolder(config.FINAL_STEP),
-        use_fast=True,
-    )
+@functools.lru_cache(maxsize=4)
+def _tokenizer(model_id: str, subfolder: str):
+    return AutoTokenizer.from_pretrained(model_id, subfolder=subfolder, use_fast=True)
 
 
-def load_checkpoint(step: int, device: str | None = None):
+def load_tokenizer(model_id: str | None = None, step: int | None = None):
+    # Tokenizer is identical across checkpoints; load from the final one.  Keyed
+    # on the model so a process that switches models doesn't reuse a stale one.
+    model_id = model_id or config.MODEL_ID
+    if step is None:
+        steps = config.checkpoint_steps(model_id)
+        step = steps[-1] if steps else config.FINAL_STEP
+        if step is None:
+            raise ValueError(f"no checkpoint grid known for {model_id!r}; pass step=")
+    return _tokenizer(model_id, config.checkpoint_subfolder(step))
+
+
+def _check_step(model_id: str, step: int) -> None:
+    """Fail loudly on a step this repo doesn't publish.
+
+    Without this, `from_pretrained` 404s the subfolder and transformers falls
+    back to inferring the model type from the repo *name* -- "dhgottesman"
+    contains "esm" -- so a wrong step surfaces as an unrelated
+    "EsmConfig ... for this kind of AutoModel: AutoModelForCausalLM".
+    """
+    steps = config.checkpoint_steps(model_id)
+    if steps is not None and step not in steps:
+        raise ValueError(
+            f"{model_id} has no step{step} checkpoint: it publishes step0 .. "
+            f"step{steps[-2]} every {config.CHECKPOINT_INTERVAL} plus the final "
+            f"step{steps[-1]}. (Different LMEnt releases have different finals -- "
+            f"109672 for the 1E models, 658032 for 1B-6E.)"
+        )
+
+
+def load_checkpoint(step: int, device: str | None = None, model_id: str | None = None):
     """Load the model weights for a single checkpoint step onto `device`.
 
     Honors LMENT_DEVICE / LMENT_DTYPE env overrides (e.g. cpu / float32 for a
@@ -78,13 +103,15 @@ def load_checkpoint(step: int, device: str | None = None):
     `torch_dtype=` fallback for older versions.
     """
     import os
+    model_id = model_id or config.MODEL_ID
+    _check_step(model_id, step)
     device = device or os.environ.get("LMENT_DEVICE", config.DEVICE)
     dtype = getattr(torch, os.environ.get("LMENT_DTYPE", config.DTYPE))
     sub = config.checkpoint_subfolder(step)
     try:
-        model = AutoModelForCausalLM.from_pretrained(config.MODEL_ID, subfolder=sub, dtype=dtype)
+        model = AutoModelForCausalLM.from_pretrained(model_id, subfolder=sub, dtype=dtype)
     except TypeError:
-        model = AutoModelForCausalLM.from_pretrained(config.MODEL_ID, subfolder=sub, torch_dtype=dtype)
+        model = AutoModelForCausalLM.from_pretrained(model_id, subfolder=sub, torch_dtype=dtype)
     model.to(device).eval()
     return model
 

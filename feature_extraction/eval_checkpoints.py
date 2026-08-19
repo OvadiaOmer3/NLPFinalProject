@@ -20,10 +20,24 @@ Run once per checkpoint (ideally a Slurm array job, one GPU each) or loop locall
 Usage:
     python feature_extraction/eval_checkpoints.py                 # all checkpoints
     python feature_extraction/eval_checkpoints.py --steps 0 10000 # a subset
+    python feature_extraction/eval_checkpoints.py --model dhgottesman/LMEnt-1B-1E
+                                                                  # another release; the
+                                                                  # checkpoint grid follows
+                                                                  # (pair with --output-dir,
+                                                                  # filenames don't carry the
+                                                                  # model)
     python feature_extraction/eval_checkpoints.py --no-hidden     # scalars only, no dump
     python feature_extraction/eval_checkpoints.py --no-internal   # recall only: correct +
                                                                   # generation, one pass/fact
     python feature_extraction/eval_checkpoints.py --limit 100     # smoke test on 100 facts
+    python feature_extraction/eval_checkpoints.py --prompts P.parquet
+                                                                  # use pre-built prompts
+                                                                  # (feature_extraction/
+                                                                  # build_prompts.py) instead of
+                                                                  # rendering them from the flags
+                                                                  # below -- the way to keep the
+                                                                  # prompts constant while
+                                                                  # comparing models
     python feature_extraction/eval_checkpoints.py --num-shots 0   # bare zero-shot cloze
     python feature_extraction/eval_checkpoints.py --fewshot-mode only-same-prop
                                                                   # demos of the query's OWN
@@ -56,6 +70,7 @@ from src import recall
 from src.features import internal
 from src import fewshot as fewshot_mod
 from src.fewshot import FewShot
+from src.prompt_set import PromptSet, fewshot_tag
 
 
 def _checkpoint_rows(rows, partial_path, dump, ndump):
@@ -74,7 +89,7 @@ def _checkpoint_rows(rows, partial_path, dump, ndump):
 
 
 def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
-             internal_dir=None, write_every=0, partial_path=None, fewshot=None,
+             internal_dir=None, write_every=0, partial_path=None, prompts=None,
              internal_feats=True):
     """Full single-checkpoint pass -> a DataFrame (one row per fact).
 
@@ -118,9 +133,9 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
         if r["id"] in done_ids:
             continue                             # already in the partial
         # (1) greedy decode -> substring-match correctness (paper's `correct`).
-        # Which demos the block holds is the mode's business (--fewshot-mode); it is
-        # cached per distinct demo set, so it is not re-rendered per fact.
-        prompt = D.prompt_for(r, prefix=fewshot.prefix_for(r) if fewshot else "")
+        # Prompts are pre-rendered (src/prompt_set.py) so every checkpoint and every
+        # model scores the identical strings; `prompts=None` is the bare cloze.
+        prompt = prompts.prompt(r["id"]) if prompts is not None else D.prompt_for(r)
         gen = recall.greedy_generation(model, tokenizer, prompt)
         # (2) one teacher-forced forward -> gold_prob + all internal features.
         # Skipped entirely with --no-internal: that forward asks for every layer's
@@ -142,7 +157,7 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
             # The count this fact actually got, not the requested one: under
             # --fewshot-mode only-same-prop a fact whose answer knocks out part of
             # its relation's bench can end up with fewer.
-            "num_shots": fewshot.shots_for(r) if fewshot is not None else 0,
+            "num_shots": prompts.shots(r["id"]) if prompts is not None else 0,
             "correct": lment_popqa.is_correct(r, gen),
             "excluded": lment_popqa.is_excluded(r),
             "prompt": prompt,
@@ -167,7 +182,16 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--steps", type=int, nargs="*", default=config.CHECKPOINT_STEPS)
+    ap.add_argument("--model", type=str, default=config.MODEL_ID,
+                    help=f"HuggingFace repo of the LMEnt release to evaluate "
+                         f"(default {config.MODEL_ID}, or $LMENT_MODEL_ID). Known "
+                         f"releases: {', '.join(config.MODEL_TOTAL_STEPS)}. Artifact "
+                         f"filenames do NOT encode the model, so give each one its "
+                         f"own --output-dir.")
+    ap.add_argument("--steps", type=int, nargs="*", default=None,
+                    help="checkpoint steps to evaluate; defaults to every "
+                         "checkpoint the --model publishes (step0 .. final, every "
+                         f"{config.CHECKPOINT_INTERVAL}).")
     ap.add_argument("--limit", type=int, default=None,
                     help="evaluate only the first N facts (smoke test)")
     ap.add_argument("--min-shared-chunks", type=int, default=0,
@@ -196,7 +220,17 @@ def main():
     ap.add_argument("--top-k", type=int, default=config.NEURON_TOPK,
                     help="also dump the indices of the top-k active MLP neurons "
                          "per (fact, layer) -> neurons_step{N}_*.npy (off by default)")
-    ap.add_argument("--num-shots", type=int, default=config.NUM_SHOTS,
+    ap.add_argument("--prompts", type=str, default=None,
+                    help="parquet of pre-built prompts (feature_extraction/"
+                         "build_prompts.py). It fixes the prompt strings, the fact "
+                         "set and its order, so different models/checkpoints are "
+                         "compared on identical inputs even if the selection rule "
+                         "or the dataset later changes. Incompatible with the "
+                         "--num-shots / --fewshot-* / --min-shared-chunks flags "
+                         "below -- those were settled when the file was built. "
+                         "Without it the prompts are rendered from those flags, as "
+                         "before.")
+    ap.add_argument("--num-shots", type=int, default=None,
                     help="in-context demonstrations prepended to the cloze "
                          f"(default {config.NUM_SHOTS}). 0 = bare zero-shot cloze. "
                          "Demonstrations come from a held-out pool, never from the "
@@ -239,6 +273,17 @@ def main():
                          "Use this to avoid surprises from running from the wrong cwd.")
     args = ap.parse_args()
 
+    # Before any load: everything downstream reads config.MODEL_ID at call time.
+    config.use_model(args.model)
+    if args.steps is None:
+        args.steps = config.CHECKPOINT_STEPS
+        if args.steps is None:
+            ap.error(f"{args.model} is not in config.MODEL_TOTAL_STEPS, so its "
+                     f"checkpoint grid is unknown -- pass --steps explicitly (or add "
+                     f"the release to the table).")
+    print(f"[model] {config.MODEL_ID} | {len(args.steps)} step(s), "
+          f"final published step{config.FINAL_STEP}")
+
     # --fewshot-keep-same-prop predates --fewshot-mode and means fixed-block; keep it
     # working, but refuse to guess when the two disagree.
     if args.fewshot_keep_same_prop:
@@ -246,7 +291,23 @@ def main():
             ap.error(f"--fewshot-keep-same-prop conflicts with --fewshot-mode "
                      f"{args.fewshot_mode} (it is an alias for fixed-block)")
         args.fewshot_mode = "fixed-block"
+
+    # A prompt file already answers every prompt-shaping question, so taking one of
+    # these flags too would mean silently honouring one and ignoring the other.
+    if args.prompts:
+        conflicting = [name for name, val in (
+            ("--num-shots", args.num_shots),
+            ("--fewshot-mode", args.fewshot_mode),
+            ("--fewshot-per-prop", args.fewshot_per_prop),
+            ("--min-shared-chunks", args.min_shared_chunks or None),
+        ) if val is not None] + (
+            ["--fewshot-source"] if args.fewshot_source != "ours" else [])
+        if conflicting:
+            ap.error(f"--prompts is incompatible with {', '.join(conflicting)}: the "
+                     "prompt file was built with its own settings (inspect them with "
+                     "build_prompts.py --inspect). Rebuild the file to change them.")
     args.fewshot_mode = args.fewshot_mode or "drop-same-prop"
+    args.num_shots = config.NUM_SHOTS if args.num_shots is None else args.num_shots
 
     if args.output_dir:
         out_root = Path(args.output_dir).resolve()
@@ -259,40 +320,48 @@ def main():
     print(f"[dirs] internal -> {internal_dir}")
 
     df = D.load_popqa_df()
-    # Demonstrations are chosen from the FULL dataset, before the filters below,
-    # so the pool doesn't shift when --limit / --min-shared-chunks change.  Their
-    # subjects then leave the eval set at every shot count (0 included) so runs
-    # remain comparable.
-    fewshot = FewShot.build(df, num_shots=args.num_shots,
-                            source=args.fewshot_source,
-                            per_prop=args.fewshot_per_prop,
-                            mode=args.fewshot_mode)
-    df = fewshot.drop_subjects(df)
-    if args.min_shared_chunks > 0:
-        n_before = len(df)
-        n_shared = df["shared_chunks"].apply(lambda c: len(c) if c is not None else 0)
-        df = df[n_shared >= args.min_shared_chunks].reset_index(drop=True)
-        print(f"[filter] dropped {n_before - len(df)} facts with "
-              f"< {args.min_shared_chunks} shared_chunks ({len(df)} remain)")
-    if args.limit:
-        df = df.head(args.limit)
+    if args.prompts:
+        # The file IS the eval set: the demonstration pool's subjects are already
+        # gone and its filters already applied, so `df` is only reordered to match.
+        prompts = PromptSet.load(args.prompts)
+        print(f"[prompts] {args.prompts}")
+        print(prompts.describe())
+        if args.limit:
+            prompts = prompts.head(args.limit)
+        df = prompts.select(df)
+    else:
+        # Demonstrations are chosen from the FULL dataset, before the filters below,
+        # so the pool doesn't shift when --limit / --min-shared-chunks change.  Their
+        # subjects then leave the eval set at every shot count (0 included) so runs
+        # remain comparable.
+        fewshot = FewShot.build(df, num_shots=args.num_shots,
+                                source=args.fewshot_source,
+                                per_prop=args.fewshot_per_prop,
+                                mode=args.fewshot_mode)
+        df = fewshot.drop_subjects(df)
+        if args.min_shared_chunks > 0:
+            n_before = len(df)
+            n_shared = df["shared_chunks"].apply(lambda c: len(c) if c is not None else 0)
+            df = df[n_shared >= args.min_shared_chunks].reset_index(drop=True)
+            print(f"[filter] dropped {n_before - len(df)} facts with "
+                  f"< {args.min_shared_chunks} shared_chunks ({len(df)} remain)")
+        if args.limit:
+            df = df.head(args.limit)
+        # Rendered up front rather than inside the loop, so the demo selection is
+        # paid for once instead of once per checkpoint.
+        prompts = PromptSet.build(df, fewshot, source=args.fewshot_source)
     tokenizer = D.load_tokenizer()
 
     # `correct` / `generation` / `prompt` depend on the shot count, so the filename
     # must too -- otherwise the `exists -> skip` guard below would hand a 0-shot
     # run the 15-shot parquet.  0-shot keeps the original bare name so existing
-    # artifacts and downstream globs are untouched.
-    tag = "" if args.num_shots == 0 else f"_{args.num_shots}shot"
-    if args.num_shots > 0 and args.fewshot_source != "ours":
-        tag += f"_{args.fewshot_source}"
-    # The mode changes the prompt too, so it also has to reach the filename.  Keep
-    # "_sameprop" for fixed-block: that is the suffix its artifacts already carry
-    # (from when --fewshot-keep-same-prop was the only alternative), and renaming it
-    # would make the `exists -> skip` guard rerun them.
-    if args.num_shots > 0 and args.fewshot_mode == "fixed-block":
-        tag += "_sameprop"
-    elif args.num_shots > 0 and args.fewshot_mode == "only-same-prop":
-        tag += "_onlysameprop"
+    # artifacts and downstream globs are untouched.  The mode and the source change
+    # the prompt too, so they also reach the filename (fixed-block keeps the
+    # "_sameprop" suffix its artifacts already carry).  With --prompts the tag comes
+    # from the file's metadata, so the same settings land on the same filenames
+    # whichever way the prompts were produced.
+    tag = (prompts.tag if args.prompts else
+           fewshot_tag(args.num_shots, args.fewshot_mode, args.fewshot_source))
     # A --no-internal parquet has strictly fewer columns, so it must not land on
     # the filename a full run uses -- otherwise the `exists -> skip` guard would
     # feed build_feature_table.py a table with no gold_prob / internal features.
@@ -311,7 +380,7 @@ def main():
                         dump_hidden=not args.no_hidden, positions=args.positions,
                         top_k=args.top_k, internal_dir=internal_dir,
                         write_every=args.write_every, partial_path=partial_path,
-                        fewshot=fewshot, internal_feats=not args.no_internal)
+                        prompts=prompts, internal_feats=not args.no_internal)
         res.to_parquet(out_path)
         partial_path.unlink(missing_ok=True)
         msg = f"[write] {out_path}  ({res['correct'].mean():.3f} correct"
