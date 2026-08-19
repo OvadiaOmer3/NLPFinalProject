@@ -14,12 +14,11 @@
 # --gpus 8 --rank-microbatch-size 4096 (same effective batch, more accumulation).
 # torchrun below picks up whatever slurm actually granted.
 #SBATCH --job-name=train_explicit
-#SBATCH --partition=gpu-mol
-#SBATCH --time=72:00:00
+#SBATCH --partition=gpu-h100-killable
+#SBATCH --time=24:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --gpus=4
-#SBATCH --constraint=l40s
+#SBATCH --gpus=1
 #SBATCH --cpus-per-task=10
 #SBATCH --mem=200000
 #SBATCH --signal=USR1@120
@@ -27,7 +26,7 @@
 #SBATCH --error=logs/train_%A.err
 
 source ~/anaconda3/etc/profile.d/conda.sh
-conda activate lment_train
+conda activate lment_train_cu126
 
 # W&B: `wandb login` once on the login node writes ~/.netrc (mode 600); read the
 # key from there so it is never stored in this repo or echoed into a log.
@@ -36,12 +35,24 @@ if [ -z "$WANDB_API_KEY" ] && [ -f "$HOME/.netrc" ]; then
 fi
 [ -n "$WANDB_API_KEY" ] && echo "[wandb] API key found" || echo "[wandb] no API key -- run wandb login, or leave --wandb off"
 
-# NCCL peer-to-peer is BROKEN on n-801 across its two NUMA nodes: slurm hands
-# out GPUs from both sockets (e.g. CUDA_VISIBLE_DEVICES=1,5,6,7), NCCL attempts
-# direct P2P over the inter-socket link, and the first collective hangs forever
-# -- this killed jobs 707979/708003. Diagnosed with slurm/nccl_test.sbatch
-# (job 710271): default transport FAILS, P2P-disabled PASSES. So default it on
-# here; override with `sbatch --export=ALL,NCCL_P2P_DISABLE=0 ...` to re-test.
+# NCCL peer-to-peer is BROKEN on n-801 -- for EVERY GPU pair, not just across
+# sockets. Do not turn this off. Two failure modes, both from
+# slurm/nccl_test.sbatch:
+#   * hang: the first collective never returns (killed jobs 707979/708003,
+#     diagnosed in job 710271).
+#   * SILENT CORRUPTION, which is worse: job 761891 (4 GPUs, 0-3) and job
+#     761982 (2 GPUs, 4-5 -- a PIX pair on one bridge in one NUMA node) both
+#     passed the 16-element broadcast and then returned 1.0 from a 1M-element
+#     all_reduce that should have returned the world size. Gradients are never
+#     averaged, NCCL reports no error, and training completes normally with a
+#     quietly wrong model.
+# Small messages take a host-staged path and look fine; large ones use direct
+# peer mappings and are the broken part -- so a quick smoke test that only
+# broadcasts will wrongly appear healthy. Likely PCIe ACS or IOMMU config;
+# fixing it needs a BIOS change or pcie_acs_override, i.e. cluster admins.
+# Re-test ONLY via slurm/nccl_test.sbatch, which verifies collective *values*.
+# Never by running training with NCCL_P2P_DISABLE=0 -- that yields no error,
+# just bad science.
 export NCCL_P2P_DISABLE=${NCCL_P2P_DISABLE:-1}
 export NCCL_DEBUG=${NCCL_DEBUG:-WARN}
 export TORCH_NCCL_BLOCKING_WAIT=${TORCH_NCCL_BLOCKING_WAIT:-0}

@@ -89,6 +89,19 @@ def main():
     ap.add_argument("--downstream-eval", action="store_true",
                     help="enable OLMo-core's in-training downstream evaluator "
                          "(needs its eval deps; off by default)")
+    ap.add_argument("--instance-metadata", action="store_true",
+                    help="attach each chunk's entity annotations to its batch. "
+                         "OFF by default because it is very expensive and "
+                         "nothing in the training path reads it: the KAS "
+                         "dataset seeks a random row in dataset-cache/"
+                         "dataset-metadata/part-*.csv (~245 GB) for EVERY "
+                         "instance, which made data loading 87%% of step time "
+                         "on a 170M run. The collator puts the result in the "
+                         "batch and only olmo_core.data.kas_metrics would "
+                         "consume it -- and nothing imports that module. Turn "
+                         "this on only if you add a callback that needs "
+                         "batch['metadata']. Does not affect the dataset "
+                         "fingerprint, so toggling it reuses the same cache.")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
@@ -134,7 +147,7 @@ def main():
             "min_sequence_length": 64,
             "vsl_curriculum": {"name": "grow_p2", "num_cycles": 8, "balanced": False},
             "paths": [paths_glob],
-            "include_instance_metadata": True,
+            "include_instance_metadata": bool(args.instance_metadata),
             "work_dir": work_dir,
         },
         "data_loader": {

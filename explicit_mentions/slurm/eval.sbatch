@@ -13,7 +13,6 @@
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64000
-#SBATCH --constraint=l40s
 #SBATCH --signal=USR1@120
 #SBATCH --output=logs/eval_%A.out
 #SBATCH --error=logs/eval_%A.err

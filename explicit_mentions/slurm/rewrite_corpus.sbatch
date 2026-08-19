@@ -24,4 +24,6 @@ export TOKENIZERS_PARALLELISM=true
 
 EM_DIR=/home/morg/NLP_2526b/shaharmayo/NLPFinalProject/explicit_mentions
 cd "$EM_DIR"
-python build_explicit_corpus.py --part "${SLURM_ARRAY_TASK_ID}" "$@"
+python build_explicit_corpus.py --corpus-tag explicit_half \
+     --replace-fraction 0.5 \
+     --part "${SLURM_ARRAY_TASK_ID}" "$@" 

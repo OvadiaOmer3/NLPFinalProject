@@ -139,6 +139,16 @@ def build_config(config: Dict[str, Any]) -> ExperimentConfig:
         compile=True,
         fused_ops=False,
         use_flash=False,
+        # FSDP, measured 20% faster than DDP here (0.2512 vs 0.3025 s/step,
+        # matched over steps 2000-8000 of original_170M_1E on 4x L40S).
+        # Counting collectives suggests otherwise -- FSDP does ~21 per step to
+        # DDP's one -- but the bytes are equal (~1.49 GB/GPU/step each way),
+        # and FSDP wins on two things DDP can't match here: params are natively
+        # bf16 so there is no autocast casting on every op, and the optimizer
+        # step is sharded (each rank runs AdamW over 1/4 of the params instead
+        # of all of them). Sharding also becomes a hard requirement at
+        # olmo2_1B, where AdamW state alone is ~21 GB against 44 GB of device
+        # memory -- so this is the one strategy that works at every size.
         dp_config=TransformerDataParallelConfig(
             name=DataParallelType.fsdp,
             param_dtype=DType.bfloat16,
@@ -183,6 +193,10 @@ def build_config(config: Dict[str, Any]) -> ExperimentConfig:
             metrics_collect_interval=tr["metrics_collect_interval"],
             cancel_check_interval=tr["cancel_check_interval"],
             max_duration=max_duration,
+            # No autocast_precision: FSDP's param_dtype already gives bf16
+            # compute, and stacking autocast on top only adds casts. Side
+            # effect: SpeedMonitor only reports MFU when autocast_precision is
+            # bfloat16, so MFU is absent from the logs under FSDP.
             load_key_mapping={
                 "lm_head.w_out.weight": "w_out.weight",
                 "lm_head.norm.weight": "norm.weight",

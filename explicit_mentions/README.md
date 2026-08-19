@@ -195,6 +195,8 @@ build_explicit_corpus.py  ->  inspect_rewrites.py  ->  make_train_config.py +
                                                               |
 eval_explicit.py  <-  convert_checkpoints.py  <---------------+
    (GPU, PopQA)          (OLMo-core -> HF)
+      ^
+build_prompts.py   (once: the frozen prompt file every model is scored on)
 ```
 
 ### 0. Environment
@@ -349,15 +351,32 @@ sbatch slurm/convert_to_hf.sbatch \
 ### 5. Evaluate PopQA recall
 
 Same prompts/scoring as the main project (olmes cloze, held-out few-shot
-pool), so results are comparable with existing artifacts:
+pool), so results are comparable with existing artifacts.
+
+Build the prompts **once** first and hand the file to every model. The
+comparison here is model-vs-model, so the prompts must not be re-derived per
+run: the file fixes the prompt strings, the fact set and its order, and carries
+a `prompt_hash` you can compare across runs to prove they matched (see
+`emlib/prompt_set.py`).
 
 ```bash
+python build_prompts.py --num-shots 5            # mode defaults to only-same-prop
+# -> $EXPLICIT_ROOT/artifacts/prompts/prompts_5shot_onlysameprop.parquet (+ .meta.json)
+python build_prompts.py --inspect $EXPLICIT_ROOT/artifacts/prompts/prompts_5shot_onlysameprop.parquet
+```
+
+```bash
+setenv P $EXPLICIT_ROOT/artifacts/prompts/prompts_5shot_onlysameprop.parquet
 sbatch slurm/eval.sbatch --model $EXPLICIT_ROOT/hf/explicit_170M_1E \
-    --run-tag explicit_170M_1E --num-shots 5 --fewshot-mode only-same-prop
+    --run-tag explicit_170M_1E --prompts $P
 # baseline (published model):
 sbatch slurm/eval.sbatch --model dhgottesman/LMEnt-170M-1E --steps 109672 \
-    --run-tag baseline_170M_1E --num-shots 5 --fewshot-mode only-same-prop
+    --run-tag baseline_170M_1E --prompts $P
 ```
+
+Without `--prompts` the prompts are still rendered from `--num-shots` /
+`--fewshot-mode` at run time, exactly as before (`--prompts` is incompatible
+with those flags — the file already answers them).
 
 Outputs land in `$EXPLICIT_ROOT/artifacts/<run-tag>/recall_step{N}_*.parquet`
 with the same schema as the main repo's recall parquets
@@ -377,6 +396,7 @@ are where the explicit corpus should help most).
 | `train_explicit.py` | OLMo-core training (patched copy of authors' `kas/train.py`: config-controlled wandb/eval, `load_path` for two-phase) |
 | `make_train_config.py` | generates training config JSONs |
 | `convert_checkpoints.py` | OLMo-core checkpoints → HF `stepN/` layout |
+| `build_prompts.py` | renders the few-shot prompts once to a parquet (the eval's `--prompts` input), so every model is scored on identical inputs |
 | `eval_explicit.py` | PopQA recall sweep (recall-only port of the main repo's `eval_checkpoints.py`) |
 | `emlib/` | copies of the main repo's prompt/recall/few-shot modules (self-contained) |
 | `prebuild_dataset_cache.py` | builds OLMo-core's index/chunk/VSL caches on CPU before training |
