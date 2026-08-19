@@ -1,0 +1,3 @@
+The evaluation output under NLPFinalProject/data/artifacts/recall/regular_corpus/Constant_prompt/170M/recall/recall_step438688_15shot_recallonly.parquet,
+was produced by the 170M-4E model. However the checkpoint 'step438688' is broken, and produces gibrish. you can see the bad outputs at /bad_4E_outputs.
+Instead we used 'step430000' but called it 'recall_step438688_15shot_recallonly.parquet' for consistency.

@@ -78,8 +78,29 @@ pip install -e olmes                          # install AFTER the env so the for
 ## Run order
 
 ```bash
+# Step A.0 (optional but recommended) — freeze the few-shot prompts
+python feature_extraction/build_prompts.py --num-shots 15
+#   Renders the prompts ONCE to artifacts/prompts/prompts{tag}.parquet: the exact prompt
+#   string per fact, which facts are evaluated, in which order, how many demos each got
+#   (`num_shots` is per fact) and which ones (`demo_ids`). The flags, the demonstration
+#   pool and a `prompt_hash` over the strings are stored in the parquet's schema metadata
+#   (mirrored to a `*.meta.json` sidecar); `--inspect FILE` prints them back.
+#   Takes the same --num-shots / --fewshot-mode / --fewshot-source / --fewshot-per-prop /
+#   --min-shared-chunks / --limit flags as the eval, plus --out / --out-dir / --force /
+#   --show N. Pass the file to the eval with --prompts and every model, checkpoint and
+#   rerun is scored on identical inputs, even if the selection rule or the dataset later
+#   changes -- which is what makes model-vs-model numbers comparable.
+# -> artifacts/prompts/prompts_15shot.parquet (+ .meta.json)
+
 # Step A.1 — recall + internal states at every checkpoint (GPU; one per checkpoint)
+python feature_extraction/eval_checkpoints.py --prompts artifacts/prompts/prompts_15shot.parquet
 python feature_extraction/eval_checkpoints.py            # or --steps 0 10000 ... as a Slurm array
+#   --prompts FILE         use a pre-built prompt file (Step A.0) instead of rendering the
+#                          prompts from the flags below; the file then defines the prompts,
+#                          the eval set and its order, and supplies the output filename tag,
+#                          so a run off the same file is byte-identical to one off the
+#                          matching flags. Incompatible with --num-shots / --fewshot-* /
+#                          --min-shared-chunks (those were settled when the file was built).
 #   --num-shots N          in-context demos (default 15; 0 = bare cloze). Demos come from a
 #                          held-out pool of one fact per relation, never the eval set, and a
 #                          fact is never shown its OWN relation -- hence 15 of 16. The pool's
