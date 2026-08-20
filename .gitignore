@@ -7,3 +7,4 @@ __pycache__/
 /data/corpora
 /data/hf
 /data/runs
+/explicit_mentions/logs
