@@ -41,6 +41,12 @@ def _final_norm_and_head(model):
     For ``transformers`` ``Olmo2ForCausalLM`` these are ``model.model.norm`` and
     ``model.lm_head`` (kept as a getattr with a tied-embeddings fallback for the
     head).  VERIFY once against ``print(model)`` on the real checkpoint.
+
+    NOTE for the logit lens: ``output_hidden_states`` returns the LAST entry
+    already normalised -- ``head(hs[-1])`` reproduces ``out.logits`` exactly,
+    while ``head(norm(hs[-1]))`` does not.  Applying ``norm`` to it a second time
+    scales the residual by the learned RMSNorm weight twice and changes the
+    argmax, so every lens loop below must skip the norm on the final entry.
     """
     base = getattr(model, "model", model)
     norm = getattr(base, "norm", None)
@@ -98,7 +104,9 @@ def logit_lens_features(model, tokenizer, row):
     depth = np.nan
     for layer, h in enumerate(hs):
         vec = h[0, pos]
-        if norm is not None:
+        # hs[-1] is already post-final-norm; norming it again would corrupt the
+        # one boundary where the lens is exact.  See _final_norm_and_head.
+        if norm is not None and layer < n_layers - 1:
             vec = norm(vec)
         layer_logits = head(vec)
         if int(layer_logits.argmax()) == gold0:
@@ -119,7 +127,7 @@ def logit_lens_features(model, tokenizer, row):
 
 
 # --------------------------------------------------------------------------- #
-# Representation drift between consecutive checkpoints
+# Representation drift between consecutive checkpoints - Not used in the project
 # --------------------------------------------------------------------------- #
 def representation_drift(vecs_t, vecs_tp1):
     """Cosine similarity per layer between subject hidden states at t and t+1.
@@ -137,7 +145,7 @@ def representation_drift(vecs_t, vecs_tp1):
 
 
 # --------------------------------------------------------------------------- #
-# Paraphrase stability
+# Paraphrase stability - Not used in the project
 # --------------------------------------------------------------------------- #
 def paraphrase_prompts(row) -> list[str]:
     """A small set of surface phrasings of the same fact for the stability test:
@@ -176,7 +184,7 @@ def paraphrase_stability(model, tokenizer, row):
 
 
 # --------------------------------------------------------------------------- #
-# Linear probe over collected subject hidden states (offline, CPU)
+# Linear probe over collected subject hidden states (offline, CPU) - Not used in the project
 # --------------------------------------------------------------------------- #
 def train_layer_probes(X_by_layer, y, n_splits=5, max_iter=1000):
     """Train a linear classifier per layer to predict the answer from the
@@ -224,9 +232,18 @@ def _decoder_layers(model):
 
 @torch.no_grad()
 def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
-                 neuron_eps=1e-3, per_layer=True, top_k=None):
-    """Run the model ONCE on ``[zero-shot cloze] + [gold answer tokens]`` and
-    return ``(features, hidden, neurons)``.
+                 neuron_eps=1e-3, per_layer=True, top_k=None, prompt=None):
+    """Run the model ONCE on ``[prompt] + [gold answer tokens]`` and return
+    ``(features, hidden, neurons)``.
+
+    ``prompt`` defaults to the **zero-shot cloze**, which is what every artifact
+    produced before this parameter existed used: the answer position is then
+    unconditioned and therefore comparable across shot counts, even in a run
+    whose ``correct`` was scored on a 15-shot prompt.  Pass the few-shot prompt
+    (``eval_checkpoints.py --internal-fewshot``) to measure the internals under
+    the same conditioning the decode saw instead; it must end exactly where the
+    answer begins, and the fact's own cloze must be its tail, since ``ans_pos``
+    is its last token and the subject is located with ``rfind``.
 
     ``features`` mixes scalars (safe to put straight in a parquet) with a few
     per-layer lists (only when ``per_layer=True``).  ``hidden`` maps each name in
@@ -242,7 +259,8 @@ def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
     prediction *is* the answer -- so all logit-based features read that slot.
     """
     device = model.device
-    prompt = D.zero_shot_cloze(row)
+    if prompt is None:
+        prompt = D.zero_shot_cloze(row)
     prompt_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
     n_prompt = prompt_ids.shape[1]
     ans_pos = n_prompt - 1                      # predicts the first answer token
@@ -303,7 +321,7 @@ def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
     p = logp.exp()
     top1 = int(final_logits.argmax())
     max_logit = float(final_logits[top1])
-    feats["pred_entropy"] = float(-(p * logp).sum())    # nats; peakedness of the guess
+    feats["pred_entropy"] = float(-(p * logp).sum())    # peakedness of the guess
     feats["top1_prob"] = float(p[top1])
 
     gold0 = gold_ids[0] if gold_ids else None
@@ -340,7 +358,9 @@ def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
     for layer, h in enumerate(hs):
         vec = h[0, ans_pos]
         resid_norm_by_layer.append(float(vec.float().norm()))
-        lens_vec = norm(vec) if norm is not None else vec
+        # hs[-1] arrives post-final-norm, so the last boundary goes to the head
+        # unmodified -- there it is not a "lens" at all, it is the real logits.
+        lens_vec = norm(vec) if (norm is not None and layer < n_hs - 1) else vec
         layer_logits = head(lens_vec).float()
         if gold0 is not None:
             gl = float(layer_logits[gold0])

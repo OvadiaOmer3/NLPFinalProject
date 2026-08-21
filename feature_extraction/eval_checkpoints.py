@@ -40,6 +40,10 @@ Usage:
     python feature_extraction/eval_checkpoints.py --top-shared-chunks-pct 10
                                                                   # keep only the top decile of
                                                                   # facts by num_shared_chunks
+    python feature_extraction/eval_checkpoints.py --num-shots 15 --internal-fewshot
+                                                                  # measure the internals on the
+                                                                  # 15-shot prompt too, not on the
+                                                                  # bare zero-shot cloze
     python feature_extraction/eval_checkpoints.py --top-k 128      # also dump the top-k active
                                                                   # MLP neurons per (fact, layer):
                                                                   # indices + signed activations
@@ -79,7 +83,7 @@ def _checkpoint_rows(rows, partial_path, dump, ndump):
 
 def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
              internal_dir=None, write_every=0, partial_path=None, fewshot=None,
-             internal_feats=True, neuron_values=True):
+             internal_feats=True, neuron_values=True, internal_fewshot=False):
     """Full single-checkpoint pass -> a DataFrame (one row per fact).
 
     Also streams the f16 hidden-state dump (when ``dump_hidden``) and the top-k
@@ -132,10 +136,15 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
         # Skipped entirely with --no-internal: that forward asks for every layer's
         # hidden state, hooks every mlp.down_proj, and runs the LM head once per
         # layer for the logit lens.  None of it is needed for correct/generation.
+        # The teacher-forced pass reads the ZERO-SHOT cloze by default, so the
+        # answer position stays unconditioned and comparable across shot counts
+        # even when `correct` above was scored on a 15-shot prompt.  With
+        # --internal-fewshot it reads the same prompt the decode saw instead.
         if internal_feats:
             feats, hidden, neurons = internal.extract_fact(
                 model, tokenizer, r, positions=positions,
-                neuron_eps=config.NEURON_EPS, top_k=top_k)
+                neuron_eps=config.NEURON_EPS, top_k=top_k,
+                prompt=prompt if internal_fewshot else None)
             if dump is not None:
                 dump.write(i, hidden)
             if ndump is not None:
@@ -202,6 +211,19 @@ def main():
                          "calls per fact and avoids running the LM head once per "
                          "layer. Note build_feature_table.py needs the dropped "
                          "columns, so such runs are for recall inspection only.")
+    ap.add_argument("--internal-fewshot", action="store_true",
+                    help="measure the internal features on the SAME few-shot prompt "
+                         "the greedy decode saw, instead of on the bare zero-shot "
+                         "cloze. Default (off) keeps the answer position "
+                         "unconditioned, so the lens/hidden states are comparable "
+                         "across shot counts and with every artifact produced so far "
+                         "-- at the cost of `correct` and the internals living on two "
+                         "different prompts. Turning it on makes them agree but "
+                         "changes what the depth profile describes: retrieval under "
+                         "in-context conditioning rather than how the fact is stored. "
+                         "No-op at --num-shots 0; conflicts with --no-internal. "
+                         "Output is tagged `_fsinternal` so it never collides with "
+                         "the zero-shot-internals parquets.")
     ap.add_argument("--write-every", type=int, default=1000,
                     help="checkpoint progress to recall_step{N}.partial.parquet "
                          "every N facts; a rerun resumes from it instead of "
@@ -282,6 +304,14 @@ def main():
         if not (0 < args.top_shared_chunks_pct <= 100):
             ap.error("--top-shared-chunks-pct must be in (0, 100]")
 
+    if args.internal_fewshot:
+        if args.no_internal:
+            ap.error("--internal-fewshot needs the internal forward pass that "
+                     "--no-internal skips")
+        if args.num_shots == 0:
+            ap.error("--internal-fewshot is a no-op at --num-shots 0: the few-shot "
+                     "prompt IS the zero-shot cloze there")
+
     if args.output_dir:
         out_root = Path(args.output_dir).resolve()
         recall_dir, internal_dir = out_root / "recall", out_root / "internal"
@@ -342,6 +372,12 @@ def main():
     # feed build_feature_table.py a table with no gold_prob / internal features.
     if args.no_internal:
         tag += "_recallonly"
+    # Same population and same shot count, but a different measured prompt, so the
+    # internal columns are not comparable with a default run's -- it needs its own
+    # filename or the `exists -> skip` guard would serve the zero-shot-internals
+    # parquet in its place.
+    if args.internal_fewshot:
+        tag += "_fsinternal"
     # The population changes with the filter, so it has to reach the filename too --
     # otherwise the `exists -> skip` guard would hand a filtered run the unfiltered
     # parquet (or vice versa).
@@ -363,7 +399,8 @@ def main():
                         top_k=args.top_k, internal_dir=internal_dir,
                         write_every=args.write_every, partial_path=partial_path,
                         fewshot=fewshot, internal_feats=not args.no_internal,
-                        neuron_values=not args.no_neuron_values)
+                        neuron_values=not args.no_neuron_values,
+                        internal_fewshot=args.internal_fewshot)
         res.to_parquet(out_path)
         partial_path.unlink(missing_ok=True)
         msg = f"[write] {out_path}  ({res['correct'].mean():.3f} correct"
