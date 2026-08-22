@@ -153,7 +153,7 @@ SEED = 0
 # Which token positions to dump the full per-layer hidden state for.  "answer"
 # is the cloze's last token (predicts the object); "subject_last" feeds the
 # linear probe + representation drift.  Storage per position ~= n_facts *
-# (n_layers+1) * hidden * 2 bytes (f16); for LMEnt-1B (17 x 2048) that's ~68 KB
+# (n_layers+1) * hidden * 2 bytes (f16); for LMEnt-1B (19 x 2048) that's ~76 KB
 # per fact per checkpoint per position.  Add "all" handling in the script only if
 # you really need every token (blows up ~10-15x).
 HIDDEN_POSITIONS = ("answer", "subject_last")

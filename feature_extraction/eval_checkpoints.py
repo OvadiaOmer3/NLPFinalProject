@@ -126,7 +126,7 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
     n_new = 0
     for i, (_, r) in enumerate(df.iterrows()):
         if r["id"] in done_ids:
-            continue                             # already in the partial
+            continue                           
         # (1) greedy decode -> substring-match correctness (paper's `correct`).
         # Which demos the block holds is the mode's business (--fewshot-mode); it is
         # cached per distinct demo set, so it is not re-rendered per fact.

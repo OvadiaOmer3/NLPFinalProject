@@ -98,6 +98,17 @@ python feature_extraction/eval_checkpoints.py            # or --steps 0 10000 ..
 #   --fewshot-keep-same-prop    deprecated alias for --fewshot-mode fixed-block
 #   --fewshot-source upstream   use LMEnt's verbatim demos (leaky; parity runs only)
 #   --no-hidden            skip the f16 hidden-state dump (scalar features only)
+#   --internal-fewshot     measure the internal features on the same few-shot prompt the
+#                          greedy decode saw. OFF by default: the internals (gold_prob,
+#                          logit lens, hidden states, neurons) are otherwise read from the
+#                          bare ZERO-SHOT cloze even in an n-shot run, so the answer
+#                          position is unconditioned and comparable across shot counts --
+#                          at the cost of `correct` and the internals living on two
+#                          different prompts. Turning it on makes them agree but changes
+#                          what the depth profile describes: retrieval under in-context
+#                          conditioning rather than how the fact is stored. Output is
+#                          suffixed `_fsinternal` so it never collides with the
+#                          zero-shot-internals artifacts.
 #   --positions answer     dump fewer positions (default: answer subject_last)
 #   --top-k 64             also dump top-k active-neuron indices (off by default)
 #   --limit 100            smoke test on the first 100 facts
@@ -207,7 +218,7 @@ records shape/positions. Reload lazily with `np.load(path, mmap_mode="r")`.
   so it's left out; add it in the script only if you truly need per-token states.
 
 Size per default position ≈ `n_facts × (n_layers+1) × hidden × 2` bytes
-(≈ 68 KB/fact/checkpoint for LMEnt-1B). `config.HIDDEN_POSITIONS` / `--positions`
+(≈ 76 KB/fact/checkpoint for LMEnt-1B: 19 × 2048 × 2). `config.HIDDEN_POSITIONS` / `--positions`
 control which are dumped.
 
 ### `neurons_step{N}_{position}.npy` — top-k active-neuron indices (`artifacts/internal/`)
@@ -408,7 +419,9 @@ each fact is only run once.
   — all from olmes `PopQACloze` via `src/lment_popqa.py`.
 - **LR peak `5e-3`, warmup `1000`, batch `32768`** — from the paper §B.4 (the
   authoritative 1B config; `kas_config.json` on `main` is the 170M *example*).
-- **1B = 16 layers, 2048 hidden** (§B.4) — validates the internal-features assumptions.
+- **1B = 18 layers, 2048 hidden, `d_ff` 5632** — read off the checkpoint `config.json`
+  (`num_hidden_layers: 18`, Olmo2), which is authoritative over any paper-table reading;
+  validates the internal-features assumptions.
 - PopQA-KAS schema (`prop_id`, `possible_answers` as a list, the `*_chunks`
   fields) — confirmed by loading the dataset (see notebook §1).
 
