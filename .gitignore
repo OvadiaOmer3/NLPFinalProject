@@ -31,3 +31,5 @@ data/artifacts/expermints/15shot_trajectory_top10_internal_with_neurons/
 
 # scratch dataframe, regenerable from the notebooks
 competition_df.parquet
+test_inference_output/
+test-output/
