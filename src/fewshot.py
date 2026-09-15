@@ -64,14 +64,14 @@ Deterministic, no RNG.  Candidates must satisfy, and are then ranked by:
   5. the answer is unique *within the eval set* (``obj`` shared by <=
      ``OBJ_FREQ_MAX`` = 1 fact, i.e. only the demo itself), so no eval fact can be
      answered by copying a demo's answer.
-  6. both entities are real enough to be unambiguous (``s_pop``/``o_pop`` sitelink
-     counts >= ``MIN_POP``), then ranked by ``o_pop`` descending.
+  6. both entities are real enough to be unambiguous (``s_pop``/``o_pop`` monthly
+     Wikipedia page views >= ``MIN_POP``), then ranked by ``o_pop`` descending.
 
 Rank-by-``o_pop`` matters: filters 1-5 alone leave only the rarest facts, which
 are disproportionately junk ("The sport run batted in plays is" -> softball,
 "The color of ruby is" -> pink).  Preferring a notable *answer* entity picks
 coherent, correct-looking demonstrations instead.  Note ``obj_n`` (frequency in
-the eval set) and ``o_pop`` (Wikipedia sitelinks) are independent, so 5 and 6
+the eval set) and ``o_pop`` (monthly Wikipedia page views) are independent, so 5 and 6
 don't fight: the answer is globally notable but locally unique.
 
 On popqa-kas this yields 16 demonstrations (one per relation) costing 16 eval
@@ -95,7 +95,7 @@ from src import lment_popqa
 # measured overlap with the eval set (see the module docstring); they still leave
 # enough candidates to cover all 16 relations.
 OBJ_FREQ_MAX = 1        # max eval facts sharing a demo's answer
-MIN_POP = 500           # min sitelink count for both demo entities
+MIN_POP = 500           # min monthly Wikipedia page views, both demo entities
 MIN_SUBJ_LEN = 12       # min demo subject length, in characters
 
 # Thresholds for the same-relation pool (mode "only-same-prop"), which needs

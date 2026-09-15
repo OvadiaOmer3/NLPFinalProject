@@ -26,15 +26,16 @@ baked into its defaults -- see the plan doc for the numbers:
 2.  **Do not pool Wikidata aliases.**  Every QID in popqa-kas appears with
     exactly one observed surface form, while ``s_aliases``/``o_aliases`` add
     2.1x more forms (up to 208 for one entity).  Pooling them inflates median
-    object strain from 5 to 251 and destroys the signal, because an alias list
+    object strain several-fold -- 11 -> 56 per fact over all of popqa-kas, 4 -> 75
+    on the top-decile panel -- and destroys the signal, because an alias list
     is a knowledge-base artifact -- not evidence that a token ever appeared in
     training.  ``TokenIndex`` therefore uses canonical forms only.  The
     principled upgrade is corpus-observed ``text_mention`` forms (Stage 2), not
     aliases.
 
 3.  **There is no clean stopword cutoff below the top.**  ``the`` occurs in
-    2,024 entities and ``of`` in 830, then ``a`` at 209 -- so a threshold in
-    (209, 830) removes exactly those two.  Below that the distribution is a
+    2,024 entities and ``of`` in 830, then ``a`` at 209 -- so any threshold in
+    [209, 830) removes exactly those two.  Below that the distribution is a
     smooth Zipf where ``john`` (180), ``david`` (138), ``county`` (137) are
     interleaved with ``and`` (163), ``in`` (147): any cutoff aggressive enough
     to catch the function words also deletes the collisions the hypothesis is
@@ -42,6 +43,11 @@ baked into its defaults -- see the plan doc for the numbers:
     is offered as the threshold-free alternative.  Re-run
     ``token_document_frequency`` whenever the tokenizer changes -- BPE pieces
     have a different frequency profile than whole words.
+
+Every number in (2) and (3) is recomputed and saved by section 12 of
+``analysis/strain_diagnostics.py``.  An earlier version of (2) quoted "5 to 251";
+that pair does not reproduce under any denominator or cutoff and was replaced by the
+figures above, while the direction it described holds throughout.
 """
 from __future__ import annotations
 

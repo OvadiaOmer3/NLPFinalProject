@@ -74,6 +74,43 @@ def strain_columns(idx: S.TokenIndex, ids, meta) -> tuple[np.ndarray, np.ndarray
     return np.log1p(subj), np.log1p(obj)
 
 
+def run_permutations(panel, meta, universe, real, base_formula: str, n: int,
+                     verbose: bool = True) -> dict:
+    """Fit ``base_formula + strain`` on the real index and on ``n`` scrambled ones.
+
+    The single implementation of the permutation loop: ``main`` below and
+    ``strain_diagnostics.sec10`` both call this, so the two can never drift apart.
+    ``base_formula`` must already include whatever baseline is wanted (pass
+    ``BASE + NAMELEN`` for the reported test).
+
+    Returns ``{observed, null, p_empirical, n_rows, n_events}``.
+    """
+    baseline = fit(base_formula, panel)
+
+    def chi2_for(idx) -> float:
+        q = panel.copy()
+        q["ss"], q["os"] = strain_columns(idx, q["id"], meta)
+        return LR.between(fit(base_formula + " + ss + os", q), baseline).chi2
+
+    observed = chi2_for(real)
+    if verbose:
+        print(f"real token index      chi2 = {observed:.1f}\n")
+
+    null = []
+    for seed in range(n):
+        null.append(chi2_for(permuted_index(universe, real, seed)))
+        if verbose:
+            print(f"  permutation {seed:>3}    chi2 = {null[-1]:7.1f}", flush=True)
+
+    arr = np.asarray(null)
+    # +1 in numerator and denominator: the standard finite-sample permutation
+    # p-value, which cannot report an impossible p = 0.
+    p_emp = (1 + int((arr >= observed).sum())) / (1 + len(arr))
+    return {"observed": float(observed), "null": [float(x) for x in arr],
+            "p_empirical": float(p_emp), "n_rows": int(len(panel)),
+            "n_events": int(panel["forgot"].sum())}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--panel", default="data/artifacts/features/strain_panel.parquet")
@@ -96,34 +133,19 @@ def main():
     keep = raw.groupby("prop")["forgot"].agg(["size", "sum"])
     keep = keep[(keep["size"] >= MIN_ROWS) & (keep["sum"] >= MIN_EVENTS)].index
     panel = raw[raw["prop"].isin(keep)].reset_index(drop=True)
-    cols = ["evidence_w", "evidence_static", "s_pop", "o_pop"]
+    cols = ["shared_static", "distract_static", "s_pop", "o_pop"]
     if args.control_namelen:
         cols += ["s_ntok", "o_ntok", "s_charlen", "o_charlen"]
     for c in cols:
         panel["l_" + c] = np.log1p(panel[c].astype(float))
     base_formula = BASE + (NAMELEN if args.control_namelen else "")
-    baseline = fit(base_formula, panel)
     print(f"panel: {len(panel):,} rows, {int(panel['forgot'].sum()):,} events")
     print(f"baseline: exposure"
           f"{' + NAME LENGTH' if args.control_namelen else ''}\n")
 
-    def chi2_for(idx) -> float:
-        p = panel.copy()
-        p["ss"], p["os"] = strain_columns(idx, p["id"], meta)
-        return LR.between(fit(base_formula + " + ss + os", p), baseline).chi2
-
-    observed = chi2_for(real)
-    print(f"real token index      chi2 = {observed:.1f}\n")
-
-    null = []
-    for seed in range(args.n):
-        null.append(chi2_for(permuted_index(universe, real, seed)))
-        print(f"  permutation {seed:>3}    chi2 = {null[-1]:7.1f}", flush=True)
-
-    null = np.asarray(null)
-    # +1 in numerator and denominator: the standard finite-sample permutation
-    # p-value, which cannot report an impossible p = 0.
-    p_emp = (1 + int((null >= observed).sum())) / (1 + len(null))
+    res = run_permutations(panel, meta, universe, real, base_formula, args.n)
+    observed, p_emp = res["observed"], res["p_empirical"]
+    null = np.asarray(res["null"])
     print(f"\nnull distribution over {len(null)} permutations")
     print(f"  min {null.min():.1f} | median {np.median(null):.1f} | "
           f"max {null.max():.1f} | mean {null.mean():.1f} (sd {null.std():.1f})")
@@ -138,13 +160,7 @@ def main():
     import json
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps({
-        "observed": float(observed),
-        "null": [float(x) for x in null],
-        "p_empirical": float(p_emp),
-        "n_rows": int(len(panel)),
-        "n_events": int(panel["forgot"].sum()),
-    }, indent=2))
+    out.write_text(json.dumps(res, indent=2))
     print(f"\nwrote {out}")
 
 

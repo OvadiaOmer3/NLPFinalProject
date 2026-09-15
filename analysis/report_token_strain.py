@@ -1,16 +1,33 @@
 """Plot the numbers in analysis/FINDINGS_token_strain.md. Data only, no argument.
 
 Every figure is a direct rendering of one block of the findings doc: axes, values,
-uncertainty, and sample sizes. No captions, no interpretation, no verdict — read
+uncertainty, and sample sizes. No captions, no interpretation, no verdict -- read
 the doc for what the numbers mean.
 
-Everything is recomputed from the panel and the permutation JSON, so pointing
-``--panel`` at a different panel regenerates the whole page against that data.
+**This script fits nothing.** Every model-derived quantity -- likelihood-ratio tests,
+pseudo-R2, clustered coefficients, per-relation estimates -- is read from the JSON
+written by ``analysis/strain_diagnostics.py``, which is the single computational
+source. Earlier versions refit the models here, which meant the figures could drift
+from the log they were meant to illustrate (and did need hand-editing whenever BASE
+changed). The panel parquet is still read directly, but only for descriptive plots
+(per-window counts, relation mix, raw quartiles, the static-vs-windowed scatter);
+those are deterministic groupbys that cannot disagree with a regression.
 
+The permutation histogram also comes from that JSON (``permutation_reported``, all
+draws of the reported test), so the diagnostics JSON plus the panel are the only
+inputs. If the diagnostics were run without ``--permutations`` the histogram is
+skipped and the page says so.
+
+So: regenerate the diagnostics first, then this.
+
+    python analysis/strain_diagnostics.py --permutations 150
     python analysis/report_token_strain.py \
+        --diagnostics data/artifacts/features/strain_diagnostics_specE.json \
         --panel data/artifacts/features/strain_panel_15shot_top10.parquet \
-        --null-json data/artifacts/features/null_control_15shot_top10_namelen.json \
-        --out analysis/report_token_strain.html
+        --out analysis/report_token_strain_specE.html
+
+Pass ``--cdn`` to load plotly from a CDN instead of inlining it: ~60 KB instead of
+~4.8 MB, at the cost of needing a network connection to view the page.
 """
 from __future__ import annotations
 
@@ -18,6 +35,7 @@ import argparse
 import json
 import sys
 import warnings
+from collections import namedtuple
 from pathlib import Path
 
 import numpy as np
@@ -28,8 +46,13 @@ import plotly.io as pio
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 warnings.filterwarnings("ignore")
 
-from analysis.strain_models import (  # noqa: E402
-    BASE, F1, F2_W, MODELS, NAMELEN, STRAIN, STRAIN_W, LR, fit, prepare)
+# `prepare` is row filtering plus log transforms -- no model fitting -- and is
+# imported rather than reimplemented so the figures sit on exactly the analysis
+# panel. Nothing else comes from strain_models.
+from analysis.strain_models import prepare  # noqa: E402
+
+# One likelihood-ratio result as read from the diagnostics JSON.
+LRT = namedtuple("LRT", "chi2 df p")
 
 # Categorical slots 1-3 of the validated reference palette (light mode):
 # worst adjacent CVD dE 9.2, normal-vision dE 27.6, all six checks pass.
@@ -100,72 +123,47 @@ def headroom(values, pad=1.18):
 # Data
 # --------------------------------------------------------------------------- #
 COEF_TERMS = ["l_subj_strain", "l_obj_strain", "l_s_ntok", "l_o_ntok",
-              "l_o_pop", "l_s_pop", "l_evidence_static", "l_evidence_w"]
-
-FAMILIES = {
-    "strain (static)": STRAIN,
-    "strain (windowed)": STRAIN_W,
-    "F1 ownership/rivals": F1,
-    "F2 alt-answer ratio": F2_W,
-}
+              "l_o_pop", "l_s_pop", "l_shared_static", "l_distract_static"]
 
 
-def load(panel_path: str, null_path: str | None):
+def load(diag_path: str, panel_path: str):
+    """Assemble the figure inputs. Models come from the diagnostics JSON; the
+    panel is read only for the descriptive plots."""
+    dj = json.loads(Path(diag_path).read_text(encoding="utf-8"))
+    missing = [k for k in ("models", "families", "coefs", "per_relation_full",
+                           "namelen_lr", "windowed_strain") if k not in dj]
+    if missing:
+        raise SystemExit(
+            f"{diag_path} is missing {missing}. It was written by an older "
+            "strain_diagnostics.py -- rerun that script, then this one."
+        )
+
     raw = pd.read_parquet(panel_path)
-    p = prepare(raw).dropna(subset=["ratio_static", "ratio_w",
-                                    "l_s_own_rare", "l_o_own_rare"])
-    d = {"raw": raw, "panel": p}
+    # Same construction the models used: relation filter + log transforms, then
+    # drop rows the F1/F2 terms cannot be defined on.
+    panel = prepare(raw).dropna(subset=["ratio_static", "ratio_w",
+                                        "l_s_own_rare", "l_o_own_rare"])
+    d = {"raw": raw, "panel": panel, "diag_path": diag_path}
 
-    fits = {n: fit(f, p) for n, f in MODELS.items()}
-    d["fits"] = fits
-    d["base"], d["base_len"] = fits["exposure only"], fits["+ NAME LENGTH"]
+    d["models"] = dj["models"]
+    d["families"] = {n: (LRT(*v["vs_base"]), LRT(*v["vs_namelen"]))
+                     for n, v in dj["families"].items()}
+    d["namelen_lr"] = LRT(*dj["namelen_lr"])
+    # windowed_strain stores [chi2, p]; df is 2 by construction (two strain terms).
+    ws = dj["windowed_strain"]
+    d["w_on_s"] = LRT(ws["windowed_on_static"][0], 2, ws["windowed_on_static"][1])
+    d["s_on_w"] = LRT(ws["static_on_windowed"][0], 2, ws["static_on_windowed"][1])
 
-    # Each family scored against both reference models.
-    d["families"] = {
-        name: (LR.between(fit(BASE + NAMELEN + terms, p), d["base"]),
-               LR.between(fit(BASE + NAMELEN + terms, p), d["base_len"]))
-        for name, terms in FAMILIES.items()
-    }
-    d["namelen_lr"] = LR.between(d["base_len"], d["base"])
+    c = pd.DataFrame(dj["coefs"])
+    order = {t: i for i, t in enumerate(COEF_TERMS)}
+    c = c[c["term"].isin(order)].copy()
+    d["coefs"] = c.sort_values("std")
 
-    # Coefficients, clustered, from BASE + NAMELEN + STRAIN.
-    mc = fit(BASE + NAMELEN + STRAIN, p, cluster=True)
-    tb = mc.summary2().tables[1]
-    rows = []
-    for t in COEF_TERMS:
-        if t not in tb.index:
-            continue
-        c, se = tb.loc[t, "Coef."], tb.loc[t, "Std.Err."]
-        sd = p[t].std()
-        rows.append(dict(term=t, coef=c, se=se, sd=sd, std=c * sd,
-                         std_se=se * sd, p=tb.loc[t, "P>|z|"]))
-    d["coefs"] = pd.DataFrame(rows).sort_values("std")
+    d["per_relation"] = pd.DataFrame(dj["per_relation_full"])
 
-    # Windowed vs static, both directions.
-    both = fit(BASE + NAMELEN + STRAIN + STRAIN_W, p)
-    d["w_on_s"] = LR.between(both, fits["+ strain STATIC | name length"])
-    d["s_on_w"] = LR.between(both, fits["+ strain WINDOWED | name length"])
-
-    # Subject strain per relation, each on its own subsample.
-    per_rel = []
-    for rel, sub in [("all", p)] + [(r, p[p["prop"] == r])
-                                    for r in sorted(p["prop"].unique())]:
-        f = BASE + NAMELEN + STRAIN
-        if sub["prop"].nunique() == 1:
-            f = f.replace(" + C(prop)", "")
-        try:
-            m = fit(f, sub, cluster=True).summary2().tables[1]
-            per_rel.append(dict(relation=rel, rows=len(sub),
-                                events=int(sub["forgot"].sum()),
-                                coef=m.loc["l_subj_strain", "Coef."],
-                                se=m.loc["l_subj_strain", "Std.Err."],
-                                p=m.loc["l_subj_strain", "P>|z|"]))
-        except Exception:                                   # noqa: BLE001
-            continue
-    d["per_relation"] = pd.DataFrame(per_rel)
-
-    d["null"] = json.loads(Path(null_path).read_text()) if (
-        null_path and Path(null_path).exists()) else None
+    # All draws of the reported permutation test. Absent when the diagnostics ran
+    # without --permutations; fig_permutation then returns None and is skipped.
+    d["null"] = dj.get("permutation_reported")
     return d
 
 
@@ -230,8 +228,8 @@ def fig_pseudo_r2(d):
     order = ["exposure only", "+ NAME LENGTH", "+ strain STATIC | name length",
              "+ F1 ownership/rivals | len", "+ F2 ratio WINDOWED | len",
              "+ everything | name length"]
-    order = [n for n in order if n in d["fits"]]
-    vals = [d["fits"][n].prsquared for n in order]
+    order = [n for n in order if n in d["models"]]
+    vals = [d["models"][n]["pseudoR2"] for n in order]
     fig = go.Figure()
     fig.add_bar(y=order, x=vals, orientation="h", marker_color=BLUE,
                 showlegend=False, **bar_labels("{:.4f}", vals),
@@ -409,14 +407,15 @@ def lr_table(d) -> str:
             f"</tr></thead><tbody>{body}</tbody></table>")
 
 
-def render(d, panel_path: str) -> str:
+def render(d, panel_path: str, cdn: bool = False) -> str:
     p, sections = d["panel"], []
+    first = "cdn" if cdn else "inline"
     for i, make in enumerate(FIGURES):
         out = make(d)
         if out is None:
             continue
         title, fig = out
-        chart = pio.to_html(fig, include_plotlyjs="inline" if not sections else False,
+        chart = pio.to_html(fig, include_plotlyjs=first if not sections else False,
                             full_html=False, config=PLOT_CONFIG)
         extra = ""
         if title.startswith("Effect sizes (standardised)"):
@@ -440,7 +439,9 @@ def render(d, panel_path: str) -> str:
 <title>Token strain — data</title><style>{CSS}</style></head><body><div class="wrap">
 <h1>Token strain — data</h1>
 <p class="sub">Figures for <code>analysis/FINDINGS_token_strain.md</code>.
-Panel: <code>{Path(panel_path).name}</code>.</p>
+Panel: <code>{Path(panel_path).name}</code>.<br>
+Model numbers read from <code>{Path(d['diag_path']).name}</code> &mdash; this page
+fits nothing itself.</p>
 <div class="meta">
   <span class="pill"><b>{len(p):,}</b> rows</span>
   <span class="pill"><b>{int(p['forgot'].sum()):,}</b> forgetting events</span>
@@ -454,17 +455,27 @@ Panel: <code>{Path(panel_path).name}</code>.</p>
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--diagnostics",
+                    default="data/artifacts/features/strain_diagnostics_specE.json",
+                    help="JSON from analysis/strain_diagnostics.py -- the source of "
+                         "every model-derived number on the page")
     ap.add_argument("--panel",
                     default="data/artifacts/features/strain_panel_15shot_top10.parquet")
-    ap.add_argument("--null-json",
-                    default="data/artifacts/features/null_control_15shot_top10_namelen.json")
-    ap.add_argument("--out", default="analysis/report_token_strain.html")
+    ap.add_argument("--out", default="analysis/report_token_strain_specE.html")
+    ap.add_argument("--cdn", action="store_true",
+                    help="load plotly from a CDN (~60 KB page) instead of inlining "
+                         "it (~4.8 MB, viewable offline)")
     a = ap.parse_args()
 
-    d = load(a.panel, a.null_json)
-    Path(a.out).write_text(render(d, a.panel), encoding="utf-8")
+    d = load(a.diagnostics, a.panel)
+    Path(a.out).write_text(render(d, a.panel, cdn=a.cdn), encoding="utf-8")
+    kb = Path(a.out).stat().st_size / 1024
     print(f"wrote {a.out}  ({len(d['panel']):,} rows, "
-          f"{int(d['panel']['forgot'].sum()):,} events)")
+          f"{int(d['panel']['forgot'].sum()):,} events, {kb:,.0f} KB)")
+    print(f"  models and permutations from {a.diagnostics}")
+    if d["null"] is None:
+        print("  [note] no permutation_reported in that JSON -- histogram skipped; "
+              "rerun strain_diagnostics.py with --permutations 150")
 
 
 if __name__ == "__main__":

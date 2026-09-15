@@ -44,11 +44,16 @@ feature_extraction/        # PRODUCES artifacts (run on GPU)
   build_strain_panel.py    # (fact x window) interference panel -> strain_panel.parquet   [CPU]
 analysis/                  # CONSUMES artifacts (CPU / notebooks)
   README.md                # how to load & analyze the artifacts (start here)
-  strain_models.py         # model spec (BASE/NAMELEN/STRAIN/F1/F2) + LR test + fits.
-                           #   SINGLE source of truth -- the other two import from here
+  strain_models.py         # model spec (BASE/NAMELEN/STRAIN/F1/F2) + prepare + fit +
+                           #   LR test. LIBRARY ONLY, no CLI: the single source of
+                           #   truth for WHAT is fitted. Everything else imports it
   null_control_distribution.py  # permutation test: reshuffle which tokens belong to which
                            #   entity, N times, and locate the real index in that null
-  report_token_strain.py   # figures for FINDINGS_token_strain.md (data only, no prose)
+  strain_diagnostics.py    # regenerates EVERY number in FINDINGS_token_strain.md ->
+                           #   strain_diagnostics_specE.{txt,json}. The computational
+                           #   source of record; the report renders its JSON
+  report_token_strain.py   # figures for FINDINGS_token_strain.md (data only, no prose).
+                           #   Fits nothing -- reads strain_diagnostics.py's JSON
   FINDINGS_token_strain.md # the write-up: conclusion, method, results, caveats
   notebooks/
     01_explore_and_load.ipynb  # end-to-end demo on a single fact
@@ -156,6 +161,22 @@ Consumes a recall sweep from Step A.1 plus `popqa-kas` and the six per-epoch bat
 indices. No GPU, no hidden-state dumps.
 
 ```bash
+# 0. The recall sweep (GPU; produced by a team member -- the command is recorded on
+#    main in 02_internal_paper_figures.ipynb, run (4), as `--top-shared-chunks-pct 10`,
+#    a flag that exists only on main's eval_checkpoints.py). On this branch the
+#    equivalent is --min-shared-chunks 42: the top decile of popqa-kas is exactly the
+#    facts with >= 42 shared chunks (1,456 = 10.21%; 1,452 after the 16 few-shot
+#    subjects are dropped -- the same ids as the committed parquets). --no-hidden
+#    skips the hidden-state dump, which token strain does not use.
+#    Decoding is not bit-reproducible across reruns: a second run of this sweep
+#    (main's recall/rotemab_15shot_top10) gives identical prompts but flips `correct`
+#    for a small fraction of facts, which shifts the strain estimates slightly. The
+#    paper's exact numbers therefore come from the committed parquets, not a rerun.
+STEPS="50000 100000 150000 200000 250000 300000 350000 400000 450000 500000 550000 600000 658032"
+python feature_extraction/eval_checkpoints.py --num-shots 15 --no-hidden \
+    --steps $STEPS --min-shared-chunks 42 \
+    --output-dir data/artifacts/expermints/15shot_trajectory_top10_internal_with_hidden
+
 # 1. Build the (fact x window) panel.  --recall-dir pivots a sweep directly;
 #    --trajectory takes a wide CSV (id + one column per checkpoint step) instead.
 python feature_extraction/build_strain_panel.py \
@@ -168,26 +189,47 @@ python feature_extraction/build_strain_panel.py \
 #                     (implemented, not yet run -- re-derive the cutoff if you use it)
 #   --idf             IDF-weight shared tokens instead of counting them
 
-# 2. Fit and print the model comparison
-python analysis/strain_models.py --panel data/artifacts/features/strain_panel_15shot_top10.parquet
+# 2. (nothing to run -- strain_models.py is a library. The model comparison it
+#     used to print is section 2 of the diagnostics in step 4.)
 
-# 3. Permutation test.  ALWAYS pass --control-namelen: without it the baseline is
-#    exposure-only, where scrambled strain still proxies name length, so both the
-#    real and the scrambled feature beat it for the same uninteresting reason.
-python analysis/null_control_distribution.py \
+# 3. (nothing to run -- the permutation test is section 10 of step 4, which calls
+#     null_control_distribution.run_permutations and saves every draw of the
+#     reported test in its JSON. The standalone script is still there for ad-hoc
+#     runs on other panels; if you use it, ALWAYS pass --control-namelen: without
+#     it the baseline is exposure-only, where scrambled strain still proxies name
+#     length, so both the real and the scrambled feature beat it for the same
+#     uninteresting reason.)
+
+# 4. Every diagnostic quoted in the findings doc, as a saved log + JSON mirror.
+#    Run this before the figures -- the report reads its JSON and fits nothing.
+#    Drop --permutations for a seconds-long run; 150 takes ~6 min (3 specs).
+python analysis/strain_diagnostics.py \
     --panel data/artifacts/features/strain_panel_15shot_top10.parquet \
-    --n 150 --control-namelen \
-    --out data/artifacts/features/null_control_15shot_top10_namelen.json
+    --out data/artifacts/features/strain_diagnostics_specE.txt \
+    --permutations 150
 
-# 4. Figures (reads the panel + the JSON from step 3)
+# 5. Figures (reads step 4's JSON for every model number and the permutation
+#    histogram, and the panel for the descriptive plots).
+#    --cdn gives a ~60 KB page instead of ~4.8 MB, but needs a network to view.
 python analysis/report_token_strain.py \
+    --diagnostics data/artifacts/features/strain_diagnostics_specE.json \
     --panel data/artifacts/features/strain_panel_15shot_top10.parquet \
-    --null-json data/artifacts/features/null_control_15shot_top10_namelen.json \
-    --out analysis/report_token_strain.html
+    --out analysis/report_token_strain_specE.html
 ```
 
+The rendered HTML is **not** kept in the repo (it is a few MB of inlined plotly);
+regenerate it from step 5 when you want it.
+
+There is **one entry point that fits these models**: `analysis/strain_diagnostics.py`.
+`strain_models.py` is a library with no `main()`, `null_control_distribution.py` fits
+only permutation replicates (and exposes that loop as `run_permutations`, which the
+diagnostics calls rather than copying), and `report_token_strain.py` fits nothing.
+Section 3 of the diagnostics additionally *asserts* that its "current" comparison
+spec reproduces `BASE` verbatim, so a change to the specification cannot silently
+leave a stale robustness table behind -- it fails with a diff.
+
 The model specification lives in `analysis/strain_models.py` (`BASE`, `NAMELEN`,
-`STRAIN`, `F1`, `F2`, `MODELS`, `LR`); the other two scripts import it, so the
+`STRAIN`, `F1`, `F2`, `MODELS`, `LR`); the other scripts import it, so the
 baseline cannot drift between them. Results and caveats:
 [`analysis/FINDINGS_token_strain.md`](analysis/FINDINGS_token_strain.md).
 

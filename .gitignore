@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 .DS_Store
+data/artifacts/expermints/15shot_trajectory_top10_internal_with_hidden/*
+!data/artifacts/expermints/15shot_trajectory_top10_internal_with_hidden/recall/
