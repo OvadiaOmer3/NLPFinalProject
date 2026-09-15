@@ -43,7 +43,6 @@ feature_extraction/        # PRODUCES artifacts (run on GPU)
   build_feature_table.py   # Step A.2/B: assemble panel.parquet + facts.parquet
   build_strain_panel.py    # (fact x window) interference panel -> strain_panel.parquet   [CPU]
 analysis/                  # CONSUMES artifacts (CPU / notebooks)
-  README.md                # how to load & analyze the artifacts (start here)
   strain_models.py         # model spec (BASE/NAMELEN/STRAIN/F1/F2) + prepare + fit +
                            #   LR test. LIBRARY ONLY, no CLI: the single source of
                            #   truth for WHAT is fitted. Everything else imports it
@@ -55,10 +54,6 @@ analysis/                  # CONSUMES artifacts (CPU / notebooks)
   report_token_strain.py   # figures for FINDINGS_token_strain.md (data only, no prose).
                            #   Fits nothing -- reads strain_diagnostics.py's JSON
   FINDINGS_token_strain.md # the write-up: conclusion, method, results, caveats
-  notebooks/
-    01_explore_and_load.ipynb  # end-to-end demo on a single fact
-    02_prompt_playground.ipynb # debug console: string in -> model's answer out, at any
-                               #   checkpoint. Standalone (torch + transformers only)
 tests/
   test_mention_features.py   # text.mention_features against LMEnt's real mention schema
   test_strain_features.py    # 15 tests: QID counting, self-competition, windowing
@@ -347,8 +342,7 @@ Row `i` ↔ `neurons_step{N}_ids.npy[i]`; rows for a position that wasn't locate
 are filled with `65535` (the `missing_sentinel` in `neurons_step{N}_meta.json`,
 never a valid index). Unlike the `mlp_*` scalars ("how much" machinery), this is
 *which* neurons — it enables the **circuit-overlap / churn** analyses (does a fact
-reuse the same neurons across checkpoints, or share them with other facts?). See
-[analysis/README.md](analysis/README.md) for recipes.
+reuse the same neurons across checkpoints, or share them with other facts?).
 
 Size ≈ `n_facts × n_layers × n_positions × k × 2` bytes (~4 KB/fact/checkpoint at
 k=64 over both positions — ~3% of the hidden dump).
