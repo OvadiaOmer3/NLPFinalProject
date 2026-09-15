@@ -41,6 +41,12 @@ def _final_norm_and_head(model):
     For ``transformers`` ``Olmo2ForCausalLM`` these are ``model.model.norm`` and
     ``model.lm_head`` (kept as a getattr with a tied-embeddings fallback for the
     head).  VERIFY once against ``print(model)`` on the real checkpoint.
+
+    NOTE for the logit lens: ``output_hidden_states`` returns the LAST entry
+    already normalised -- ``head(hs[-1])`` reproduces ``out.logits`` exactly,
+    while ``head(norm(hs[-1]))`` does not.  Applying ``norm`` to it a second time
+    scales the residual by the learned RMSNorm weight twice and changes the
+    argmax, so every lens loop below must skip the norm on the final entry.
     """
     base = getattr(model, "model", model)
     norm = getattr(base, "norm", None)
@@ -98,7 +104,9 @@ def logit_lens_features(model, tokenizer, row):
     depth = np.nan
     for layer, h in enumerate(hs):
         vec = h[0, pos]
-        if norm is not None:
+        # hs[-1] is already post-final-norm; norming it again would corrupt the
+        # one boundary where the lens is exact.  See _final_norm_and_head.
+        if norm is not None and layer < n_layers - 1:
             vec = norm(vec)
         layer_logits = head(vec)
         if int(layer_logits.argmax()) == gold0:
@@ -119,7 +127,7 @@ def logit_lens_features(model, tokenizer, row):
 
 
 # --------------------------------------------------------------------------- #
-# Representation drift between consecutive checkpoints
+# Representation drift between consecutive checkpoints - Not used in the project
 # --------------------------------------------------------------------------- #
 def representation_drift(vecs_t, vecs_tp1):
     """Cosine similarity per layer between subject hidden states at t and t+1.
@@ -137,7 +145,7 @@ def representation_drift(vecs_t, vecs_tp1):
 
 
 # --------------------------------------------------------------------------- #
-# Paraphrase stability
+# Paraphrase stability - Not used in the project
 # --------------------------------------------------------------------------- #
 def paraphrase_prompts(row) -> list[str]:
     """A small set of surface phrasings of the same fact for the stability test:
@@ -176,7 +184,7 @@ def paraphrase_stability(model, tokenizer, row):
 
 
 # --------------------------------------------------------------------------- #
-# Linear probe over collected subject hidden states (offline, CPU)
+# Linear probe over collected subject hidden states (offline, CPU) - Not used in the project
 # --------------------------------------------------------------------------- #
 def train_layer_probes(X_by_layer, y, n_splits=5, max_iter=1000):
     """Train a linear classifier per layer to predict the answer from the
@@ -224,23 +232,35 @@ def _decoder_layers(model):
 
 @torch.no_grad()
 def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
-                 neuron_eps=1e-3, per_layer=True, top_k=None):
-    """Run the model ONCE on ``[zero-shot cloze] + [gold answer tokens]`` and
-    return ``(features, hidden, neurons)``.
+                 neuron_eps=1e-3, per_layer=True, top_k=None, prompt=None):
+    """Run the model ONCE on ``[prompt] + [gold answer tokens]`` and return
+    ``(features, hidden, neurons)``.
+
+    ``prompt`` defaults to the **zero-shot cloze**, which is what every artifact
+    produced before this parameter existed used: the answer position is then
+    unconditioned and therefore comparable across shot counts, even in a run
+    whose ``correct`` was scored on a 15-shot prompt.  Pass the few-shot prompt
+    (``eval_checkpoints.py --internal-fewshot``) to measure the internals under
+    the same conditioning the decode saw instead; it must end exactly where the
+    answer begins, and the fact's own cloze must be its tail, since ``ans_pos``
+    is its last token and the subject is located with ``rfind``.
 
     ``features`` mixes scalars (safe to put straight in a parquet) with a few
     per-layer lists (only when ``per_layer=True``).  ``hidden`` maps each name in
     ``positions`` to an ``[L+1, H] float16`` stack of that token's residual state
     across every layer (``None`` if the position couldn't be located).  ``neurons``
     is ``{}`` unless ``top_k`` is set, in which case it maps ``answer`` /
-    ``subject_last`` to a ``[n_layers, k] uint16`` array of the indices of the k
-    most active MLP neurons per layer (``None`` if that position wasn't located).
+    ``subject_last`` to ``{"idx": [n_layers, k] uint16, "val": [n_layers, k]
+    float16}`` -- the indices of the k most active MLP neurons per layer (ranked by
+    ``|activation|``) and their *signed* activations (``None`` if that position
+    wasn't located).
 
     The answer position is the prompt's last token -- the one whose next-token
     prediction *is* the answer -- so all logit-based features read that slot.
     """
     device = model.device
-    prompt = D.zero_shot_cloze(row)
+    if prompt is None:
+        prompt = D.zero_shot_cloze(row)
     prompt_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
     n_prompt = prompt_ids.shape[1]
     ans_pos = n_prompt - 1                      # predicts the first answer token
@@ -301,7 +321,7 @@ def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
     p = logp.exp()
     top1 = int(final_logits.argmax())
     max_logit = float(final_logits[top1])
-    feats["pred_entropy"] = float(-(p * logp).sum())    # nats; peakedness of the guess
+    feats["pred_entropy"] = float(-(p * logp).sum())    # peakedness of the guess
     feats["top1_prob"] = float(p[top1])
 
     gold0 = gold_ids[0] if gold_ids else None
@@ -338,7 +358,9 @@ def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
     for layer, h in enumerate(hs):
         vec = h[0, ans_pos]
         resid_norm_by_layer.append(float(vec.float().norm()))
-        lens_vec = norm(vec) if norm is not None else vec
+        # hs[-1] arrives post-final-norm, so the last boundary goes to the head
+        # unmodified -- there it is not a "lens" at all, it is the real logits.
+        lens_vec = norm(vec) if (norm is not None and layer < n_hs - 1) else vec
         layer_logits = head(lens_vec).float()
         if gold0 is not None:
             gl = float(layer_logits[gold0])
@@ -361,7 +383,7 @@ def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
     # threshold active fraction.
     neurons: dict = {}
     for pos_name, suffix in (("answer", ""), ("subject_last", "_subj")):
-        fracs, l1s, prs, topk_idx = [], [], [], []
+        fracs, l1s, prs, topk_idx, topk_val = [], [], [], [], []
         for a in mlp_act:
             vec = a.get(pos_name) if a is not None else None
             if vec is None:
@@ -369,6 +391,7 @@ def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
                 l1s.append(np.nan)
                 prs.append(np.nan)
                 topk_idx.append(None)
+                topk_val.append(None)
                 continue
             absv = vec.abs()
             fracs.append(float((absv > neuron_eps).float().mean()))
@@ -378,7 +401,13 @@ def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
             prs.append(float(energy.sum().item() ** 2 / denom) if denom > 0 else np.nan)
             if top_k:
                 kk = min(int(top_k), absv.numel())
-                topk_idx.append(torch.topk(absv, kk).indices.cpu().numpy().astype(np.uint16))
+                idx = torch.topk(absv, kk).indices             # ranked by |activation|
+                topk_idx.append(idx.cpu().numpy().astype(np.uint16))
+                # Store the SIGNED activation, not |a|: two facts driving the same
+                # neuron in opposite directions are not agreeing, so magnitude-only
+                # values would overstate overlap.  Clamped like the hidden dump.
+                topk_val.append(vec[idx].clamp(-_F16_MAX, _F16_MAX)
+                                .to(torch.float16).cpu().numpy())
         feats[f"mlp_active_frac_mean{suffix}"] = (
             float(np.nanmean(fracs)) if fracs and not np.all(np.isnan(fracs)) else np.nan)
         feats[f"mlp_participation_mean{suffix}"] = (
@@ -388,8 +417,9 @@ def extract_fact(model, tokenizer, row, *, positions=("answer", "subject_last"),
             feats[f"mlp_l1_by_layer{suffix}"] = l1s
             feats[f"mlp_participation_by_layer{suffix}"] = prs
         if top_k:
-            neurons[pos_name] = (np.stack(topk_idx)
-                                 if all(x is not None for x in topk_idx) else None)
+            neurons[pos_name] = (
+                {"idx": np.stack(topk_idx), "val": np.stack(topk_val)}
+                if all(x is not None for x in topk_idx) else None)
 
     if per_layer:
         feats["gold_rank_by_layer"] = gold_rank_by_layer or None
@@ -461,66 +491,100 @@ class HiddenDump:
             if v is not None:
                 arr[i] = v
 
-    def close(self):
+    def flush(self):
         for arr in self.arrs.values():
             arr.flush()
+
+    def close(self):
+        self.flush()
 
 
 # --------------------------------------------------------------------------- #
 # Top-k active-neuron index store (one memmap per position, per checkpoint)
 # --------------------------------------------------------------------------- #
 class NeuronDump:
-    """Streaming writer for the top-k active MLP-neuron *indices* per (fact, layer).
+    """Streaming writer for the top-k active MLP neurons per (fact, layer).
 
-    One ``uint16`` ``.npy`` memmap per position, shape ``[n_facts, n_layers, k]``,
-    holding for each fact the indices of the ``k`` most active feed-forward
-    neurons in every layer (ordered by descending ``|activation|``).  Row ``i``
-    corresponds to ``ids[i]``; rows for a position that couldn't be located are
-    filled with the sentinel ``MISSING`` (65535, never a valid neuron index since
-    ``intermediate_size`` << 65535).  Indices alone are enough for the overlap /
-    churn analyses (which neurons a fact reuses across checkpoints or shares with
-    other facts) at ~3% of the hidden-state dump's size.
+    Per position, two parallel ``.npy`` memmaps of shape ``[n_facts, n_layers, k]``:
+
+    ``neurons_step{S}_{pos}_idx.npy``  ``uint16``  -- indices of the ``k`` most
+        active feed-forward neurons in every layer, ordered by descending
+        ``|activation|``.
+    ``neurons_step{S}_{pos}_val.npy``  ``float16`` -- those neurons' **signed**
+        activations, same ordering, so ``val[f, l, j]`` is the activation of
+        neuron ``idx[f, l, j]``.  Written unless ``store_values=False``.
+
+    Row ``i`` corresponds to ``ids[i]``.  Rows for a position that couldn't be
+    located keep the sentinel ``MISSING`` (65535, never a valid neuron index since
+    ``intermediate_size`` << 65535) in the index array and ``NaN`` in the values.
+
+    Indices alone support the set-overlap / churn analyses (which neurons a fact
+    reuses across checkpoints or shares with other facts).  The values are what
+    magnitude-weighted overlap and knowledge-entropy-style measures need, and they
+    carry sign -- two facts driving a shared neuron in opposite directions are not
+    agreeing.  Both arrays together are ~6% of the hidden-state dump at k=128.
+
+    The ``_idx`` / ``_val`` suffixes are explicit on purpose: a glob like
+    ``neurons_step*_answer*.npy`` would otherwise match both arrays.
     """
 
     MISSING = int(np.iinfo(np.uint16).max)      # 65535
 
-    def __init__(self, step, ids, n_layers, k, positions, out_dir, resume=False):
+    def __init__(self, step, ids, n_layers, k, positions, out_dir, resume=False,
+                 store_values=True):
         out_dir = Path(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
         self.step = step
         self.k = int(k)
+        self.store_values = bool(store_values)
         n = len(ids)
-        self.arrs = {}
+        self.arrs = {}                          # index memmaps, by position
+        self.vals = {}                          # value memmaps, by position
         self.paths = {}
-        for name in positions:
-            path = out_dir / f"neurons_step{step}_{name}.npy"
-            shape = (n, n_layers, int(k))
+        shape = (n, n_layers, int(k))
+
+        def _open(path, dtype, fill):
             if resume and path.exists():
                 arr = np.lib.format.open_memmap(path, mode="r+")
                 if arr.shape != shape:
                     raise ValueError(
                         f"{path.name} has shape {arr.shape}, expected {shape}; "
                         "delete the partial artifacts for this step and rerun.")
-            else:
-                arr = np.lib.format.open_memmap(
-                    path, mode="w+", dtype=np.uint16, shape=shape)
-                arr[:] = self.MISSING
-            self.arrs[name] = arr
-            self.paths[name] = path
+                return arr
+            arr = np.lib.format.open_memmap(path, mode="w+", dtype=dtype, shape=shape)
+            arr[:] = fill
+            return arr
+
+        for name in positions:
+            ipath = out_dir / f"neurons_step{step}_{name}_idx.npy"
+            self.arrs[name] = _open(ipath, np.uint16, self.MISSING)
+            self.paths[name] = ipath
+            if self.store_values:
+                vpath = out_dir / f"neurons_step{step}_{name}_val.npy"
+                self.vals[name] = _open(vpath, np.float16, np.nan)
         np.save(out_dir / f"neurons_step{step}_ids.npy", np.asarray(ids))
         (out_dir / f"neurons_step{step}_meta.json").write_text(json.dumps({
             "step": int(step), "n_facts": int(n), "n_layers": int(n_layers),
-            "k": int(k), "positions": list(positions), "dtype": "uint16",
+            "k": int(k), "positions": list(positions),
+            "idx_dtype": "uint16", "val_dtype": "float16" if self.store_values else None,
+            "stores_values": self.store_values,
             "missing_sentinel": self.MISSING,
             "order": "descending |activation|",
+            "values_are_signed": True,
         }, indent=2))
 
     def write(self, i, neurons):
         for name, arr in self.arrs.items():
             v = neurons.get(name)
-            if v is not None:                    # [n_layers, k] uint16
-                arr[i] = v
+            if v is None:
+                continue
+            arr[i] = v["idx"]                    # [n_layers, k] uint16
+            if self.store_values:
+                self.vals[name][i] = v["val"]    # [n_layers, k] float16
+
+    def flush(self):
+        for arr in list(self.arrs.values()) + list(self.vals.values()):
+            arr.flush()
 
     def close(self):
-        for arr in self.arrs.values():
-            arr.flush()
+        self.flush()

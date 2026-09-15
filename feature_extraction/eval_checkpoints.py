@@ -37,6 +37,16 @@ Usage:
                                                                   # $LMENT_DATA_ROOT/artifacts)
     python feature_extraction/eval_checkpoints.py --min-shared-chunks 1  # drop facts that can
                                                                   # never be "seen" (see below)
+    python feature_extraction/eval_checkpoints.py --top-shared-chunks-pct 10
+                                                                  # keep only the top decile of
+                                                                  # facts by num_shared_chunks
+    python feature_extraction/eval_checkpoints.py --num-shots 15 --internal-fewshot
+                                                                  # measure the internals on the
+                                                                  # 15-shot prompt too, not on the
+                                                                  # bare zero-shot cloze
+    python feature_extraction/eval_checkpoints.py --top-k 128      # also dump the top-k active
+                                                                  # MLP neurons per (fact, layer):
+                                                                  # indices + signed activations
 """
 from __future__ import annotations
 
@@ -63,11 +73,9 @@ def _checkpoint_rows(rows, partial_path, dump, ndump):
     parquet.  Written to a temp file and ``os.replace``d so a kill mid-write
     leaves the previous partial intact rather than a truncated file."""
     if dump is not None:
-        for arr in dump.arrs.values():
-            arr.flush()
+        dump.flush()
     if ndump is not None:
-        for arr in ndump.arrs.values():
-            arr.flush()
+        ndump.flush()          # flushes the value memmaps too, not just the indices
     tmp = partial_path.with_suffix(".tmp.parquet")
     pd.DataFrame(rows).to_parquet(tmp)
     os.replace(tmp, partial_path)
@@ -75,12 +83,13 @@ def _checkpoint_rows(rows, partial_path, dump, ndump):
 
 def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
              internal_dir=None, write_every=0, partial_path=None, fewshot=None,
-             internal_feats=True):
+             internal_feats=True, neuron_values=True, internal_fewshot=False):
     """Full single-checkpoint pass -> a DataFrame (one row per fact).
 
     Also streams the f16 hidden-state dump (when ``dump_hidden``) and the top-k
-    active-neuron index dump (when ``top_k``) to ``internal_dir`` (defaults to
-    ``config.INTERNAL_DIR``, i.e. ``artifacts/internal/``).
+    active-neuron dump (when ``top_k``) to ``internal_dir`` (defaults to
+    ``config.INTERNAL_DIR``, i.e. ``artifacts/internal/``).  The neuron dump
+    writes indices and, unless ``neuron_values=False``, their signed activations.
 
     With ``write_every > 0``, a partial parquet is written to ``partial_path``
     every N facts.  If that file already exists on entry its facts are skipped
@@ -111,12 +120,13 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
         # neurons are captured at answer + subject_last (both slots the hook sees).
         ndump = internal.NeuronDump(
             step, ids, model.config.num_hidden_layers, top_k,
-            ("answer", "subject_last"), internal_dir, resume=bool(done_ids))
+            ("answer", "subject_last"), internal_dir, resume=bool(done_ids),
+            store_values=neuron_values)
 
     n_new = 0
     for i, (_, r) in enumerate(df.iterrows()):
         if r["id"] in done_ids:
-            continue                             # already in the partial
+            continue                           
         # (1) greedy decode -> substring-match correctness (paper's `correct`).
         # Which demos the block holds is the mode's business (--fewshot-mode); it is
         # cached per distinct demo set, so it is not re-rendered per fact.
@@ -126,10 +136,15 @@ def eval_step(model, tokenizer, df, step, *, dump_hidden, positions, top_k=None,
         # Skipped entirely with --no-internal: that forward asks for every layer's
         # hidden state, hooks every mlp.down_proj, and runs the LM head once per
         # layer for the logit lens.  None of it is needed for correct/generation.
+        # The teacher-forced pass reads the ZERO-SHOT cloze by default, so the
+        # answer position stays unconditioned and comparable across shot counts
+        # even when `correct` above was scored on a 15-shot prompt.  With
+        # --internal-fewshot it reads the same prompt the decode saw instead.
         if internal_feats:
             feats, hidden, neurons = internal.extract_fact(
                 model, tokenizer, r, positions=positions,
-                neuron_eps=config.NEURON_EPS, top_k=top_k)
+                neuron_eps=config.NEURON_EPS, top_k=top_k,
+                prompt=prompt if internal_fewshot else None)
             if dump is not None:
                 dump.write(i, hidden)
             if ndump is not None:
@@ -174,7 +189,16 @@ def main():
                     help="drop facts whose subject and answer never co-occur in a "
                          "shared_chunk (len(shared_chunks) < N); such facts can never "
                          "get a first_learned_step or timeline features since they "
-                         "have no exposure to be tracked. Default 0 = keep everything.")
+                         "have no exposure to be tracked. Default 0 = keep everything. "
+                         "Mutually exclusive with --top-shared-chunks-pct.")
+    ap.add_argument("--top-shared-chunks-pct", type=float, default=None,
+                    help="keep only the top N%% of facts by num_shared_chunks (e.g. 10 "
+                         "for the top decile -- the facts with the most exposure to "
+                         "learn from). The cutoff is a quantile of the FULL dataset "
+                         "(before --limit / fewshot subject-drop), so it stays the same "
+                         "count regardless of --fewshot-mode or --num-shots, and is "
+                         "resolved to an equivalent --min-shared-chunks. Mutually "
+                         "exclusive with --min-shared-chunks.")
     ap.add_argument("--no-hidden", action="store_true",
                     help="skip WRITING the f16 hidden-state dump. Note the states "
                          "are still computed -- use --no-internal to skip the work.")
@@ -187,6 +211,19 @@ def main():
                          "calls per fact and avoids running the LM head once per "
                          "layer. Note build_feature_table.py needs the dropped "
                          "columns, so such runs are for recall inspection only.")
+    ap.add_argument("--internal-fewshot", action="store_true",
+                    help="measure the internal features on the SAME few-shot prompt "
+                         "the greedy decode saw, instead of on the bare zero-shot "
+                         "cloze. Default (off) keeps the answer position "
+                         "unconditioned, so the lens/hidden states are comparable "
+                         "across shot counts and with every artifact produced so far "
+                         "-- at the cost of `correct` and the internals living on two "
+                         "different prompts. Turning it on makes them agree but "
+                         "changes what the depth profile describes: retrieval under "
+                         "in-context conditioning rather than how the fact is stored. "
+                         "No-op at --num-shots 0; conflicts with --no-internal. "
+                         "Output is tagged `_fsinternal` so it never collides with "
+                         "the zero-shot-internals parquets.")
     ap.add_argument("--write-every", type=int, default=1000,
                     help="checkpoint progress to recall_step{N}.partial.parquet "
                          "every N facts; a rerun resumes from it instead of "
@@ -194,8 +231,20 @@ def main():
     ap.add_argument("--positions", nargs="*", default=list(config.HIDDEN_POSITIONS),
                     help="token positions to dump hidden states for")
     ap.add_argument("--top-k", type=int, default=config.NEURON_TOPK,
-                    help="also dump the indices of the top-k active MLP neurons "
-                         "per (fact, layer) -> neurons_step{N}_*.npy (off by default)")
+                    help="also dump the top-k active MLP neurons per (fact, layer) "
+                         "-> neurons_step{N}_{pos}_idx.npy (uint16 indices) and "
+                         "_val.npy (float16 signed activations). Off by default. "
+                         "k=128 is the recommended setting: the measured "
+                         "participation ratio (effective neuron count) is p99.9 "
+                         "~58 at both positions, so 128 gives 2x headroom, and the "
+                         "whole dump is still only ~6%% of the hidden-state dump. "
+                         "k is a truncation you cannot undo -- top-32 can be "
+                         "derived from a top-128 dump, not the reverse.")
+    ap.add_argument("--no-neuron-values", action="store_true",
+                    help="with --top-k, dump only the neuron indices and skip the "
+                         "signed-activation values (halves the neuron dump). "
+                         "Set-overlap analyses still work; magnitude-weighted "
+                         "overlap and knowledge-entropy measures do not.")
     ap.add_argument("--num-shots", type=int, default=config.NUM_SHOTS,
                     help="in-context demonstrations prepended to the cloze "
                          f"(default {config.NUM_SHOTS}). 0 = bare zero-shot cloze. "
@@ -248,6 +297,21 @@ def main():
         args.fewshot_mode = "fixed-block"
     args.fewshot_mode = args.fewshot_mode or "drop-same-prop"
 
+    if args.top_shared_chunks_pct is not None:
+        if args.min_shared_chunks > 0:
+            ap.error("--top-shared-chunks-pct and --min-shared-chunks are mutually "
+                     "exclusive")
+        if not (0 < args.top_shared_chunks_pct <= 100):
+            ap.error("--top-shared-chunks-pct must be in (0, 100]")
+
+    if args.internal_fewshot:
+        if args.no_internal:
+            ap.error("--internal-fewshot needs the internal forward pass that "
+                     "--no-internal skips")
+        if args.num_shots == 0:
+            ap.error("--internal-fewshot is a no-op at --num-shots 0: the few-shot "
+                     "prompt IS the zero-shot cloze there")
+
     if args.output_dir:
         out_root = Path(args.output_dir).resolve()
         recall_dir, internal_dir = out_root / "recall", out_root / "internal"
@@ -259,6 +323,16 @@ def main():
     print(f"[dirs] internal -> {internal_dir}")
 
     df = D.load_popqa_df()
+    if args.top_shared_chunks_pct is not None:
+        # Quantile of the FULL dataset, before any subject-drop / --limit, so the
+        # resulting count threshold means the same thing (and selects the same
+        # facts) no matter which --fewshot-mode or --num-shots is in play.
+        n_shared_full = df["shared_chunks"].apply(lambda c: len(c) if c is not None else 0)
+        args.min_shared_chunks = int(n_shared_full.quantile(1 - args.top_shared_chunks_pct / 100))
+        print(f"[filter] --top-shared-chunks-pct {args.top_shared_chunks_pct:g} -> "
+              f"--min-shared-chunks {args.min_shared_chunks} "
+              f"({(n_shared_full >= args.min_shared_chunks).sum()}/{len(df)} facts, "
+              "full dataset)")
     # Demonstrations are chosen from the FULL dataset, before the filters below,
     # so the pool doesn't shift when --limit / --min-shared-chunks change.  Their
     # subjects then leave the eval set at every shot count (0 included) so runs
@@ -298,6 +372,19 @@ def main():
     # feed build_feature_table.py a table with no gold_prob / internal features.
     if args.no_internal:
         tag += "_recallonly"
+    # Same population and same shot count, but a different measured prompt, so the
+    # internal columns are not comparable with a default run's -- it needs its own
+    # filename or the `exists -> skip` guard would serve the zero-shot-internals
+    # parquet in its place.
+    if args.internal_fewshot:
+        tag += "_fsinternal"
+    # The population changes with the filter, so it has to reach the filename too --
+    # otherwise the `exists -> skip` guard would hand a filtered run the unfiltered
+    # parquet (or vice versa).
+    if args.top_shared_chunks_pct is not None:
+        tag += f"_top{args.top_shared_chunks_pct:g}pct"
+    elif args.min_shared_chunks > 0:
+        tag += f"_minshared{args.min_shared_chunks}"
 
     for step in args.steps:
         out_path = recall_dir / f"recall_step{step}{tag}.parquet"
@@ -311,7 +398,9 @@ def main():
                         dump_hidden=not args.no_hidden, positions=args.positions,
                         top_k=args.top_k, internal_dir=internal_dir,
                         write_every=args.write_every, partial_path=partial_path,
-                        fewshot=fewshot, internal_feats=not args.no_internal)
+                        fewshot=fewshot, internal_feats=not args.no_internal,
+                        neuron_values=not args.no_neuron_values,
+                        internal_fewshot=args.internal_fewshot)
         res.to_parquet(out_path)
         partial_path.unlink(missing_ok=True)
         msg = f"[write] {out_path}  ({res['correct'].mean():.3f} correct"

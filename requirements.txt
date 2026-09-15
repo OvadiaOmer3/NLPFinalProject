@@ -16,7 +16,8 @@ jupyter
 matplotlib
 seaborn
 plotly>=6.0        # analysis/report_token_strain.py
-
+itables
+seaborn
 # Optional: interpretable prediction model (Step C) + SHAP
 xgboost>=2.0
 shap>=0.44

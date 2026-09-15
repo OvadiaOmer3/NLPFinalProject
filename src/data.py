@@ -104,9 +104,17 @@ def subject_last_token_index(prompt: str, subj: str, tokenizer) -> int | None:
     Used for hidden-state probing / logit lens / drift.  We locate the subject
     string inside the prompt and map the character span to token positions via
     the fast tokenizer's offset mapping.
+
+    ``rfind``, not ``find``: the fact's own cloze is always the *tail* of the
+    prompt, and under a few-shot prefix the subject string can also occur inside
+    the demonstration block (measured on the 15-shot top-decile run: 13 of 1452
+    facts -- ``Milan``, ``Delhi``, ``Papua New Guinea``, and short strings like
+    ``M`` / ``Ran``).  ``find`` would silently return a *demo* token there, so
+    the hidden state and neuron stats would describe the wrong entity.  On a
+    zero-shot cloze the subject occurs once and the two agree.
     """
     enc = tokenizer(prompt, return_offsets_mapping=True, add_special_tokens=True)
-    char_start = prompt.find(subj)
+    char_start = prompt.rfind(subj)
     if char_start < 0:
         return None
     char_end = char_start + len(subj)
