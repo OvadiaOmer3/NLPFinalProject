@@ -11,7 +11,7 @@ Examples:
     # Two-phase: 1 epoch original, then 1 epoch explicit starting from phase 1
     python make_train_config.py --run-name phase1_170M --corpus original
     python make_train_config.py --run-name phase2_170M --corpus explicit_all \
-        --load-path <EXPLICIT_ROOT>/runs/phase1_170M/olmo2_170M_.../stepNNNN
+        --load-path data/runs/phase1_170M/olmo2_170M_.../stepNNNN
 
 Prints the torchrun command to launch (see also slurm/train.sbatch).
 """
@@ -22,7 +22,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # repo root: config.py, src/
 import config
 
 

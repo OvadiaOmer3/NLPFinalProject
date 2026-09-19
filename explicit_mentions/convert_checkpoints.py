@@ -2,13 +2,13 @@
 
 Wraps the authors' OLMo-core script (examples/huggingface/convert_checkpoint_to_hf.py)
 to produce the same layout the published LMEnt repos use -- one HF model per
-step in stepN/ subfolders -- so eval_explicit.py can sweep them:
+step in stepN/ subfolders -- so feature_extraction/eval_checkpoints.py --model <dir> can sweep them:
 
-    <EXPLICIT_ROOT>/hf/<name>/step10000/{config.json, model.safetensors, tokenizer...}
+    data/hf/<name>/step10000/{config.json, model.safetensors, tokenizer...}
 
 Usage:
     python convert_checkpoints.py \
-        --run-dir <EXPLICIT_ROOT>/runs/explicit_170M_1E/olmo2_170M_0.0003_32768_0.01_1 \
+        --run-dir data/runs/explicit_170M_1E/olmo2_170M_0.0003_32768_0.01_1 \
         --name explicit_170M_1E [--steps 10000 20000 ...]
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # repo root: config.py, src/
 import config
 
 CONVERT_SCRIPT = (config.OLMO_CORE_PATH / "src" / "examples" / "huggingface"

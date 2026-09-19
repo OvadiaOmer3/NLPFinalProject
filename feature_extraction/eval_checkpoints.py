@@ -26,6 +26,13 @@ Usage:
                                                                   # (pair with --output-dir,
                                                                   # filenames don't carry the
                                                                   # model)
+    python feature_extraction/eval_checkpoints.py --model data/hf/explicit_170M_1E \
+        --run-tag translated_corpus/explicit_170M_1E --no-internal \
+        --num-shots 5 --fewshot-mode only-same-prop                # a LOCAL dir of converted
+                                                                  # checkpoints (explicit_mentions/
+                                                                  # convert_checkpoints.py); steps
+                                                                  # are read off the disk, output
+                                                                  # goes to artifacts/recall/<run-tag>/
     python feature_extraction/eval_checkpoints.py --no-hidden     # scalars only, no dump
     python feature_extraction/eval_checkpoints.py --no-internal   # recall only: correct +
                                                                   # generation, one pass/fact
@@ -202,13 +209,16 @@ def main():
     ap.add_argument("--model", type=str, default=config.MODEL_ID,
                     help=f"HuggingFace repo of the LMEnt release to evaluate "
                          f"(default {config.MODEL_ID}, or $LMENT_MODEL_ID). Known "
-                         f"releases: {', '.join(config.MODEL_TOTAL_STEPS)}. Artifact "
-                         f"filenames do NOT encode the model, so give each one its "
-                         f"own --output-dir.")
+                         f"releases: {', '.join(config.MODEL_TOTAL_STEPS)}. Or a LOCAL "
+                         f"directory of converted checkpoints (<dir>/stepN/, from "
+                         f"explicit_mentions/convert_checkpoints.py), whose steps are "
+                         f"discovered on disk. Artifact filenames do NOT encode the "
+                         f"model, so give each one its own --run-tag / --output-dir.")
     ap.add_argument("--steps", type=int, nargs="*", default=None,
                     help="checkpoint steps to evaluate; defaults to every "
                          "checkpoint the --model publishes (step0 .. final, every "
-                         f"{config.CHECKPOINT_INTERVAL}).")
+                         f"{config.CHECKPOINT_INTERVAL}) or, for a local dir, every "
+                         "stepN/ it contains.")
     ap.add_argument("--limit", type=int, default=None,
                     help="evaluate only the first N facts (smoke test)")
     ap.add_argument("--min-shared-chunks", type=int, default=0,
@@ -325,16 +335,36 @@ def main():
                          "config.INTERNAL_DIR, i.e. $LMENT_DATA_ROOT/artifacts/{recall,internal} "
                          "(NLPFinalProject/data/... if unset). "
                          "Use this to avoid surprises from running from the wrong cwd.")
+    ap.add_argument("--run-tag", type=str, default=None,
+                    help="subdirectory under config.RECALL_DIR (and INTERNAL_DIR) to "
+                         "write into, e.g. translated_corpus/explicit_170M_1E; slashes "
+                         "allowed. One per model, since filenames do not carry the "
+                         "model. Mutually exclusive with --output-dir.")
     args = ap.parse_args()
 
+    # A path-like --model that is not an existing directory would otherwise be
+    # sent to the HF Hub as a repo id, failing with an opaque HFValidationError.
+    # The usual cause is a dropped leading "/".
+    looks_like_path = ("/" in args.model and not args.model.startswith("hf://")
+                       and args.model.count("/") > 1)
+    if looks_like_path and not os.path.isdir(args.model):
+        hint = ""
+        if not os.path.isabs(args.model) and os.path.isdir("/" + args.model):
+            hint = f"\n  did you mean the absolute path?  /{args.model}"
+        ap.error(f"--model looks like a filesystem path but is not a directory: "
+                 f"{args.model}{hint}\n"
+                 f"  (a real HF repo id has exactly one '/', e.g. "
+                 f"dhgottesman/LMEnt-170M-1E)")
+
     # Before any load: everything downstream reads config.MODEL_ID at call time.
+    # For a local checkpoint dir this also sets the grid to its stepN/ dirs.
     config.use_model(args.model)
     if args.steps is None:
         args.steps = config.CHECKPOINT_STEPS
         if args.steps is None:
-            ap.error(f"{args.model} is not in config.MODEL_TOTAL_STEPS, so its "
-                     f"checkpoint grid is unknown -- pass --steps explicitly (or add "
-                     f"the release to the table).")
+            ap.error(f"{args.model} is not in config.MODEL_TOTAL_STEPS and is not a "
+                     f"local checkpoint directory, so its checkpoint grid is unknown "
+                     f"-- pass --steps explicitly (or add the release to the table).")
     print(f"[model] {config.MODEL_ID} | {len(args.steps)} step(s), "
           f"final published step{config.FINAL_STEP}")
 
@@ -379,11 +409,19 @@ def main():
             ap.error("--internal-fewshot is a no-op at --num-shots 0: the few-shot "
                      "prompt IS the zero-shot cloze there")
 
+    if args.output_dir and args.run_tag:
+        ap.error("--output-dir and --run-tag are mutually exclusive")
     if args.output_dir:
         out_root = Path(args.output_dir).resolve()
         recall_dir, internal_dir = out_root / "recall", out_root / "internal"
         recall_dir.mkdir(parents=True, exist_ok=True)
         internal_dir.mkdir(parents=True, exist_ok=True)
+    elif args.run_tag:
+        recall_dir = config.RECALL_DIR / args.run_tag
+        internal_dir = config.INTERNAL_DIR / args.run_tag
+        recall_dir.mkdir(parents=True, exist_ok=True)
+        if not args.no_internal:
+            internal_dir.mkdir(parents=True, exist_ok=True)
     else:
         recall_dir, internal_dir = config.RECALL_DIR, config.INTERNAL_DIR
     print(f"[dirs] recall -> {recall_dir}")

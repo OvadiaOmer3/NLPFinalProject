@@ -24,7 +24,7 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any, Dict, cast
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # repo root: config.py, src/
 import config as em_config
 
 sys.path.insert(0, str(em_config.OLMO_CORE_PATH / "src"))

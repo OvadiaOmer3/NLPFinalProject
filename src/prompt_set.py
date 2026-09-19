@@ -276,7 +276,7 @@ def _json_safe(v):
 
 
 # --------------------------------------------------------------------------- #
-# CLI  (thin wrappers in feature_extraction/ and explicit_mentions/ call this)
+# CLI  (feature_extraction/build_prompts.py is the thin wrapper that calls this)
 # --------------------------------------------------------------------------- #
 def build_argparser(prog: str | None = None) -> argparse.ArgumentParser:
     from src import fewshot as fewshot_mod

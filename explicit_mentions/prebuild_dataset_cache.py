@@ -15,14 +15,14 @@ dataset settings, so this MUST use the same config the training run will use --
 which is why it reuses train_explicit.build_config() on the same config.json.
 
 Usage (CPU job, needs the lment_train env):
-    python prebuild_dataset_cache.py <EXPLICIT_ROOT>/runs/<name>/config.json
+    python prebuild_dataset_cache.py data/runs/<name>/config.json
 """
 import json
 import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # repo root: config.py, src/
 
 # prepare() consults the distributed rank/barrier helpers; give them a
 # single-process world so they no-op instead of failing.

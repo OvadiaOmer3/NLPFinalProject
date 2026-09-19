@@ -16,6 +16,7 @@ learned.
 from __future__ import annotations
 
 import functools
+from pathlib import Path
 from typing import Iterable
 
 import torch
@@ -62,12 +63,31 @@ def load_popqa_df(split: str = "train"):
 # --------------------------------------------------------------------------- #
 @functools.lru_cache(maxsize=4)
 def _tokenizer(model_id: str, subfolder: str):
+    if config.is_local_model(model_id):
+        try:
+            return AutoTokenizer.from_pretrained(str(Path(model_id) / subfolder), use_fast=True)
+        except Exception as exc:
+            # A checkpoint converted with transformers 5.x records a v5-only
+            # tokenizer_class that 4.x rejects.  The dolma2 tokenizer is identical
+            # across every LMEnt model, so fall back to the published one rather
+            # than failing the whole eval.
+            print(f"[tokenizer] {model_id}/{subfolder} failed ({type(exc).__name__}); "
+                  f"falling back to {config.TOKENIZER_ID}/{config.TOKENIZER_SUBFOLDER}")
+            return _tokenizer(config.TOKENIZER_ID, config.TOKENIZER_SUBFOLDER)
     return AutoTokenizer.from_pretrained(model_id, subfolder=subfolder, use_fast=True)
+
+
+def available_steps(model_id: str | None = None) -> list[int]:
+    """Checkpoint steps of ``model_id`` (default config.MODEL_ID): the published
+    grid for a catalogued HF release, the stepN/ dirs for a local checkpoint dir,
+    [] when neither is known."""
+    return config.checkpoint_steps(model_id or config.MODEL_ID) or []
 
 
 def load_tokenizer(model_id: str | None = None, step: int | None = None):
     # Tokenizer is identical across checkpoints; load from the final one.  Keyed
     # on the model so a process that switches models doesn't reuse a stale one.
+    # ``model_id`` may be an HF repo id or a local dir of converted checkpoints.
     model_id = model_id or config.MODEL_ID
     if step is None:
         steps = config.checkpoint_steps(model_id)
@@ -87,6 +107,8 @@ def _check_step(model_id: str, step: int) -> None:
     """
     steps = config.checkpoint_steps(model_id)
     if steps is not None and step not in steps:
+        if config.is_local_model(model_id):
+            raise ValueError(f"{model_id} has no step{step}/ directory; found {steps}")
         raise ValueError(
             f"{model_id} has no step{step} checkpoint: it publishes step0 .. "
             f"step{steps[-2]} every {config.CHECKPOINT_INTERVAL} plus the final "
@@ -98,6 +120,11 @@ def _check_step(model_id: str, step: int) -> None:
 def load_checkpoint(step: int, device: str | None = None, model_id: str | None = None):
     """Load the model weights for a single checkpoint step onto `device`.
 
+    ``model_id`` is an HF repo with ``stepN`` subfolders (the published LMEnt
+    checkpoints) or a local directory laid out the same way
+    (``<dir>/stepN/{config.json, model.safetensors, ...}``, what
+    explicit_mentions/convert_checkpoints.py produces).
+
     Honors LMENT_DEVICE / LMENT_DTYPE env overrides (e.g. cpu / float32 for a
     machine without CUDA).  Uses the `dtype=` kwarg (transformers >= 5) with a
     `torch_dtype=` fallback for older versions.
@@ -108,10 +135,14 @@ def load_checkpoint(step: int, device: str | None = None, model_id: str | None =
     device = device or os.environ.get("LMENT_DEVICE", config.DEVICE)
     dtype = getattr(torch, os.environ.get("LMENT_DTYPE", config.DTYPE))
     sub = config.checkpoint_subfolder(step)
+    if config.is_local_model(model_id):
+        src, kw = str(Path(model_id) / sub), {}
+    else:
+        src, kw = model_id, {"subfolder": sub}
     try:
-        model = AutoModelForCausalLM.from_pretrained(model_id, subfolder=sub, dtype=dtype)
+        model = AutoModelForCausalLM.from_pretrained(src, dtype=dtype, **kw)
     except TypeError:
-        model = AutoModelForCausalLM.from_pretrained(model_id, subfolder=sub, torch_dtype=dtype)
+        model = AutoModelForCausalLM.from_pretrained(src, torch_dtype=dtype, **kw)
     model.to(device).eval()
     return model
 

@@ -56,7 +56,7 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # repo root: config.py, src/
 import config
 
 csv.field_size_limit(sys.maxsize)
