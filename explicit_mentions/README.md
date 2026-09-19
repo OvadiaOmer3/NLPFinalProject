@@ -411,22 +411,28 @@ those flags — the file already answers them).
 Outputs land in `../data/artifacts/recall/<run-tag>/recall_step{N}_*_recallonly.parquet`
 with the same schema as every other recall parquet in the repo
 (`id, step, num_shots, correct, excluded, prompt, generation`), so the
-existing analysis notebooks apply (see `analysis/compare_results/` in this directory). The headline comparison: accuracy binned by
+existing analysis notebooks apply (see `analysis/translated_corpus_results/` in this directory). The headline comparison: accuracy binned by
 the fact's `num_shared_chunks` (and, per §6.2, by the fraction of explicit
 co-mentions in the *original* data — facts that used to co-occur implicitly
 are where the explicit corpus should help most).
 
 ## Analysis notebooks (`analysis/`)
 
+`analysis/baseline_performance/` — the published LMEnt models on the original corpus:
+
 | notebook | what it shows |
 |---|---|
-| `analysis/compare_results/compare_corpora_170M.ipynb`, `compare_corpora_600M.ipynb`, `compare_corpora_600M_with_popqa.ipynb` | explicit vs original corpus at 170M / 600M (and the PopQA-entities-only rewrite): recall by exposure bin and relation, McNemar paired tests |
-| `analysis/compare_results/compare_models.ipynb` | baseline recall of the 12 published LMEnt models |
-| `analysis/compare_results/compare_results.ipynb` | head-to-head of one explicit vs one original model |
-| `analysis/compare_results/popqa_composition.ipynb` | what the PopQA-KAS eval set is made of |
-| `analysis/trajectory_analysis/trajectory_analysis.ipynb` | 5-shot only-same-prop recall across the 1B-6E checkpoints (+ the two CSVs it writes) |
-| `analysis/analyze_same_prop_fewshot.ipynb` | QA for `--fewshot-mode only-same-prop`: does the model copy answers from the in-context block? |
-| `analysis/fig9_mention_forms_170M_colab_6E.ipynb` | Colab reproduction of LMEnt Fig. 9 (mention forms vs correctness, 170M-6E) — the observational baseline this intervention tests causally |
+| `compare_models.ipynb` | baseline recall of the 12 published LMEnt models (170M / 600M / 1B x epochs) |
+| `popqa_composition.ipynb` | what the PopQA-KAS eval set is made of |
+| `trajectory_analysis/trajectory_analysis.ipynb` | 5-shot only-same-prop recall across the 1B-6E checkpoints (+ the two CSVs it writes) |
+| `fig9_mention_forms_170M_colab_6E.ipynb` | Colab reproduction of LMEnt Fig. 9 (mention forms vs correctness, 170M-6E) — the observational baseline this intervention tests causally |
+
+`analysis/translated_corpus_results/` — models we trained on the rewritten corpora vs their original-corpus controls:
+
+| notebook | what it shows |
+|---|---|
+| `compare_corpora_170M.ipynb` | explicit vs original corpus at 170M: recall by exposure bin and relation, McNemar paired tests |
+| `compare_corpora_600M.ipynb` | the same at 600M, with the half-rewrite and PopQA-entities-only arms |
 
 Every notebook's first code cell locates the repo root, so they run from any working directory.
 

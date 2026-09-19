@@ -20,7 +20,7 @@ README (question, headline result, entry point, data it reads):
 | [`frequency_forgetting/`](frequency_forgetting/) | does forgetting get *worse* for facts the model sees more often, or is that a counting artefact (count vs. hazard)? | `01_frequency_and_forgetting.ipynb` |
 | [`neuron_forgetting/`](neuron_forgetting/) | what forgetting looks like *inside* the model: logit-lens depth, MLP activity, neuron churn | `02_internal_paper_figures.ipynb` |
 | [`token_strain/`](token_strain/) | does *token interference* (tokens shared with many other entities) explain forgetting on top of exposure? | `FINDINGS_token_strain.md`, `strain_diagnostics.py` |
-| [`explicit_mentions/`](explicit_mentions/) | LMEnt §6.2 intervention: rewrite implicit mentions in the pretraining corpus to explicit names, retrain, compare recall | `README.md`, `analysis/compare_results/` |
+| [`explicit_mentions/`](explicit_mentions/) | LMEnt §6.2 intervention: rewrite implicit mentions in the pretraining corpus to explicit names, retrain, compare recall | `README.md`, `analysis/translated_corpus_results/` |
 | [`legacy/`](legacy/) | the proposal's original panel/facts feature pipeline — superseded, kept for reference | `README.md` |
 
 All four consume artifacts produced by the shared `feature_extraction/` scripts
