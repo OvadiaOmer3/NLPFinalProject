@@ -26,7 +26,7 @@ Sections mirror the doc:
      aliases. These were stated only in the src/features/strain.py docstring.
 
 Usage:
-    python analysis/strain_diagnostics.py \
+    python token_strain/strain_diagnostics.py \
         --panel data/artifacts/features/strain_panel_15shot_top10.parquet \
         --out data/artifacts/features/strain_diagnostics_specE.txt
     # add --permutations 150 to include section 10 (~2 min per spec)
@@ -45,7 +45,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 warnings.filterwarnings("ignore")
 
-from analysis.strain_models import (  # noqa: E402
+from token_strain.strain_models import (  # noqa: E402
     BASE, MIN_EVENTS, MIN_ROWS, NAMELEN, STRAIN, STRAIN_W, F1, F2, F2_W, LR,
     MODELS, fit, prepare)
 
@@ -395,7 +395,7 @@ def sec10_permutations(p: pd.DataFrame, n: int) -> None:
     head(10, f"Permutation test across exposure specs ({n} draws each)")
     # The loop itself lives in null_control_distribution.run_permutations, so the
     # standalone script and this section cannot drift apart.
-    from analysis.null_control_distribution import run_permutations
+    from token_strain.null_control_distribution import run_permutations
     from feature_extraction.build_strain_panel import load_popqa
     from src.features import strain as S
     df = load_popqa()

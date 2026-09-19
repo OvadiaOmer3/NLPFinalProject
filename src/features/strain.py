@@ -45,7 +45,7 @@ baked into its defaults -- see the plan doc for the numbers:
     have a different frequency profile than whole words.
 
 Every number in (2) and (3) is recomputed and saved by section 12 of
-``analysis/strain_diagnostics.py``.  An earlier version of (2) quoted "5 to 251";
+``token_strain/strain_diagnostics.py``.  An earlier version of (2) quoted "5 to 251";
 that pair does not reproduce under any denominator or cutoff and was replaced by the
 figures above, while the direction it described holds throughout.
 """

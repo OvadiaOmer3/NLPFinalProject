@@ -8,14 +8,14 @@ scipy>=1.10
 scikit-learn>=1.3
 tqdm>=4.66
 pyarrow>=25.0      # parquet I/O; strain panel was written by pyarrow 25 (older readers can fail)
-statsmodels>=0.14  # token-strain regressions (analysis/strain_models.py)
+statsmodels>=0.14  # token-strain regressions (token_strain/strain_models.py)
 pytest>=8.0        # tests/
 
 # Notebook / EDA
 jupyter
 matplotlib
 seaborn
-plotly>=6.0        # analysis/report_token_strain.py
+plotly>=6.0        # token_strain/report_token_strain.py
 itables
 seaborn
 # Optional: interpretable prediction model (Step C) + SHAP

@@ -8,11 +8,11 @@ the panel preparation (`prepare`), the fitter (`fit`) and the likelihood-ratio t
 
 There is exactly one entry point that fits these models and reports them:
 
-    python analysis/strain_diagnostics.py          # every number, saved to a log
+    python token_strain/strain_diagnostics.py          # every number, saved to a log
 
-`analysis/null_control_distribution.py` also fits, but only the permutation
+`token_strain/null_control_distribution.py` also fits, but only the permutation
 replicates, and it exposes that loop as `run_permutations` so the diagnostics uses
-the same implementation rather than a copy. `analysis/report_token_strain.py` fits
+the same implementation rather than a copy. `token_strain/report_token_strain.py` fits
 nothing at all -- it renders the diagnostics JSON.
 
 It used to have its own `main()` printing a model table. That meant two scripts

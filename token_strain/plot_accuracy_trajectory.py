@@ -4,9 +4,9 @@ Point ``--dir`` at a folder of per-checkpoint recall parquets -- each one a row
 per question with a ``correct`` flag -- and it plots accuracy against the
 training step, with a Wilson 95% band for the sampling noise at each point.
 
-    python analysis/plot_accuracy_trajectory.py \
+    python token_strain/plot_accuracy_trajectory.py \
         --dir "data/artifacts/expermints/15shot_trajectory_top10_internal_with_hidden/recall" \
-        --out analysis/accuracy_trajectory.html
+        --out data/artifacts/features/accuracy_trajectory.html
 
 Rows flagged ``excluded`` are dropped by default (pass ``--keep-excluded`` to
 score them as wrong instead). The step comes from the ``step`` column, falling

@@ -1,4 +1,4 @@
-"""Plot the numbers in analysis/FINDINGS_token_strain.md. Data only, no argument.
+"""Plot the numbers in token_strain/FINDINGS_token_strain.md. Data only, no argument.
 
 Every figure is a direct rendering of one block of the findings doc: axes, values,
 uncertainty, and sample sizes. No captions, no interpretation, no verdict -- read
@@ -6,7 +6,7 @@ the doc for what the numbers mean.
 
 **This script fits nothing.** Every model-derived quantity -- likelihood-ratio tests,
 pseudo-R2, clustered coefficients, per-relation estimates -- is read from the JSON
-written by ``analysis/strain_diagnostics.py``, which is the single computational
+written by ``token_strain/strain_diagnostics.py``, which is the single computational
 source. Earlier versions refit the models here, which meant the figures could drift
 from the log they were meant to illustrate (and did need hand-editing whenever BASE
 changed). The panel parquet is still read directly, but only for descriptive plots
@@ -20,11 +20,11 @@ skipped and the page says so.
 
 So: regenerate the diagnostics first, then this.
 
-    python analysis/strain_diagnostics.py --permutations 150
-    python analysis/report_token_strain.py \
+    python token_strain/strain_diagnostics.py --permutations 150
+    python token_strain/report_token_strain.py \
         --diagnostics data/artifacts/features/strain_diagnostics_specE.json \
         --panel data/artifacts/features/strain_panel_15shot_top10.parquet \
-        --out analysis/report_token_strain_specE.html
+        --out data/artifacts/features/report_token_strain_specE.html
 
 Pass ``--cdn`` to load plotly from a CDN instead of inlining it: ~60 KB instead of
 ~4.8 MB, at the cost of needing a network connection to view the page.
@@ -49,7 +49,7 @@ warnings.filterwarnings("ignore")
 # `prepare` is row filtering plus log transforms -- no model fitting -- and is
 # imported rather than reimplemented so the figures sit on exactly the analysis
 # panel. Nothing else comes from strain_models.
-from analysis.strain_models import prepare  # noqa: E402
+from token_strain.strain_models import prepare  # noqa: E402
 
 # One likelihood-ratio result as read from the diagnostics JSON.
 LRT = namedtuple("LRT", "chi2 df p")
@@ -438,7 +438,7 @@ def render(d, panel_path: str, cdn: bool = False) -> str:
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Token strain — data</title><style>{CSS}</style></head><body><div class="wrap">
 <h1>Token strain — data</h1>
-<p class="sub">Figures for <code>analysis/FINDINGS_token_strain.md</code>.
+<p class="sub">Figures for <code>token_strain/FINDINGS_token_strain.md</code>.
 Panel: <code>{Path(panel_path).name}</code>.<br>
 Model numbers read from <code>{Path(d['diag_path']).name}</code> &mdash; this page
 fits nothing itself.</p>
@@ -457,11 +457,11 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--diagnostics",
                     default="data/artifacts/features/strain_diagnostics_specE.json",
-                    help="JSON from analysis/strain_diagnostics.py -- the source of "
+                    help="JSON from token_strain/strain_diagnostics.py -- the source of "
                          "every model-derived number on the page")
     ap.add_argument("--panel",
                     default="data/artifacts/features/strain_panel_15shot_top10.parquet")
-    ap.add_argument("--out", default="analysis/report_token_strain_specE.html")
+    ap.add_argument("--out", default="data/artifacts/features/report_token_strain_specE.html")
     ap.add_argument("--cdn", action="store_true",
                     help="load plotly from a CDN (~60 KB page) instead of inlining "
                          "it (~4.8 MB, viewable offline)")

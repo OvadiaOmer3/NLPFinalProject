@@ -44,3 +44,8 @@ data/artifacts/expermints/15shot_trajectory_top10_internal_with_neurons/
 competition_df.parquet
 test_inference_output/
 test-output/
+
+# rendered token-strain figures (several MB of inlined plotly / a pdf);
+# regenerate with token_strain/report_token_strain.py and plot_*.py
+data/artifacts/features/*.html
+data/artifacts/features/*.pdf

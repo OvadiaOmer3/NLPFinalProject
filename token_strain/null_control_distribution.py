@@ -12,7 +12,7 @@ Reading the output:
     its own scrambled version, and whatever it measures is a property the
     permutation preserved -- here, how many tokens an entity's name has.
 
-    python analysis/null_control_distribution.py --n 20
+    python token_strain/null_control_distribution.py --n 20
 """
 from __future__ import annotations
 
@@ -28,8 +28,8 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 warnings.filterwarnings("ignore")
 
-from analysis.strain_models import BASE, LR, NAMELEN  # noqa: E402
-from analysis.strain_models import MIN_EVENTS, MIN_ROWS, fit  # noqa: E402
+from token_strain.strain_models import BASE, LR, NAMELEN  # noqa: E402
+from token_strain.strain_models import MIN_EVENTS, MIN_ROWS, fit  # noqa: E402
 from feature_extraction.build_strain_panel import load_popqa  # noqa: E402
 from src.features import strain as S  # noqa: E402
 

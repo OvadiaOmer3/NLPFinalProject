@@ -1,12 +1,12 @@
 """Appendix figure: the token-strain permutation null, for the paper.
 
 Fits nothing. Reads ``permutation_reported`` (all draws of the reported permutation
-test) from the JSON written by ``analysis/strain_diagnostics.py --permutations N``
+test) from the JSON written by ``token_strain/strain_diagnostics.py --permutations N``
 and draws the null distribution with the observed statistic marked.
 
-    python analysis/plot_token_strain_permutation.py \\
+    python token_strain/plot_token_strain_permutation.py \\
         --diagnostics data/artifacts/features/strain_diagnostics_specE.json \\
-        --out ../token_strain_permutation.pdf
+        --out data/artifacts/features/token_strain_permutation.pdf
 """
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--diagnostics",
                     default="data/artifacts/features/strain_diagnostics_specE.json")
-    ap.add_argument("--out", default="../token_strain_permutation.pdf")
+    ap.add_argument("--out", default="data/artifacts/features/token_strain_permutation.pdf")
     ap.add_argument("--dpi", type=int, default=300, help="raster resolution (only used if --out is a .png)")
     a = ap.parse_args()
 

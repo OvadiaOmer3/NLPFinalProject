@@ -14,7 +14,7 @@ spans ``(steps[w], steps[w+1]]``.
 
 Usage:
     python feature_extraction/build_strain_panel.py \
-        --trajectory 5_shot_trajectory_with_fact_properites.csv \
+        --trajectory explicit_mentions/analysis/trajectory_analysis/5_shot_trajectory_with_fact_properites.csv \
         --out data/artifacts/features/strain_panel.parquet
 """
 from __future__ import annotations
