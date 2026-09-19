@@ -335,9 +335,10 @@ Single-fact helpers `logit_lens_features`, `subject_hidden_states` and
 `_hidden_states` remain for notebook use; the sweep uses `extract_fact` instead so
 each fact is only run once.
 
-## ⚠️ Verify against the real download
+## Design decisions verified against LMEnt
 
-**Resolved** (from LMEnt / the paper, no longer guessed):
+Each of these was checked against LMEnt's code, the paper, or the real download
+rather than assumed:
 - **Few-shot cloze evaluation, demonstrations held out** — verified against olmes
   commit `1f0568f` (the SHA LMEnt pins): `PopQACloze` defaults to `num_shots=15`,
   as does the registered `popqa_cloze_sitelinks`, and the fork has *no* zero-shot
@@ -392,26 +393,3 @@ each fact is only run once.
   validates the internal-features assumptions.
 - PopQA-KAS schema (`prop_id`, `possible_answers` as a list, the `*_chunks`
   fields) — confirmed by loading the dataset (see notebook §1).
-
-**Still confirm at checkout** (isolated in `config.py` / tagged `# VERIFY`):
-- **`LR_PEAK` superscript** — §B.4 reads `5e-3`; superscripts are easy to misread
-  on the PDF, so eyeball it. Low-risk: the LR feature depends on the curve *shape*,
-  not absolute scale.
-- **`LR_ALPHA_F`** (cosine floor) — §B.4 omits it; OLMo-core's `CosWithWarmup`
-  defaults to `0.1`.
-- ~~**olmes symbols**~~ — verified against commit `1f0568f`: `PopQACloze` in
-  `oe_eval/tasks/oe_eval_tasks/popqa_cloze.py`, `doc_to_text` → `doc["query"]`,
-  `doc_to_target` → `" " + gold`, and `Task.fewshot_context`'s layout
-  (`"\n\n".join(text + target) + "\n\n" + text`). One template still differs
-  deliberately: upstream maps `prop_id` 97 *and* 422 both to `"The capital of {} is"`
-  even though 97 is the inverse relation, so we use `"{} is the capital of"` for 97
-  — our prompts are therefore **not** byte-identical to upstream for 97's facts.
-- ~~**`batch_indices` path & shape**~~ — verified on download. `dataset-cache/
-  batch_indices_epoch_{1..6}.npy`, each an object array of 109,672 steps × 16
-  chunk IDs (6 × 109,672 = 658,032 = the final 6E checkpoint). `batch_indices.npy`
-  is byte-identical to `_epoch_1`; all six orderings differ (chunk 3561491 lands at
-  local step 0 / 80374 / 53637 / 27332 / 24924 / 68259). Seed 0, confirmed by the
-  sibling `vsl-grow-p2-8-cycle/global_batch_indices_bz*_epoch{1..6}_seed0.npy`.
-- **Model internals** (`src/features/internal.py::_final_norm_and_head`) — confirmed
-  as `model.model.norm` / `model.lm_head` for HF `Olmo2ForCausalLM`; sanity-check
-  with `print(model)` on the real checkpoint.
