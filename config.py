@@ -183,15 +183,18 @@ TOKENIZED_DIR = DATASET_DIR / "dataset-tokenized"    # *.csv.gz tokenized chunks
 # file matches (PopQA-only setup), mention features are skipped.
 TOKENIZED_GLOB = os.environ.get("LMENT_TOKENIZED_GLOB", str(TOKENIZED_DIR / "*.npy"))
 
-# Where we write derived outputs (Step A/B/C).  These used to sit under an
-# extra <data>/artifacts/ level; that layer is gone and they are now siblings
-# directly under DATA_ROOT, alongside corpora/ hf/ prompts/ runs/.
-RECALL_DIR = DATA_ROOT / "recall"             # per-checkpoint recall / gold prob
-FEATURE_DIR = DATA_ROOT / "features"          # per-fact feature tables
-INTERNAL_DIR = DATA_ROOT / "internal"         # hidden states / probes / logit lens
-CHUNK_INDEX_PATH = DATA_ROOT / "chunk_to_steps.pkl"  # inverted index cache
+# Where we write derived artifacts (Step A/B/C outputs).  Everything the eval and
+# analysis scripts produce lives under one artifacts/ level; the explicit-mentions
+# training pipeline's bulk outputs (corpora/ hf/ runs/, gitignored) sit beside it
+# directly under DATA_ROOT.
+ARTIFACT_DIR = DATA_ROOT / "artifacts"
+RECALL_DIR = ARTIFACT_DIR / "recall"          # per-checkpoint recall / gold prob
+FEATURE_DIR = ARTIFACT_DIR / "features"       # per-fact feature tables
+INTERNAL_DIR = ARTIFACT_DIR / "internal"      # hidden states / probes / logit lens
+PROMPTS_DIR = ARTIFACT_DIR / "prompts"        # frozen few-shot prompt parquets (build_prompts.py)
+CHUNK_INDEX_PATH = ARTIFACT_DIR / "chunk_to_steps.pkl"  # inverted index cache
 
-for _d in (RECALL_DIR, FEATURE_DIR, INTERNAL_DIR):
+for _d in (ARTIFACT_DIR, RECALL_DIR, FEATURE_DIR, INTERNAL_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
 # --------------------------------------------------------------------------- #

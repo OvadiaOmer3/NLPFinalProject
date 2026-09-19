@@ -54,11 +54,11 @@ EXPLICIT_ROOT = Path(os.environ.get(
 CORPORA_DIR = EXPLICIT_ROOT / "corpora"
 RUNS_DIR = EXPLICIT_ROOT / "runs"          # OLMo-core save_folders
 HF_DIR = EXPLICIT_ROOT / "hf"              # converted HF checkpoints
-# Eval outputs.  There is no longer an artifacts/ level: everything the eval
-# scripts produce goes under recall/, matching the main pipeline's
-# config.RECALL_DIR so both trees write to the same directory.
-RECALL_DIR = EXPLICIT_ROOT / "recall"
-PROMPTS_DIR = EXPLICIT_ROOT / "prompts"    # few-shot prompt parquets
+# Eval outputs, under the same artifacts/ level as the main pipeline's config.py
+# (same names and values as its ARTIFACT_DIR / RECALL_DIR / PROMPTS_DIR).
+ARTIFACT_DIR = EXPLICIT_ROOT / "artifacts"
+RECALL_DIR = ARTIFACT_DIR / "recall"
+PROMPTS_DIR = ARTIFACT_DIR / "prompts"     # few-shot prompt parquets
 
 
 def corpus_dir(tag: str) -> Path:

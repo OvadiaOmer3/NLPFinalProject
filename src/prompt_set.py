@@ -59,18 +59,8 @@ COLUMNS = ("id", "prop_id", "num_shots", "demo_ids", "prompt")
 
 
 def prompt_dir() -> Path:
-    """Default output directory: ``<data root>/prompts``.
-
-    The two trees spell the root differently -- the main pipeline's config has
-    ``DATA_ROOT``, the explicit-mentions copy has ``EXPLICIT_ROOT`` plus a
-    ready-made ``PROMPTS_DIR`` -- and this module is mirrored into both, so
-    accept any of them.  (Both now resolve to the same NLPFinalProject/data.)
-    """
-    explicit = getattr(config, "PROMPTS_DIR", None)
-    if explicit is not None:
-        return Path(explicit)
-    root = getattr(config, "DATA_ROOT", None) or config.EXPLICIT_ROOT
-    return Path(root) / "prompts"
+    """Default output directory: ``config.PROMPTS_DIR`` (``<data>/artifacts/prompts``)."""
+    return Path(config.PROMPTS_DIR)
 
 
 def fewshot_tag(num_shots: int, mode: str, source: str = "ours") -> str:
@@ -317,7 +307,7 @@ def build_argparser(prog: str | None = None) -> argparse.ArgumentParser:
     ap.add_argument("--limit", type=int, default=None,
                     help="keep only the first N facts (smoke test)")
     ap.add_argument("--out", type=str, default=None,
-                    help="output parquet path (default: <data>/prompts/"
+                    help="output parquet path (default: <data>/artifacts/prompts/"
                          "prompts{tag}.parquet)")
     ap.add_argument("--out-dir", type=str, default=None,
                     help="directory for the default filename (default: "

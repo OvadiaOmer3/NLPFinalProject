@@ -29,6 +29,8 @@ src/                       # shared library (imported by both phases)
   data.py                  # load dataset + checkpoints + tokenizer; prompt wrappers -> lment_popqa
   schedule.py              # batch_indices -> chunk->steps index; LR at step (real kas_config)
   recall.py                # per-checkpoint cloze recall (olmes scoring) + gold-answer prob
+  fewshot.py               # held-out demonstration pool + few-shot modes (drop/only-same-prop)
+  prompt_set.py            # frozen prompt parquets: build once, score every model on identical strings
   features/
     timeline.py            # recency, spacing/burstiness, LR-at-appearance, epoch position
     competition.py         # subject/answer/shared counts; interference post-learning
@@ -39,7 +41,9 @@ src/                       # shared library (imported by both phases)
     strain.py              # token interference: EntityUniverse, TokenIndex (strain, ownership),
                            #   alt-answer co-occurrence, WindowMap over all 6 epochs
 feature_extraction/        # PRODUCES artifacts (run on GPU)
+  build_prompts.py         # Step A.0: freeze the few-shot prompts       -> artifacts/prompts/
   eval_checkpoints.py      # Step A.1: recall + internal-state sweep  -> artifacts/recall/ (+ internal/)
+                           #   --model may be an HF release or a local dir of converted checkpoints
   build_feature_table.py   # Step A.2/B: assemble panel.parquet + facts.parquet
   build_strain_panel.py    # (fact x window) interference panel -> strain_panel.parquet   [CPU]
 analysis/                  # CONSUMES artifacts (CPU / notebooks)
@@ -54,6 +58,11 @@ analysis/                  # CONSUMES artifacts (CPU / notebooks)
   report_token_strain.py   # figures for FINDINGS_token_strain.md (data only, no prose).
                            #   Fits nothing -- reads strain_diagnostics.py's JSON
   FINDINGS_token_strain.md # the write-up: conclusion, method, results, caveats
+  compare_results/         # notebooks: explicit-mentions corpus vs original (recall by exposure, McNemar)
+  trajectory_analysis/     # notebooks: few-shot recall trajectories over checkpoints
+explicit_mentions/         # LMEnt S6.2 intervention: rewrite implicit mentions in the pretraining
+                           #   corpus -> retrain (OLMo-core) -> convert to HF -> evaluate with the
+                           #   scripts above. See explicit_mentions/README.md
 tests/
   test_mention_features.py   # text.mention_features against LMEnt's real mention schema
   test_strain_features.py    # 15 tests: QID counting, self-competition, windowing

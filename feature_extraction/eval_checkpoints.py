@@ -322,7 +322,7 @@ def main():
     ap.add_argument("--output-dir", type=str, default=None,
                     help="artifacts root to write into (gets recall/ and internal/ "
                          "subdirs); defaults to config.RECALL_DIR and "
-                         "config.INTERNAL_DIR, i.e. $LMENT_DATA_ROOT/{recall,internal} "
+                         "config.INTERNAL_DIR, i.e. $LMENT_DATA_ROOT/artifacts/{recall,internal} "
                          "(NLPFinalProject/data/... if unset). "
                          "Use this to avoid surprises from running from the wrong cwd.")
     args = ap.parse_args()
