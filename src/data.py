@@ -16,6 +16,7 @@ learned.
 from __future__ import annotations
 
 import functools
+from pathlib import Path
 from typing import Iterable
 
 import torch
@@ -24,6 +25,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import config
 
+import re
 
 # --------------------------------------------------------------------------- #
 # Dataset
@@ -32,7 +34,12 @@ def load_popqa(split: str = "train"):
     """Return the PopQA-KAS split as a HuggingFace Dataset."""
     return load_dataset(config.POPQA_DATASET_ID, split=split)
 
-
+def get_words(x):
+        remove = set(['film','movie', 'game' , 'story', 'song', 'novel', 'series', 'video', 'short' ])
+        x = str(x).lower()
+        x = re.sub(r'[(),]', ' ', x)  # remove parentheses and commas
+        return set(x.split()) - remove
+    
 def load_popqa_df(split: str = "train"):
     """Same data as a pandas DataFrame (convenient for feature joins).
 
@@ -41,37 +48,101 @@ def load_popqa_df(split: str = "train"):
     ``subject_last_token_index``; the fact is unmeasurable either way, so drop
     them here -> 14264 rows.
     """
-    return load_popqa(split).to_pandas().dropna(subset=["subj", "obj"]).reset_index(drop=True)
-
+    df = load_popqa(split).to_pandas().dropna(subset=["subj", "obj"]).reset_index(drop=True)
+    # df['possible_answers'] = df['possible_answers'].apply(tuple)
+    # df = df.drop_duplicates(['question', 'possible_answers'])
+    # df['possible_answers'] = df['possible_answers'].apply(list)
+    # dup_mask = df.duplicated('question', keep=False)
+    # df.loc[dup_mask, 'subj'] = df.loc[dup_mask, 's_wiki_title']
+    # answer_in_mask = df.apply(lambda row: bool(get_words(row['subj']) & get_words(row['obj'])),axis=1)
+    # df = df[~(answer_in_mask & dup_mask)]
+    return df
 
 # --------------------------------------------------------------------------- #
 # Model / tokenizer
 # --------------------------------------------------------------------------- #
-@functools.lru_cache(maxsize=1)
-def load_tokenizer():
-    # Tokenizer is identical across checkpoints; load from the final one.
-    return AutoTokenizer.from_pretrained(
-        config.MODEL_ID,
-        subfolder=config.checkpoint_subfolder(config.FINAL_STEP),
-        use_fast=True,
-    )
+@functools.lru_cache(maxsize=4)
+def _tokenizer(model_id: str, subfolder: str):
+    if config.is_local_model(model_id):
+        try:
+            return AutoTokenizer.from_pretrained(str(Path(model_id) / subfolder), use_fast=True)
+        except Exception as exc:
+            # A checkpoint converted with transformers 5.x records a v5-only
+            # tokenizer_class that 4.x rejects.  The dolma2 tokenizer is identical
+            # across every LMEnt model, so fall back to the published one rather
+            # than failing the whole eval.
+            print(f"[tokenizer] {model_id}/{subfolder} failed ({type(exc).__name__}); "
+                  f"falling back to {config.TOKENIZER_ID}/{config.TOKENIZER_SUBFOLDER}")
+            return _tokenizer(config.TOKENIZER_ID, config.TOKENIZER_SUBFOLDER)
+    return AutoTokenizer.from_pretrained(model_id, subfolder=subfolder, use_fast=True)
 
 
-def load_checkpoint(step: int, device: str | None = None):
+def available_steps(model_id: str | None = None) -> list[int]:
+    """Checkpoint steps of ``model_id`` (default config.MODEL_ID): the published
+    grid for a catalogued HF release, the stepN/ dirs for a local checkpoint dir,
+    [] when neither is known."""
+    return config.checkpoint_steps(model_id or config.MODEL_ID) or []
+
+
+def load_tokenizer(model_id: str | None = None, step: int | None = None):
+    # Tokenizer is identical across checkpoints; load from the final one.  Keyed
+    # on the model so a process that switches models doesn't reuse a stale one.
+    # ``model_id`` may be an HF repo id or a local dir of converted checkpoints.
+    model_id = model_id or config.MODEL_ID
+    if step is None:
+        steps = config.checkpoint_steps(model_id)
+        step = steps[-1] if steps else config.FINAL_STEP
+        if step is None:
+            raise ValueError(f"no checkpoint grid known for {model_id!r}; pass step=")
+    return _tokenizer(model_id, config.checkpoint_subfolder(step))
+
+
+def _check_step(model_id: str, step: int) -> None:
+    """Fail loudly on a step this repo doesn't publish.
+
+    Without this, `from_pretrained` 404s the subfolder and transformers falls
+    back to inferring the model type from the repo *name* -- "dhgottesman"
+    contains "esm" -- so a wrong step surfaces as an unrelated
+    "EsmConfig ... for this kind of AutoModel: AutoModelForCausalLM".
+    """
+    steps = config.checkpoint_steps(model_id)
+    if steps is not None and step not in steps:
+        if config.is_local_model(model_id):
+            raise ValueError(f"{model_id} has no step{step}/ directory; found {steps}")
+        raise ValueError(
+            f"{model_id} has no step{step} checkpoint: it publishes step0 .. "
+            f"step{steps[-2]} every {config.CHECKPOINT_INTERVAL} plus the final "
+            f"step{steps[-1]}. (Different LMEnt releases have different finals -- "
+            f"109672 for the 1E models, 658032 for 1B-6E.)"
+        )
+
+
+def load_checkpoint(step: int, device: str | None = None, model_id: str | None = None):
     """Load the model weights for a single checkpoint step onto `device`.
+
+    ``model_id`` is an HF repo with ``stepN`` subfolders (the published LMEnt
+    checkpoints) or a local directory laid out the same way
+    (``<dir>/stepN/{config.json, model.safetensors, ...}``, what
+    explicit_mentions/convert_checkpoints.py produces).
 
     Honors LMENT_DEVICE / LMENT_DTYPE env overrides (e.g. cpu / float32 for a
     machine without CUDA).  Uses the `dtype=` kwarg (transformers >= 5) with a
     `torch_dtype=` fallback for older versions.
     """
     import os
+    model_id = model_id or config.MODEL_ID
+    _check_step(model_id, step)
     device = device or os.environ.get("LMENT_DEVICE", config.DEVICE)
     dtype = getattr(torch, os.environ.get("LMENT_DTYPE", config.DTYPE))
     sub = config.checkpoint_subfolder(step)
+    if config.is_local_model(model_id):
+        src, kw = str(Path(model_id) / sub), {}
+    else:
+        src, kw = model_id, {"subfolder": sub}
     try:
-        model = AutoModelForCausalLM.from_pretrained(config.MODEL_ID, subfolder=sub, dtype=dtype)
+        model = AutoModelForCausalLM.from_pretrained(src, dtype=dtype, **kw)
     except TypeError:
-        model = AutoModelForCausalLM.from_pretrained(config.MODEL_ID, subfolder=sub, torch_dtype=dtype)
+        model = AutoModelForCausalLM.from_pretrained(src, torch_dtype=dtype, **kw)
     model.to(device).eval()
     return model
 

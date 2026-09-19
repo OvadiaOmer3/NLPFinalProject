@@ -48,7 +48,12 @@ def greedy_generation(model, tokenizer, prompt: str) -> str:
     """Greedy decode with olmes generation settings; truncated at the stop seq."""
     device = model.device
     enc = tokenizer(prompt, return_tensors="pt").to(device)
-    out = model.generate(**enc, pad_token_id=tokenizer.eos_token_id, **lment_popqa.gen_kwargs())
+    # Some tokenizer configs (e.g. a checkpoint converted by transformers 5.x)
+    # also return token_type_ids, which generate() refuses.  Pass only what the
+    # model consumes.
+    gen_inputs = {k: v for k, v in enc.items() if k in ("input_ids", "attention_mask")}
+    out = model.generate(**gen_inputs, pad_token_id=tokenizer.eos_token_id,
+                         **lment_popqa.gen_kwargs())
     gen = tokenizer.decode(out[0, enc.input_ids.shape[1]:], skip_special_tokens=True)
     return lment_popqa.truncate_at_stop(gen)
 

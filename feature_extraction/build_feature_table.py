@@ -1,6 +1,6 @@
 """Step A.2 / B - Assemble the feature tables from the recall sweep + corpus.
 
-Produces two artifacts under ``artifacts/features/``:
+Produces two artifacts under ``features/``:
 
   * ``panel.parquet``    -- long: one row per (fact, checkpoint) with the
                             time-varying features (timeline + competition) joined
@@ -11,7 +11,7 @@ Produces two artifacts under ``artifacts/features/``:
                             what Step C's prediction model trains on.
 
 Requires:
-  * artifacts/recall/recall_step*.parquet  (from eval_checkpoints.py)
+  * recall/recall_step*.parquet  (from eval_checkpoints.py)
   * batch_indices  ->  chunk_to_steps cache (built here if missing)
 """
 from __future__ import annotations

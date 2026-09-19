@@ -13,24 +13,97 @@ from pathlib import Path
 # --------------------------------------------------------------------------- #
 # HuggingFace identifiers
 # --------------------------------------------------------------------------- #
-MODEL_ID = "dhgottesman/LMEnt-1B-6E"          # 1B model, single epoch
+# Which LMEnt release we evaluate.  Pick it per run with `--model`
+# (feature_extraction/eval_checkpoints.py) or process-wide with $LMENT_MODEL_ID;
+# the env var is the safer of the two because it applies before any import (see
+# `use_model` below).
+MODEL_ID = os.environ.get("LMENT_MODEL_ID", "dhgottesman/LMEnt-1B-6E")  # 1B, 6 epochs
 POPQA_DATASET_ID = "dhgottesman/popqa-kas"    # entity-annotated PopQA
 LMENT_DATASET_ID = "dhgottesman/LMEnt-Dataset"  # corpus + batch indices + mentions
 
 # --------------------------------------------------------------------------- #
 # Checkpoints  (subfolders inside MODEL_ID)
 # --------------------------------------------------------------------------- #
-# From the model repo tree: step0, step10000 ... step100000, step109672 (final).
-CHECKPOINT_STEPS = [
-    0, 10000, 20000, 30000, 40000, 50000,
-    60000, 70000, 80000, 90000, 100000
-]
-FINAL_STEP = CHECKPOINT_STEPS[-1]              # total training steps (1 epoch)
-TOTAL_STEPS = 658032
+# Every release stores a checkpoint every 10k steps plus the final, uneven one:
+# step0, step10000, ..., step{total}.  The totals differ per release, so the grid
+# MUST follow MODEL_ID: asking LMEnt-1B-6E for step109672 (the *1E* final) 404s
+# the subfolder, and transformers then falls back to guessing the model type from
+# the repo name -- "dhgottesman" contains "esm" -- and dies with an unrelated
+# "EsmConfig is not supported by AutoModelForCausalLM".  Hence the guard in
+# src/data.py:load_checkpoint.  Verified against the repo trees on the Hub.
+CHECKPOINT_INTERVAL = 10000
+MODEL_TOTAL_STEPS = {
+    "6E": 658032,
+    "1E": 109672,
+    "4E": 438688,
+    "2E": 219344,
+}
+
+def is_local_model(model_id: str | None = None) -> bool:
+    """True when ``model_id`` (default MODEL_ID) is a *directory* of converted
+    checkpoints -- ``<dir>/stepN/{config.json, model.safetensors, ...}``, what
+    explicit_mentions/convert_checkpoints.py writes -- rather than an HF repo id.
+    Every model-loading path in src/data.py branches on this."""
+    return Path(model_id or MODEL_ID).is_dir()
+
+
+def local_checkpoint_steps(model_dir: str | Path) -> list[int]:
+    """The ``stepN/`` subdirectories of a local checkpoint dir, as sorted ints."""
+    steps = sorted(int(p.name[4:]) for p in Path(model_dir).glob("step*")
+                   if p.is_dir() and p.name[4:].isdigit())
+    if not steps:
+        raise ValueError(f"{model_dir} has no step<N>/ subdirectories")
+    return steps
+
+
+def total_steps(model_id: str | None = None) -> int | None:
+    """Training steps of ``model_id``; None for a repo we haven't catalogued.
+    For a local checkpoint dir: its last stepN/."""
+    model = model_id or MODEL_ID
+    if is_local_model(model):
+        return local_checkpoint_steps(model)[-1]
+    epochs = model.split("-")[-1]
+    return MODEL_TOTAL_STEPS.get(epochs)
+
+def checkpoint_steps(model_id: str | None = None) -> list[int] | None:
+    """Every checkpoint published for ``model_id``; None if it isn't catalogued
+    (then the caller has to name the steps itself, e.g. `--steps`).  For a local
+    checkpoint dir the grid is whatever stepN/ directories exist on disk."""
+    model = model_id or MODEL_ID
+    if is_local_model(model):
+        return local_checkpoint_steps(model)
+    total = total_steps(model)
+    if total is None:
+        return None
+    return list(range(0, total, CHECKPOINT_INTERVAL)) + [total]
 
 
 def checkpoint_subfolder(step: int) -> str:
     return f"step{step}"
+
+
+def use_model(model_id: str) -> None:
+    """Repoint MODEL_ID and the checkpoint grid at ``model_id``.
+
+    Call before the first tokenizer / checkpoint load.  Anything that captured
+    CHECKPOINT_STEPS / TOTAL_STEPS as a *default argument* at import time
+    (src/features/learning.py, src/features/timeline.py, src/schedule.py) keeps
+    the old values, so pass those explicitly -- or use $LMENT_MODEL_ID, which
+    lands before any import and needs no such care.
+    """
+    global MODEL_ID, CHECKPOINT_STEPS, FINAL_STEP, TOTAL_STEPS
+    MODEL_ID = model_id
+    CHECKPOINT_STEPS = checkpoint_steps(model_id)
+    FINAL_STEP = CHECKPOINT_STEPS[-1] if CHECKPOINT_STEPS else None
+    TOTAL_STEPS = FINAL_STEP
+
+
+CHECKPOINT_STEPS = checkpoint_steps()
+# Last published checkpoint == the last training step, so these coincide; both
+# names are kept because they mean different things downstream (a subfolder to
+# load vs. the horizon of the LR schedule / timeline features).
+FINAL_STEP = CHECKPOINT_STEPS[-1] if CHECKPOINT_STEPS else None
+TOTAL_STEPS = FINAL_STEP
 
 
 # --------------------------------------------------------------------------- #
@@ -116,8 +189,12 @@ NUM_SHOTS = 15
 # --------------------------------------------------------------------------- #
 # Local storage layout
 # --------------------------------------------------------------------------- #
-# Root for anything we download / cache.  Override with LMENT_DATA_ROOT.
-DATA_ROOT = Path(os.environ.get("LMENT_DATA_ROOT", "./data")).resolve()
+# Root for anything we download / cache, and the single place every script
+# writes to.  Anchored to this file's directory rather than the cwd: the old
+# "./data" default silently created a second tree when a script was launched
+# from anywhere else.  Override with LMENT_DATA_ROOT.
+DATA_ROOT = Path(os.environ.get(
+    "LMENT_DATA_ROOT", str(Path(__file__).resolve().parent / "data"))).resolve()
 
 # Where the LMEnt-Dataset is downloaded to (batch indices, mentions, tokenized).
 DATASET_DIR = DATA_ROOT / "LMEnt-Dataset"
@@ -130,11 +207,15 @@ TOKENIZED_DIR = DATASET_DIR / "dataset-tokenized"    # *.csv.gz tokenized chunks
 # file matches (PopQA-only setup), mention features are skipped.
 TOKENIZED_GLOB = os.environ.get("LMENT_TOKENIZED_GLOB", str(TOKENIZED_DIR / "*.npy"))
 
-# Where we write derived artifacts (Step A/B/C outputs).
+# Where we write derived artifacts (Step A/B/C outputs).  Everything the eval and
+# analysis scripts produce lives under one artifacts/ level; the explicit-mentions
+# training pipeline's bulk outputs (corpora/ hf/ runs/, gitignored) sit beside it
+# directly under DATA_ROOT.
 ARTIFACT_DIR = DATA_ROOT / "artifacts"
 RECALL_DIR = ARTIFACT_DIR / "recall"          # per-checkpoint recall / gold prob
 FEATURE_DIR = ARTIFACT_DIR / "features"       # per-fact feature tables
 INTERNAL_DIR = ARTIFACT_DIR / "internal"      # hidden states / probes / logit lens
+PROMPTS_DIR = ARTIFACT_DIR / "prompts"        # frozen few-shot prompt parquets (build_prompts.py)
 CHUNK_INDEX_PATH = ARTIFACT_DIR / "chunk_to_steps.pkl"  # inverted index cache
 
 for _d in (ARTIFACT_DIR, RECALL_DIR, FEATURE_DIR, INTERNAL_DIR):
@@ -175,3 +256,76 @@ NEURON_EPS = 1e-3
 # dump, but not the reverse, and re-running costs a full GPU sweep.
 # None = off.  Override per-run with --top-k.
 NEURON_TOPK = None
+
+
+# --------------------------------------------------------------------------- #
+# Explicit-mentions training pipeline (explicit_mentions/)
+# --------------------------------------------------------------------------- #
+# LMEnt S6.2 intervention: rewrite implicit entity mentions in the pretraining
+# corpus into explicit canonical names, retrain, and evaluate PopQA recall against
+# the unmodified corpus.  The rewrite reads the authors' LMEnt corpus in place
+# (read-only) and writes everything it produces under DATA_ROOT; the resulting HF
+# checkpoints are evaluated with feature_extraction/eval_checkpoints.py
+# --model <HF_DIR>/<name>.  See explicit_mentions/README.md.
+
+# Source corpus (read-only, the authors' copy on the lab filesystem).
+#   dataset-tokenized/part-N-00000.npy      raw little-endian uint32 dolma2 tokens
+#                                           (no numpy header), docs concatenated,
+#                                           each doc terminated by EOS (100257)
+#   dataset-cache/dataset-metadata/part-N-00000.csv
+#                                           one row per document:
+#                                           start,end,id,src,loc,title,entities,offsets
+SRC_ROOT = Path(os.environ.get(
+    "LMENT_SRC_ROOT", "/home/morg/students/gottesman3/LMEnt"))
+SRC_TOKENIZED_DIR = SRC_ROOT / "dataset-tokenized"
+SRC_METADATA_DIR = SRC_ROOT / "dataset-cache" / "dataset-metadata"
+
+# The authors' OLMo-core fork (training code + HF conversion).  Imported / run in
+# place; nothing is written into it (save_folder / work_dir point at ours).
+OLMO_CORE_PATH = Path(os.environ.get(
+    "OLMO_CORE_PATH", "/home/morg/students/gottesman3/LMEnt/OLMo-core"))
+
+PARTS = list(range(8))                     # part-0-00000 ... part-7-00000
+PART_TEMPLATE = "part-{part}-00000"
+
+# Bulk outputs, beside artifacts/ under DATA_ROOT (all gitignored, ~291 GB).
+# The rewritten corpus mirrors the source layout so OLMo-core's
+# NumpyKASVSLDataset consumes it unchanged:
+#   <corpus>/dataset-tokenized/part-N-00000.npy         (+ .csv.gz for bucketing)
+#   <corpus>/dataset-cache/dataset-metadata/part-N-00000.csv
+# Each rewrite configuration gets its own subdirectory ("corpus tag").
+CORPORA_DIR = DATA_ROOT / "corpora"
+RUNS_DIR = DATA_ROOT / "runs"              # OLMo-core save_folders
+HF_DIR = DATA_ROOT / "hf"                  # converted HF checkpoints: <HF_DIR>/<name>/stepN/
+
+
+def corpus_dir(tag: str) -> Path:
+    return CORPORA_DIR / tag
+
+
+def corpus_tokenized_dir(tag: str) -> Path:
+    return corpus_dir(tag) / "dataset-tokenized"
+
+
+def corpus_metadata_dir(tag: str) -> Path:
+    return corpus_dir(tag) / "dataset-cache" / "dataset-metadata"
+
+
+# Tokenizer (allenai/dolma2-tokenizer).  Identical across every LMEnt model, so
+# the corpus rewrite loads it from a published repo (already in the local HF
+# cache -> works offline on compute nodes), and src/data.py falls back to it when
+# a locally converted checkpoint's own tokenizer files cannot be loaded.
+# Override with EXPLICIT_TOKENIZER (an HF id or local path).
+TOKENIZER_ID = os.environ.get("EXPLICIT_TOKENIZER", "dhgottesman/LMEnt-1B-6E")
+TOKENIZER_SUBFOLDER = os.environ.get("EXPLICIT_TOKENIZER_SUBFOLDER", "step658032")
+EOS_TOKEN_ID = 100257                      # dolma2 <|endoftext|>
+TOKEN_DTYPE = "<u4"                        # little-endian uint32, headerless
+
+# Mention-rewriting defaults (see explicit_mentions/build_explicit_corpus.py --help).
+# A mention is IMPLICIT when its best candidate has no hyperlink and no
+# entity-linking evidence (coref / coref_cluster only).  We only rewrite implicit
+# mentions whose coref evidence clears this threshold -- 0.6 matches the
+# retrieval threshold used in the paper (S5.2: C >= 0.6).
+MIN_COREF_SCORE = 0.6
+# Candidates below this aggregated score are never trusted for rewriting.
+MIN_AGGREGATED_SCORE = 0.0

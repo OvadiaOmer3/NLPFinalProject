@@ -29,6 +29,8 @@ src/                       # shared library (imported by both phases)
   data.py                  # load dataset + checkpoints + tokenizer; prompt wrappers -> lment_popqa
   schedule.py              # batch_indices -> chunk->steps index; LR at step (real kas_config)
   recall.py                # per-checkpoint cloze recall (olmes scoring) + gold-answer prob
+  fewshot.py               # held-out demonstration pool + few-shot modes (drop/only-same-prop)
+  prompt_set.py            # frozen prompt parquets: build once, score every model on identical strings
   features/
     timeline.py            # recency, spacing/burstiness, LR-at-appearance, epoch position
     competition.py         # subject/answer/shared counts; interference post-learning
@@ -39,7 +41,9 @@ src/                       # shared library (imported by both phases)
     strain.py              # token interference: EntityUniverse, TokenIndex (strain, ownership),
                            #   alt-answer co-occurrence, WindowMap over all 6 epochs
 feature_extraction/        # PRODUCES artifacts (run on GPU)
+  build_prompts.py         # Step A.0: freeze the few-shot prompts       -> artifacts/prompts/
   eval_checkpoints.py      # Step A.1: recall + internal-state sweep  -> artifacts/recall/ (+ internal/)
+                           #   --model may be an HF release or a local dir of converted checkpoints
   build_feature_table.py   # Step A.2/B: assemble panel.parquet + facts.parquet
   build_strain_panel.py    # (fact x window) interference panel -> strain_panel.parquet   [CPU]
 analysis/                  # CONSUMES artifacts (CPU / notebooks)
@@ -54,6 +58,11 @@ analysis/                  # CONSUMES artifacts (CPU / notebooks)
   report_token_strain.py   # figures for FINDINGS_token_strain.md (data only, no prose).
                            #   Fits nothing -- reads strain_diagnostics.py's JSON
   FINDINGS_token_strain.md # the write-up: conclusion, method, results, caveats
+  compare_results/         # notebooks: explicit-mentions corpus vs original (recall by exposure, McNemar)
+  trajectory_analysis/     # notebooks: few-shot recall trajectories over checkpoints
+explicit_mentions/         # LMEnt S6.2 intervention: rewrite implicit mentions in the pretraining
+                           #   corpus -> retrain (OLMo-core) -> convert to HF -> evaluate with the
+                           #   scripts above. See explicit_mentions/README.md
 tests/
   test_mention_features.py   # text.mention_features against LMEnt's real mention schema
   test_strain_features.py    # 15 tests: QID counting, self-competition, windowing
@@ -113,8 +122,29 @@ pip install -e olmes                          # install AFTER the env so the for
 ## Run order
 
 ```bash
+# Step A.0 (optional but recommended) — freeze the few-shot prompts
+python feature_extraction/build_prompts.py --num-shots 15
+#   Renders the prompts ONCE to artifacts/prompts/prompts{tag}.parquet: the exact prompt
+#   string per fact, which facts are evaluated, in which order, how many demos each got
+#   (`num_shots` is per fact) and which ones (`demo_ids`). The flags, the demonstration
+#   pool and a `prompt_hash` over the strings are stored in the parquet's schema metadata
+#   (mirrored to a `*.meta.json` sidecar); `--inspect FILE` prints them back.
+#   Takes the same --num-shots / --fewshot-mode / --fewshot-source / --fewshot-per-prop /
+#   --min-shared-chunks / --limit flags as the eval, plus --out / --out-dir / --force /
+#   --show N. Pass the file to the eval with --prompts and every model, checkpoint and
+#   rerun is scored on identical inputs, even if the selection rule or the dataset later
+#   changes -- which is what makes model-vs-model numbers comparable.
+# -> artifacts/prompts/prompts_15shot.parquet (+ .meta.json)
+
 # Step A.1 — recall + internal states at every checkpoint (GPU; one per checkpoint)
+python feature_extraction/eval_checkpoints.py --prompts artifacts/prompts/prompts_15shot.parquet
 python feature_extraction/eval_checkpoints.py            # or --steps 0 10000 ... as a Slurm array
+#   --prompts FILE         use a pre-built prompt file (Step A.0) instead of rendering the
+#                          prompts from the flags below; the file then defines the prompts,
+#                          the eval set and its order, and supplies the output filename tag,
+#                          so a run off the same file is byte-identical to one off the
+#                          matching flags. Incompatible with --num-shots / --fewshot-* /
+#                          --min-shared-chunks (those were settled when the file was built).
 #   --num-shots N          in-context demos (default 15; 0 = bare cloze). Demos come from a
 #                          held-out pool of one fact per relation, never the eval set, and a
 #                          fact is never shown its OWN relation -- hence 15 of 16. The pool's

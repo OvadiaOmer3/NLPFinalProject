@@ -2,6 +2,14 @@ __pycache__/
 *.pyc
 .DS_Store
 
+# Generated training data, checkpoints and converted models (~291G, way over
+# GitHub's 100MB/file limit). Rebuild with explicit_mentions/build_explicit_corpus.py
+# and train_explicit.py / convert_checkpoints.py.
+/data/corpora
+/data/hf
+/data/runs
+/explicit_mentions/logs
+
 # ---------------------------------------------------------------------------
 # data/ : keep only the artifacts the three submitted notebooks actually read
 #

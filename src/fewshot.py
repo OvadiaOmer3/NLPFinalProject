@@ -484,6 +484,21 @@ class FewShot:
         its relation's bench to leave fewer."""
         return len(self.demos_for(row))
 
+    def prefix_for_demos(self, demos) -> str:
+        """Render a demonstration block, cached by the tuple of demo ids.
+
+        Split out of ``prefix_for`` for callers that already hold the demo list
+        (``src.prompt_set.PromptSet.build``), so ``demos_for`` -- which under
+        ``only-same-prop`` walks the relation's bench per query -- is not paid for
+        twice.
+        """
+        key = tuple(d["id"] for d in demos)
+        prefix = self._render_cache.get(key)
+        if prefix is None:
+            prefix = lment_popqa.render_fewshot_block(demos)
+            self._render_cache[key] = prefix
+        return prefix
+
     def prefix_for(self, row) -> str:
         """Demonstration block for ``row`` ("" at 0-shot).
 
@@ -492,13 +507,7 @@ class FewShot:
         drop-same-prop, one per relation x knocked-out set for only-same-prop) --
         never one per fact.
         """
-        demos = self.demos_for(row)
-        key = tuple(d["id"] for d in demos)
-        prefix = self._render_cache.get(key)
-        if prefix is None:
-            prefix = lment_popqa.render_fewshot_block(demos)
-            self._render_cache[key] = prefix
-        return prefix
+        return self.prefix_for_demos(self.demos_for(row))
 
     def prompt(self, row) -> str:
         """Full recall prompt for ``row``: demo block + this fact's cloze."""
