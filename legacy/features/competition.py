@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from src import schedule
+from legacy import schedule
 
 
 def competition_features(row, chunk_to_steps, checkpoint_step,

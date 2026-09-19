@@ -8,7 +8,7 @@ Sweep every checkpoint and, for every fact, record:
 Writes one enriched parquet per checkpoint to ``recall/`` and, unless
 ``--no-hidden`` is passed, one f16 hidden-state dump per checkpoint to
 ``internal/``.  The recall parquet keeps its original columns (so
-``build_feature_table.py`` is unaffected) and gains the internal-feature columns.
+``legacy/build_feature_table.py`` is unaffected) and gains the internal-feature columns.
 
 Cost model: we touch the model exactly twice per (checkpoint, fact) -- once for
 the greedy decode that ``correct`` needs, once for the teacher-forced forward
@@ -245,7 +245,7 @@ def main():
                          "geometry, per-layer MLP activity and both dumps. Use this "
                          "when you only care about recall -- it halves the model "
                          "calls per fact and avoids running the LM head once per "
-                         "layer. Note build_feature_table.py needs the dropped "
+                         "layer. Note legacy/build_feature_table.py needs the dropped "
                          "columns, so such runs are for recall inspection only.")
     ap.add_argument("--internal-fewshot", action="store_true",
                     help="measure the internal features on the SAME few-shot prompt "
@@ -483,7 +483,7 @@ def main():
            fewshot_tag(args.num_shots, args.fewshot_mode, args.fewshot_source))
     # A --no-internal parquet has strictly fewer columns, so it must not land on
     # the filename a full run uses -- otherwise the `exists -> skip` guard would
-    # feed build_feature_table.py a table with no gold_prob / internal features.
+    # feed legacy/build_feature_table.py a table with no gold_prob / internal features.
     if args.no_internal:
         tag += "_recallonly"
     # Same population and same shot count, but a different measured prompt, so the

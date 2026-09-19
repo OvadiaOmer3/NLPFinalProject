@@ -5,7 +5,7 @@ model's activations at every checkpoint, as opposed to the corpus-side (timeline
 competition, mention) and behavioural (recall trajectory) features. All of them are
 produced by `src/features/internal.py::extract_fact`, driven by
 `feature_extraction/eval_checkpoints.py`, and assembled into the modelling tables by
-`feature_extraction/build_feature_table.py`.
+`legacy/build_feature_table.py` (the superseded panel/facts pipeline).
 
 ## X.1 Extraction protocol
 

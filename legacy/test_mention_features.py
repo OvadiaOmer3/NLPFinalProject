@@ -6,7 +6,7 @@ produced by ``aggregate_entity_annotations`` and read by
 per-source scores).  We can't download the 212 GB corpus here, so we drive the
 feature logic through DictMentionProvider with hand-built chunks.
 
-Run:  python NLPFinalProject/tests/test_mention_features.py
+Run:  python legacy/test_mention_features.py   (or: python -m pytest legacy/test_mention_features.py)
 """
 import math
 import sys
@@ -14,7 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.features import text as T
+from legacy.features import text as T
 
 
 def _cand(qid, name="", agg=1.0, hyper=0.0, el=0.0, coref=0.0, coref_cluster=0.0):

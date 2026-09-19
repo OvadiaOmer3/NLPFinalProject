@@ -87,7 +87,7 @@ def use_model(model_id: str) -> None:
 
     Call before the first tokenizer / checkpoint load.  Anything that captured
     CHECKPOINT_STEPS / TOTAL_STEPS as a *default argument* at import time
-    (src/features/learning.py, src/features/timeline.py, src/schedule.py) keeps
+    (legacy/features/learning.py, legacy/features/timeline.py, legacy/schedule.py) keeps
     the old values, so pass those explicitly -- or use $LMENT_MODEL_ID, which
     lands before any import and needs no such care.
     """
@@ -109,6 +109,7 @@ TOTAL_STEPS = FINAL_STEP
 # --------------------------------------------------------------------------- #
 # Learning-rate schedule
 # --------------------------------------------------------------------------- #
+# Used only by legacy/schedule.py (the superseded panel/facts feature pipeline).
 # From the LMEnt paper's training details (§B.4), which is authoritative for the
 # 1B run -- NOT kas_config.json (that file is the OLMo2-170M *example*, lr=3e-4).
 # §B.4: "All LMEnt models were trained ... with a global batch size of 32,768,
@@ -198,13 +199,14 @@ DATA_ROOT = Path(os.environ.get(
 
 # Where the LMEnt-Dataset is downloaded to (batch indices, mentions, tokenized).
 DATASET_DIR = DATA_ROOT / "LMEnt-Dataset"
-BATCH_INDICES_PATH = DATASET_DIR / "dataset-cache" / "batch_indices_epoch_1.npy"  # VERIFY name
+BATCH_INDICES_PATH = DATASET_DIR / "dataset-cache" / "batch_indices_epoch_1.npy"  # VERIFY name; legacy/schedule.py only
 MENTIONS_DIR = DATASET_DIR / "dataset-metadata"      # ReFinED + Maverick mentions
 TOKENIZED_DIR = DATASET_DIR / "dataset-tokenized"    # *.csv.gz tokenized chunks
 # Glob of the tokenized *.npy files that back the OLMo-core dataset used for the
 # mention features (chunk text + per-chunk entity annotations).  Only needed if
 # you downloaded the full corpus; override with LMENT_TOKENIZED_GLOB.  When no
-# file matches (PopQA-only setup), mention features are skipped.
+# file matches (PopQA-only setup), mention features are skipped.  Only
+# legacy/build_feature_table.py reads this.
 TOKENIZED_GLOB = os.environ.get("LMENT_TOKENIZED_GLOB", str(TOKENIZED_DIR / "*.npy"))
 
 # Where we write derived artifacts (Step A/B/C outputs).  Everything the eval and
@@ -216,7 +218,7 @@ RECALL_DIR = ARTIFACT_DIR / "recall"          # per-checkpoint recall / gold pro
 FEATURE_DIR = ARTIFACT_DIR / "features"       # per-fact feature tables
 INTERNAL_DIR = ARTIFACT_DIR / "internal"      # hidden states / probes / logit lens
 PROMPTS_DIR = ARTIFACT_DIR / "prompts"        # frozen few-shot prompt parquets (build_prompts.py)
-CHUNK_INDEX_PATH = ARTIFACT_DIR / "chunk_to_steps.pkl"  # inverted index cache
+CHUNK_INDEX_PATH = ARTIFACT_DIR / "chunk_to_steps.pkl"  # inverted index cache (legacy/schedule.py only)
 
 for _d in (ARTIFACT_DIR, RECALL_DIR, FEATURE_DIR, INTERNAL_DIR):
     _d.mkdir(parents=True, exist_ok=True)
@@ -229,7 +231,7 @@ DTYPE = "bfloat16"
 SEED = 0
 
 # --------------------------------------------------------------------------- #
-# Internal-state extraction (scripts/eval_checkpoints.py --features)
+# Internal-state extraction (feature_extraction/eval_checkpoints.py)
 # --------------------------------------------------------------------------- #
 # Which token positions to dump the full per-layer hidden state for.  "answer"
 # is the cloze's last token (predicts the object); "subject_last" feeds the

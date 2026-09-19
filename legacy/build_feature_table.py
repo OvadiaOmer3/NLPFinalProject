@@ -28,8 +28,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import config
 from src import data as D
-from src import schedule
-from src.features import timeline, competition, text, learning
+from legacy import schedule
+from legacy.features import timeline, competition, text, learning
 
 
 # Scalar internal-state columns produced by eval_checkpoints.py (internal.extract_fact).

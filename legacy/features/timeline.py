@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 
 import config
-from src import schedule
+from legacy import schedule
 
 
 def _appearances_up_to(appearance_steps, checkpoint_step):
