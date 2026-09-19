@@ -1,6 +1,6 @@
 """Loading the dataset, checkpoints, tokenizer, and building prompts.
 
-The PopQA-KAS schema (VERIFY against the real parquet ``.features``):
+The PopQA-KAS schema (confirmed against the real parquet):
 
     id, subj, prop, obj, subj_id, prop_id, obj_id,
     s_aliases, o_aliases, s_uri, o_uri, s_wiki_title, o_wiki_title,

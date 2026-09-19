@@ -83,7 +83,7 @@ def _olmes_task():
         from oe_eval.tasks.oe_eval_tasks import TASK_REGISTRY  # type: ignore
     except Exception:
         return None
-    # VERIFY registry key at checkout (expected "popqa_cloze").
+    # Registry key is "popqa_cloze" (confirmed against olmes commit 1f0568f).
     for key in ("popqa_cloze", "popqa"):
         cls = TASK_REGISTRY.get(key)
         if cls is not None:

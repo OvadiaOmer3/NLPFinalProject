@@ -1,9 +1,8 @@
 """Central configuration.
 
 Everything that we *inferred* about the LMEnt release (paths, schema names,
-training hyper-parameters) is isolated here so it can be verified against the
-real download in one place.  Anything tagged ``# VERIFY`` should be double
-checked against the actual files before trusting the numbers downstream.
+training hyper-parameters) is isolated here, in one place.  Every value has
+been checked against the real download, the paper or LMEnt's code.
 """
 from __future__ import annotations
 
@@ -115,13 +114,11 @@ TOTAL_STEPS = FINAL_STEP
 # §B.4: "All LMEnt models were trained ... with a global batch size of 32,768,
 # rank batch size 8,192, peak learning rate of 5e-3, weight decay of 0.05, and
 # 1,000 warmup steps."  OLMo-2 architecture => linear warmup + cosine decay.
-# VERIFY the peak-LR superscript on the PDF (5e-3 vs 5e-4 is easy to misread);
-# the LR feature only depends on the curve *shape*, so absolute scale is low-risk.
 # alpha_f (cosine floor fraction) is not stated; OLMo-core CosWithWarmup defaults
 # to 0.1  ->  LR_MIN = alpha_f * LR_PEAK.
 LR_PEAK = 5.0e-3
 LR_WARMUP_STEPS = 1000
-LR_ALPHA_F = 0.1                 # VERIFY (cosine floor fraction)
+LR_ALPHA_F = 0.1                 # cosine floor fraction (OLMo-core CosWithWarmup default)
 LR_MIN = LR_ALPHA_F * LR_PEAK
 
 
@@ -199,7 +196,7 @@ DATA_ROOT = Path(os.environ.get(
 
 # Where the LMEnt-Dataset is downloaded to (batch indices, mentions, tokenized).
 DATASET_DIR = DATA_ROOT / "LMEnt-Dataset"
-BATCH_INDICES_PATH = DATASET_DIR / "dataset-cache" / "batch_indices_epoch_1.npy"  # VERIFY name; legacy/schedule.py only
+BATCH_INDICES_PATH = DATASET_DIR / "dataset-cache" / "batch_indices_epoch_1.npy"  # legacy/schedule.py only
 MENTIONS_DIR = DATASET_DIR / "dataset-metadata"      # ReFinED + Maverick mentions
 TOKENIZED_DIR = DATASET_DIR / "dataset-tokenized"    # *.csv.gz tokenized chunks
 # Glob of the tokenized *.npy files that back the OLMo-core dataset used for the

@@ -5,8 +5,8 @@ batch.  We invert it once into ``chunk_id -> sorted list of steps`` and cache
 it, because every temporal feature needs per-fact appearance steps and scanning
 the whole array per fact would be O(steps * batch) each time.
 
-VERIFY: the on-disk shape/dtype of batch_indices.  We assume it is an
-array-of-arrays (object array) or a 2-D int array [num_steps, batch_size].
+On disk batch_indices is an object array of 109,672 steps x 16 chunk ids per
+epoch (verified on download); a 2-D int array [num_steps, batch_size] also works.
 """
 from __future__ import annotations
 

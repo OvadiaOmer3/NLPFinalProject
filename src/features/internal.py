@@ -40,7 +40,7 @@ def _final_norm_and_head(model):
 
     For ``transformers`` ``Olmo2ForCausalLM`` these are ``model.model.norm`` and
     ``model.lm_head`` (kept as a getattr with a tied-embeddings fallback for the
-    head).  VERIFY once against ``print(model)`` on the real checkpoint.
+    head).  Confirmed against ``print(model)`` on the real 1B checkpoint.
 
     NOTE for the logit lens: ``output_hidden_states`` returns the LAST entry
     already normalised -- ``head(hs[-1])`` reproduces ``out.logits`` exactly,
