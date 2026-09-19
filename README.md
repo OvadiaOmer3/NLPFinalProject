@@ -10,77 +10,68 @@ Built on the [LMEnt](https://github.com/dhgottesman/LMEnt) suite
 entity-annotated corpus, and the
 [`popqa-kas`](https://huggingface.co/datasets/dhgottesman/popqa-kas) dataset.
 
-A second line of work sits on the same artifacts: **token interference** — does a
-fact get forgotten because its tokens are shared with many *other entities* the
-model saw in training? See [`analysis/FINDINGS_token_strain.md`](analysis/FINDINGS_token_strain.md)
-for the result and the "Token interference" run block below for the pipeline.
+## Sub-projects
+
+Four sub-projects share this codebase. Each lives in its own directory with a
+README (question, headline result, entry point, data it reads):
+
+| directory | question | start here |
+|---|---|---|
+| [`frequency_forgetting/`](frequency_forgetting/) | does forgetting get *worse* for facts the model sees more often, or is that a counting artefact (count vs. hazard)? | `01_frequency_and_forgetting.ipynb` |
+| [`neuron_forgetting/`](neuron_forgetting/) | what forgetting looks like *inside* the model: logit-lens depth, MLP activity, neuron churn | `02_internal_paper_figures.ipynb` |
+| [`token_strain/`](token_strain/) | does *token interference* (tokens shared with many other entities) explain forgetting on top of exposure? | `FINDINGS_token_strain.md`, `strain_diagnostics.py` |
+| [`explicit_mentions/`](explicit_mentions/) | LMEnt §6.2 intervention: rewrite implicit mentions in the pretraining corpus to explicit names, retrain, compare recall | `README.md`, `analysis/compare_results/` |
+| [`legacy/`](legacy/) | the proposal's original panel/facts feature pipeline — superseded, kept for reference | `README.md` |
+
+All four consume artifacts produced by the shared `feature_extraction/` scripts
+(GPU) through the shared `src/` library; the notebooks locate the repo root
+themselves, so they run from any working directory.
 
 ## Layout
 
-The repo is organized around two phases: **feature_extraction/** runs the model
-to *produce* artifacts, **analysis/** *consumes* them. `src/` is the shared
-library both phases import.
+**feature_extraction/** runs the model to *produce* artifacts under
+`data/artifacts/`; the sub-project directories *consume* them. `src/` is the
+shared library both sides import; `config.py` holds every path and constant.
 
 ```
-config.py                  # all IDs, checkpoint steps, paths, LR schedule, few-shot settings
-src/                       # shared library (imported by both phases)
+config.py                  # all IDs, checkpoint steps, paths, few-shot settings, explicit-mentions constants
+src/                       # shared library
   lment_popqa.py           # SINGLE home for the olmes coupling: cloze prompts (by prop_id),
                            #   few-shot context, exact-match scoring, generation kwargs
-  data.py                  # load dataset + checkpoints + tokenizer; prompt wrappers -> lment_popqa
-  schedule.py              # batch_indices -> chunk->steps index; LR at step (real kas_config)
+  data.py                  # load dataset + checkpoints (HF release or local converted dir) + tokenizer
   recall.py                # per-checkpoint cloze recall (olmes scoring) + gold-answer prob
   fewshot.py               # held-out demonstration pool + few-shot modes (drop/only-same-prop)
+  fewshot_source.py        # LMEnt's verbatim demonstrations (for --fewshot-source upstream)
   prompt_set.py            # frozen prompt parquets: build once, score every model on identical strings
   features/
-    timeline.py            # recency, spacing/burstiness, LR-at-appearance, epoch position
-    competition.py         # subject/answer/shared counts; interference post-learning
-    text.py                # answer length, relation, mention explicitness, phrasing variety
-    learning.py            # first-learned step, confidence, learning speed (+ leaky_* target-likes)
     internal.py            # one-pass extractor: logit-lens depth, next-token geometry,
-                           #   MLP activity, hidden-state probe/drift/paraphrase (+ f16 dump)
+                           #   MLP activity, hidden-state + top-k neuron dumps      [neuron_forgetting]
     strain.py              # token interference: EntityUniverse, TokenIndex (strain, ownership),
-                           #   alt-answer co-occurrence, WindowMap over all 6 epochs
-feature_extraction/        # PRODUCES artifacts (run on GPU)
-  build_prompts.py         # Step A.0: freeze the few-shot prompts       -> artifacts/prompts/
-  eval_checkpoints.py      # Step A.1: recall + internal-state sweep  -> artifacts/recall/ (+ internal/)
+                           #   alt-answer co-occurrence, WindowMap over all 6 epochs [token_strain]
+feature_extraction/        # PRODUCES artifacts
+  build_prompts.py         # Step A.0: freeze the few-shot prompts       -> data/artifacts/prompts/
+  eval_checkpoints.py      # Step A.1: recall + internal-state sweep   -> data/artifacts/recall/ (+ internal/)
                            #   --model may be an HF release or a local dir of converted checkpoints
-  build_feature_table.py   # Step A.2/B: assemble panel.parquet + facts.parquet
-  build_strain_panel.py    # (fact x window) interference panel -> strain_panel.parquet   [CPU]
-analysis/                  # CONSUMES artifacts (CPU / notebooks)
-  strain_models.py         # model spec (BASE/NAMELEN/STRAIN/F1/F2) + prepare + fit +
-                           #   LR test. LIBRARY ONLY, no CLI: the single source of
-                           #   truth for WHAT is fitted. Everything else imports it
-  null_control_distribution.py  # permutation test: reshuffle which tokens belong to which
-                           #   entity, N times, and locate the real index in that null
-  strain_diagnostics.py    # regenerates EVERY number in FINDINGS_token_strain.md ->
-                           #   strain_diagnostics_specE.{txt,json}. The computational
-                           #   source of record; the report renders its JSON
-  report_token_strain.py   # figures for FINDINGS_token_strain.md (data only, no prose).
-                           #   Fits nothing -- reads strain_diagnostics.py's JSON
-  FINDINGS_token_strain.md # the write-up: conclusion, method, results, caveats
-  compare_results/         # notebooks: explicit-mentions corpus vs original (recall by exposure, McNemar)
-  trajectory_analysis/     # notebooks: few-shot recall trajectories over checkpoints
-explicit_mentions/         # LMEnt S6.2 intervention: rewrite implicit mentions in the pretraining
-                           #   corpus -> retrain (OLMo-core) -> convert to HF -> evaluate with the
-                           #   scripts above. See explicit_mentions/README.md
-tests/
-  test_mention_features.py   # text.mention_features against LMEnt's real mention schema
-  test_strain_features.py    # 15 tests: QID counting, self-competition, windowing
-  test_fewshot_internals.py  # from main: few-shot internals (--internal-fewshot)
-  test_neuron_dump.py        # from main: NeuronDump writer
+  build_strain_panel.py    # (fact x window) interference panel        -> data/artifacts/features/  [CPU]
+tests/                     # test_strain_features, test_neuron_dump, test_fewshot_internals
+docs/                      # the LMEnt paper (+ Gottesman et al. final version), the proposal, project.bib
+data/artifacts/            # committed results: recall/ features/ expermints/ prompts/ popqa/
+                           #   (bulk outputs data/{corpora,hf,runs} are gitignored)
 
+frequency_forgetting/      # sub-project: notebooks + the two trajectory CSVs
+neuron_forgetting/         # sub-project: notebook + the internal-features docs
+token_strain/              # sub-project: strain_models / strain_diagnostics / report / null control / FINDINGS
+explicit_mentions/         # sub-project: corpus rewrite -> OLMo-core training -> HF conversion -> slurm,
+  analysis/                #   plus its notebooks (corpus/model comparisons, trajectories, Fig. 9)
+legacy/                    # superseded panel/facts pipeline (build_feature_table, schedule, 4 feature modules)
 ```
 
-## Feature groups (mapped to the proposal)
+## Shared feature modules
 
-| Group | Module | Notes |
-|-------|--------|-------|
-| When the fact showed up | `features/timeline.py` | `steps_since_last` (recency) is likely the strongest; plus spacing/burstiness, LR at appearance, epoch position |
-| Competition from other facts | `features/competition.py` | subject & answer counts **separately**; interference *after* first-learned |
-| What the text looks like | `features/text.py` | answer token length, explicit (EL) vs. coref mentions, phrasing variety, subj–answer distance |
-| How the fact was learned | `features/learning.py` | first-learned step, confidence there, learning speed. `leaky_*` = forgetting/oscillation counts — **EDA only, drop before modeling** |
-| Inside the model | `features/internal.py` | **one forward pass per (fact, checkpoint)**: logit-lens depth, next-token geometry (margin, top-logit gap, rank, entropy), per-layer residual/MLP-neuron activity (active fraction + participation ratio, at answer & subject), plus f16 hidden-state and optional top-k neuron-index dumps for offline probe / drift / circuit-overlap |
-| Competition for the same **tokens** | `features/strain.py` | *token* interference, as opposed to `competition.py`'s *chunk* interference: how many **other entities** share a token with this fact's subject / object (`strain`), what share of the evidence carrying those tokens is this fact's (`ownership`), and how often the subject co-occurs with a *different* valid answer for the same relation (`alt-answer`). Static and per-window forms. Requires no GPU |
+| Module | Used by | Notes |
+|--------|---------|-------|
+| `src/features/internal.py` | `neuron_forgetting/` | **one forward pass per (fact, checkpoint)**: logit-lens depth, next-token geometry (margin, top-logit gap, rank, entropy), per-layer residual/MLP-neuron activity (active fraction + participation ratio, at answer & subject), plus f16 hidden-state and optional top-k neuron-index dumps for offline probe / drift / circuit-overlap | |
+| `src/features/strain.py` | `token_strain/` | *token* interference, as opposed to the chunk-level interference in `legacy/`: how many **other entities** share a token with this fact's subject / object (`strain`), what share of the evidence carrying those tokens is this fact's (`ownership`), and how often the subject co-occurs with a *different* valid answer for the same relation (`alt-answer`). Static and per-window forms. Requires no GPU | |
 
 ## Setup
 
@@ -124,7 +115,7 @@ pip install -e olmes                          # install AFTER the env so the for
 ```bash
 # Step A.0 (optional but recommended) — freeze the few-shot prompts
 python feature_extraction/build_prompts.py --num-shots 15
-#   Renders the prompts ONCE to artifacts/prompts/prompts{tag}.parquet: the exact prompt
+#   Renders the prompts ONCE to data/artifacts/prompts/prompts{tag}.parquet: the exact prompt
 #   string per fact, which facts are evaluated, in which order, how many demos each got
 #   (`num_shots` is per fact) and which ones (`demo_ids`). The flags, the demonstration
 #   pool and a `prompt_hash` over the strings are stored in the parquet's schema metadata
@@ -134,10 +125,10 @@ python feature_extraction/build_prompts.py --num-shots 15
 #   --show N. Pass the file to the eval with --prompts and every model, checkpoint and
 #   rerun is scored on identical inputs, even if the selection rule or the dataset later
 #   changes -- which is what makes model-vs-model numbers comparable.
-# -> artifacts/prompts/prompts_15shot.parquet (+ .meta.json)
+# -> data/artifacts/prompts/prompts_15shot.parquet (+ .meta.json)
 
 # Step A.1 — recall + internal states at every checkpoint (GPU; one per checkpoint)
-python feature_extraction/eval_checkpoints.py --prompts artifacts/prompts/prompts_15shot.parquet
+python feature_extraction/eval_checkpoints.py --prompts data/artifacts/prompts/prompts_15shot.parquet
 python feature_extraction/eval_checkpoints.py            # or --steps 0 10000 ... as a Slurm array
 #   --prompts FILE         use a pre-built prompt file (Step A.0) instead of rendering the
 #                          prompts from the flags below; the file then defines the prompts,
@@ -184,92 +175,17 @@ python feature_extraction/eval_checkpoints.py            # or --steps 0 10000 ..
 #                          shared_chunk (~17% of PopQA-KAS, 2,450/14,267) -- they can
 #                          never get a first_learned_step or timeline features since
 #                          there's no exposure to track. Default 0 = keep everything.
-# -> artifacts/recall/recall_step{N}.parquet   (recall + internal scalar/per-layer features)
-# -> artifacts/internal/hidden_step{N}_*.npy   (f16 [n_facts, n_layers+1, hidden] per position)
-# -> artifacts/internal/neurons_step{N}_*.npy  (uint16 [n_facts, n_layers, k]; only with --top-k)
+# -> data/artifacts/recall/recall_step{N}.parquet   (recall + internal scalar/per-layer features)
+# -> data/artifacts/internal/hidden_step{N}_*.npy   (f16 [n_facts, n_layers+1, hidden] per position)
+# -> data/artifacts/internal/neurons_step{N}_*.npy  (uint16 [n_facts, n_layers, k]; only with --top-k)
 
-# Step A.2 / B — assemble feature tables
-python feature_extraction/build_feature_table.py         # -> artifacts/features/{panel,facts}.parquet
 
-# Step C — fit interpretable model on facts.parquet (drop leaky_* columns first)
+# Step B — the analyses live in the sub-project directories; each README says what
+#          it reads and how to regenerate it:
+#   token_strain/README.md        build_strain_panel.py -> strain_diagnostics.py -> report_token_strain.py
+#   frequency_forgetting/README.md, neuron_forgetting/README.md   notebooks on the recall sweeps
+#   explicit_mentions/README.md   corpus rewrite -> train -> convert -> eval_checkpoints.py --model <local dir>
 ```
-
-### Token interference (CPU only, independent of Steps B/C)
-
-Consumes a recall sweep from Step A.1 plus `popqa-kas` and the six per-epoch batch
-indices. No GPU, no hidden-state dumps.
-
-```bash
-# 0. The recall sweep (GPU; produced by a team member -- the same command as run (4)
-#    in 02_internal_paper_figures.ipynb). --top-shared-chunks-pct 10 keeps the top
-#    decile of popqa-kas by shared chunks: 1,452 facts after the 16 few-shot subjects
-#    are dropped, the same ids as the committed parquets. --no-hidden skips the
-#    hidden-state dump, which token strain does not use.
-#    Decoding is not bit-reproducible across reruns: a second run of this sweep
-#    (main's recall/rotemab_15shot_top10) gives identical prompts but flips `correct`
-#    for a small fraction of facts, which shifts the strain estimates slightly. The
-#    paper's exact numbers therefore come from the committed parquets, not a rerun.
-STEPS="50000 100000 150000 200000 250000 300000 350000 400000 450000 500000 550000 600000 658032"
-python feature_extraction/eval_checkpoints.py --num-shots 15 --no-hidden \
-    --steps $STEPS --top-shared-chunks-pct 10 \
-    --output-dir data/artifacts/expermints/15shot_trajectory_top10_internal_with_hidden
-
-
-# 1. Build the (fact x window) panel.  --recall-dir pivots a sweep directly;
-#    --trajectory takes a wide CSV (id + one column per checkpoint step) instead.
-python feature_extraction/build_strain_panel.py \
-    --recall-dir data/artifacts/expermints/15shot_trajectory_top10_internal_with_hidden/recall \
-    --out data/artifacts/features/strain_panel_15shot_top10.parquet
-#   --df-cutoff 400   drop tokens carried by more than N entities (-1 keeps all).
-#                     400 removes exactly {the, of} on popqa-kas; there is no clean
-#                     gap below that, so a lower cutoff also deletes `john`/`david`.
-#   --bpe             tokenize with the model tokenizer instead of whitespace words
-#                     (implemented, not yet run -- re-derive the cutoff if you use it)
-#   --idf             IDF-weight shared tokens instead of counting them
-
-# 2. (nothing to run -- strain_models.py is a library. The model comparison it
-#     used to print is section 2 of the diagnostics in step 4.)
-
-# 3. (nothing to run -- the permutation test is section 10 of step 4, which calls
-#     null_control_distribution.run_permutations and saves every draw of the
-#     reported test in its JSON. The standalone script is still there for ad-hoc
-#     runs on other panels; if you use it, ALWAYS pass --control-namelen: without
-#     it the baseline is exposure-only, where scrambled strain still proxies name
-#     length, so both the real and the scrambled feature beat it for the same
-#     uninteresting reason.)
-
-# 4. Every diagnostic quoted in the findings doc, as a saved log + JSON mirror.
-#    Run this before the figures -- the report reads its JSON and fits nothing.
-#    Drop --permutations for a seconds-long run; 150 takes ~6 min (3 specs).
-python analysis/strain_diagnostics.py \
-    --panel data/artifacts/features/strain_panel_15shot_top10.parquet \
-    --out data/artifacts/features/strain_diagnostics_specE.txt \
-    --permutations 150
-
-# 5. Figures (reads step 4's JSON for every model number and the permutation
-#    histogram, and the panel for the descriptive plots).
-#    --cdn gives a ~60 KB page instead of ~4.8 MB, but needs a network to view.
-python analysis/report_token_strain.py \
-    --diagnostics data/artifacts/features/strain_diagnostics_specE.json \
-    --panel data/artifacts/features/strain_panel_15shot_top10.parquet \
-    --out analysis/report_token_strain_specE.html
-```
-
-The rendered HTML is **not** kept in the repo (it is a few MB of inlined plotly);
-regenerate it from step 5 when you want it.
-
-There is **one entry point that fits these models**: `analysis/strain_diagnostics.py`.
-`strain_models.py` is a library with no `main()`, `null_control_distribution.py` fits
-only permutation replicates (and exposes that loop as `run_permutations`, which the
-diagnostics calls rather than copying), and `report_token_strain.py` fits nothing.
-Section 3 of the diagnostics additionally *asserts* that its "current" comparison
-spec reproduces `BASE` verbatim, so a change to the specification cannot silently
-leave a stale robustness table behind -- it fails with a diff.
-
-The model specification lives in `analysis/strain_models.py` (`BASE`, `NAMELEN`,
-`STRAIN`, `F1`, `F2`, `MODELS`, `LR`); the other scripts import it, so the
-baseline cannot drift between them. Results and caveats:
-[`analysis/FINDINGS_token_strain.md`](analysis/FINDINGS_token_strain.md).
 
 **One inference per (fact, checkpoint).** `eval_checkpoints.py` touches the model
 exactly twice per fact: once for the greedy decode `correct` needs, and once for a
@@ -278,10 +194,6 @@ depth, next-token geometry, per-layer residual/MLP activity, and the hidden-stat
 dump. (A true single pass is possible only if you redefine `correct` as
 "first answer token is top-1", i.e. the `is_top1` column — but that changes the
 paper's metric, so the decode is kept.)
-
-The prediction target: a fact that is **ever** correct and still correct at the
-final checkpoint = *retained* (1); ever correct but wrong at the end =
-*forgotten* (0); never correct = excluded. See `learning.retention_target`.
 
 ## Feature dictionary (output columns)
 
@@ -377,104 +289,9 @@ reuse the same neurons across checkpoints, or share them with other facts?).
 Size ≈ `n_facts × n_layers × n_positions × k × 2` bytes (~4 KB/fact/checkpoint at
 k=64 over both positions — ~3% of the hidden dump).
 
-### `panel.parquet` — one row per (fact × checkpoint) (`feature_extraction/build_feature_table.py`)
-
-Contains `id`, `step`, `correct`, `gold_prob` (above), the **internal-state
-scalar columns** at that step (`is_top1`, `gold_rank`, `logit_gap_top`,
-`answer_margin`, `pred_entropy`, `resolution_depth`, `mlp_active_frac_mean`, …
-whichever were produced by the sweep) **+** all *timeline* and *competition*
-columns below, recomputed relative to that checkpoint's `step`.
-
-**Timeline** (`features/timeline.py`) — all relative to the checkpoint step:
-
-| column | type | range / values | meaning |
-|--------|------|----------------|---------|
-| `n_appearances` | int | `≥ 0` | cumulative shared-chunk appearances seen so far |
-| `steps_since_last` | int / NaN | `≥ 0` | steps since the fact was last seen (**recency — likely strongest**) |
-| `first_seen_step` | int / NaN | `0 … 658032` | step of first appearance |
-| `last_seen_step` | int / NaN | `0 … 658032` | step of most recent appearance ≤ checkpoint |
-| `span` | int / NaN | `≥ 0` | `last_seen − first_seen` (spread of appearances) |
-| `gap_mean` | float / NaN | `≥ 0` | mean steps between consecutive appearances |
-| `gap_std` | float / NaN | `≥ 0` | std of those gaps |
-| `gap_cv` | float / NaN | `≥ 0` | coefficient of variation (`std/mean`) |
-| `max_gap` | float / NaN | `≥ 0` | largest gap between appearances |
-| `burstiness` | float / NaN | `[-1, 1]` | −1 = evenly spaced, 0 = random, +1 = bursty |
-| `lr_first` | float / NaN | `[0, LR_PEAK]` | learning rate at first appearance |
-| `lr_last` | float / NaN | `[0, LR_PEAK]` | learning rate at last appearance |
-| `lr_mean` | float / NaN | `[0, LR_PEAK]` | mean LR across appearances |
-| `first_epoch_frac` | float / NaN | `[0, 1]` | first appearance as fraction of the epoch (early/mid/late) |
-| `last_epoch_frac` | float / NaN | `[0, 1]` | last appearance as fraction of the epoch |
-
-**Competition / interference** (`features/competition.py`):
-
-| column | type | range / values | meaning |
-|--------|------|----------------|---------|
-| `subject_num_chunks` | int | `≥ 0` | chunks mentioning the subject |
-| `answer_num_chunks` | int | `≥ 0` | chunks mentioning the answer |
-| `num_shared_chunks` | int | `≥ 0` | chunks with both (where the fact can be learned) |
-| `subject_only_chunks` | int | `≥ 0` | subject chunks that do **not** state the fact |
-| `answer_only_chunks` | int | `≥ 0` | answer chunks that do **not** state the fact |
-| `s_pop` | int | `≥ 0` | subject Wikipedia popularity |
-| `o_pop` | int | `≥ 0` | object Wikipedia popularity |
-| `subject_interference_seen` | int | `≥ 0` | subject-only appearances seen by this checkpoint |
-| `answer_interference_seen` | int | `≥ 0` | answer-only appearances seen by this checkpoint |
-| `subject_interference_post_learn` | int / NaN | `≥ 0` | subject-only appearances **after** first-learned (overwriting pressure) |
-| `answer_interference_post_learn` | int / NaN | `≥ 0` | answer-only appearances after first-learned |
-
-### `facts.parquet` — one row per fact; Step C trains on this
-
-Static identifiers + content features (evaluated at the **final** checkpoint) +
-learning-dynamics summary + target. Includes all *competition* and *timeline*
-columns above (at `FINAL_STEP`) plus:
-
-| column | type | range / values | meaning |
-|--------|------|----------------|---------|
-| `id` / `subj` / `obj` / `prop` | int / str | — | identifiers |
-| `retained` | int / NaN | `1` retained, `0` forgotten, `NaN` never-learned (excluded) | **prediction target** |
-
-**Text content** (`features/text.py::cheap_text_features`):
-
-| column | type | range / values | meaning |
-|--------|------|----------------|---------|
-| `relation` | str | `occupation`, `place of birth`, `country`, `capital of`, `author`, `director`, `composer`, `sport`, `religion`, `color`, `genre`, `father`, `mother`, `producer`, `screenwriter`, `capital` | PopQA relation type |
-| `answer_token_len` | int | `≥ 1` | gold answer length in tokens (harder to say = more fragile) |
-| `answer_char_len` | int | `≥ 1` | answer length in characters |
-| `answer_word_len` | int | `≥ 1` | answer length in words |
-
-**Learning dynamics** (`features/learning.py`):
-
-| column | type | range / values | meaning |
-|--------|------|----------------|---------|
-| `first_learned_step` | int / NaN | `0 … 658032` | first checkpoint where correct |
-| `confidence_at_first_known` | float / NaN | `[0, 1]` | gold prob at first-learned (**likely strong**) |
-| `steps_to_learn` | int / NaN | `≥ 0` | steps from first exposure to first correct |
-| `max_gold_prob` | float / NaN | `[0, 1]` | peak gold prob ever reached |
-| `leaky_forgetting_events` | int | `≥ 0` | ⚠️ 1→0 flips — **target leakage, EDA only** |
-| `leaky_relearning_events` | int | `≥ 0` | ⚠️ 0→1 flips — **EDA only** |
-| `leaky_oscillation_count` | int | `≥ 0` | ⚠️ total flips — **EDA only** |
-| `leaky_ever_correct` | bool | — | ⚠️ correct at any checkpoint — **EDA only** |
-| `leaky_correct_final` | bool | — | ⚠️ correct at the final checkpoint (= target) — **EDA only** |
-
-> Drop every `leaky_*` column before fitting the Step C model — they encode the
-> answer you're predicting.
-
-**Internal state at first-learned** (`atlearn_*`, from `internal.extract_fact`) —
-the internal-state scalars (above) snapshotted at the fact's `first_learned_step`,
-i.e. *how the fact looked in the model the moment it was first acquired*
-(`atlearn_logit_gap_top`, `atlearn_resolution_depth`, `atlearn_pred_entropy`,
-`atlearn_mlp_active_frac_mean`, …). `NaN` for never-learned facts. These are
-**non-leaky** — measured before the end of training — so they're usable as Step C
-predictors (the research question: does *how* a fact is first stored predict
-whether it's retained?).
-
-> ⚠️ Do **not** substitute the *final*-checkpoint internal state here: because
-> `retained` is defined by final-checkpoint correctness, final-step internals
-> (e.g. is the answer top-1 at the end) would leak the target, like `leaky_*`.
-> `build_feature_table.py` deliberately reads the first-learned step instead.
-
 ### `strain_panel.parquet` — one row per (fact × window) (`feature_extraction/build_strain_panel.py`)
 
-A **different shape** from `panel.parquet`: rows exist only for windows where the
+A **different shape** from the legacy per-checkpoint panel: rows exist only for windows where the
 fact was **correct at the window's start**, so the outcome `forgot` is defined on a
 population that could actually produce the event (a discrete-time hazard design).
 Window `w` spans `(steps[w], steps[w+1]]`, taken from the trajectory's own header.
@@ -500,26 +317,6 @@ Window `w` spans `(steps[w], steps[w+1]]`, taken from the trajectory's own heade
 > so on a broad fact set the strain terms are largely a proxy for it — and
 > controlling it reverses their sign. Condition on `s_ntok`/`o_ntok` in any model,
 > and put them in the baseline of any permutation test.
-
-**Mention-based text** (`features/text.py::mention_features`) — also in
-`facts.parquet`. These need LMEnt's tokenized corpus + `olmo_core` to read each
-chunk's aggregated ReFinED + Maverick mentions; when the corpus isn't present
-(PopQA-only setup) the columns are still emitted, as `NaN`. Entities are matched
-by **Wikidata QID** (`s_uri` / `o_uri`, e.g. `"Q42"` — *not* `subj_id`/`obj_id`).
-
-| column | type | range / values | meaning |
-|--------|------|----------------|---------|
-| `frac_explicit_subject` | float / NaN | `[0, 1]` | fraction of subject mentions that are hyperlink / entity-link evidence (explicit) |
-| `frac_coref_subject` | float / NaN | `[0, 1]` | fraction that are coreference / pronoun (indirect, weaker signal) |
-| `n_subject_mentions` | int | `≥ 0` | subject mentions across shared chunks (score ≥ `MIN_CANDIDATE_SCORE`) |
-| `subj_answer_distance` | float / NaN | `≥ 0` | mean **character** distance (mention midpoints) between subject & answer in-chunk |
-| `phrasing_variety` | float / NaN | `(0, 1]` | distinct chunk texts / total (1 = all different) |
-
-> Explicit vs. coref comes from each matched candidate's `scores_by_source`
-> (`hyperlinks`/`entity_linking` = explicit; `coref`/`coref_cluster` = indirect);
-> a pronoun surface form is always counted as coref. Provider access follows
-> LMEnt's `retrieval-index/create_es_index.py` (`OlmoCoreMentionProvider`);
-> `DictMentionProvider` backs the tests in `tests/test_mention_features.py`.
 
 **Inside the model** (`features/internal.py`). The per-(fact, checkpoint) internal
 features now ship **in `recall_step{N}.parquet`** (via `extract_fact`, documented
@@ -614,14 +411,6 @@ each fact is only run once.
   is byte-identical to `_epoch_1`; all six orderings differ (chunk 3561491 lands at
   local step 0 / 80374 / 53637 / 27332 / 24924 / 68259). Seed 0, confirmed by the
   sibling `vsl-grow-p2-8-cycle/global_batch_indices_bz*_epoch{1..6}_seed0.npy`.
-- **Model internals** (`features/internal.py::_final_norm_and_head`) — confirmed
+- **Model internals** (`src/features/internal.py::_final_norm_and_head`) — confirmed
   as `model.model.norm` / `model.lm_head` for HF `Olmo2ForCausalLM`; sanity-check
   with `print(model)` on the real checkpoint.
-**Resolved** (from LMEnt's code, no longer guessed):
-- **Mention schema** (`features/text.py`) — read from LMEnt's own reader
-  (`retrieval-index/create_es_index.py`): per-chunk `metadata["entities"]`, each
-  mention having **char** offsets, `text_mention`, and `candidates[{qid,
-  aggregated_score, scores_by_source{hyperlinks, entity_linking, coref,
-  coref_cluster}}]`. Entities are Wikidata QIDs (`s_uri`/`o_uri`). `mention_features`
-  is implemented + unit-tested against this schema; it only *runs* when the 47 GB
-  tokenized corpus + `olmo_core` are present (else NaN columns).
