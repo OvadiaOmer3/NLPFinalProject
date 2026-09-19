@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
+.DS_Store
 
 # Generated training data, checkpoints and converted models (~291G, way over
 # GitHub's 100MB/file limit). Rebuild with explicit_mentions/build_explicit_corpus.py
@@ -8,3 +9,38 @@ __pycache__/
 /data/hf
 /data/runs
 /explicit_mentions/logs
+
+# ---------------------------------------------------------------------------
+# data/ : keep only the artifacts the three submitted notebooks actually read
+#
+#   trajectory_analysis_rotemab_15shot_top10.ipynb
+#       data/artifacts/recall/rotemab_15shot_top10/*.parquet
+#   01_frequency_and_forgetting.ipynb / 02_internal_paper_figures.ipynb
+#       data/artifacts/recall/rotemab_15shot_top10_internal/*.parquet
+#
+# Everything else below is either an unused run or regenerable via
+# feature_extraction/eval_checkpoints.py.
+# ---------------------------------------------------------------------------
+
+# unused recall runs
+data/artifacts/recall/*.parquet
+data/artifacts/recall/5shot_trajectory/
+data/artifacts/recall/rotemab_15shot_top10_last_ckpt_internal/
+data/artifacts/recall/rotemab_exp_5fewshots_not_same_prop/
+
+# unused experiment run (hidden-state variant of the neurons run)
+data/artifacts/expermints/15shot_trajectory_top10_internal_with_hidden/*
+# keep the recall parquet from the above run, which is used by the Token Strain analysis
+!data/artifacts/expermints/15shot_trajectory_top10_internal_with_hidden/recall/
+
+# neurons run: excluded entirely. The hidden-state arrays are 113 MB each (over
+# GitHub's 100 MB limit), the neurons_* arrays are 332 MB in aggregate, the
+# recall parquets duplicate the rotemab_15shot_top10_internal ones, and the zip
+# is the 1.9 GB raw download. Regenerate with feature_extraction/eval_checkpoints.py
+# before running the internal-activation cells of 02_internal_paper_figures.ipynb.
+data/artifacts/expermints/15shot_trajectory_top10_internal_with_neurons/
+
+# scratch dataframe, regenerable from the notebooks
+competition_df.parquet
+test_inference_output/
+test-output/

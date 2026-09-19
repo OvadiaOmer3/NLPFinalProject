@@ -16,6 +16,7 @@ Requires:
 """
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -56,14 +57,40 @@ def make_mention_provider():
         pattern, work_dir=str(config.DATASET_DIR / "dataset-cache"))
 
 
-def load_recall_panel() -> pd.DataFrame:
-    frames = []
-    for step in config.CHECKPOINT_STEPS:
-        p = config.RECALL_DIR / f"recall_step{step}.parquet"
-        if p.exists():
+def load_recall_panel(pattern: str = "recall_step*.parquet") -> pd.DataFrame:
+    """All recall sweeps under ``RECALL_DIR``, including subdirectories.
+
+    Deliberately a glob rather than ``recall_step{step}.parquet`` over
+    ``config.CHECKPOINT_STEPS``: ``eval_checkpoints.py`` tags filenames with the
+    run's settings (``_5shot``, ``_onlysameprop``, ``_recallonly``, ...) and
+    writes trajectory sweeps into subdirectories, so the exact-name lookup
+    silently found nothing for every real run.  The step comes from the file's
+    own ``step`` column, so the grid does not have to match ``CHECKPOINT_STEPS``.
+
+    ``.partial.`` files are skipped -- they are mid-run checkpoints holding a
+    prefix of the fact set, and concatenating them duplicates rows.
+    """
+    import glob as _glob
+
+    paths = sorted(p for p in _glob.glob(
+        str(config.RECALL_DIR / "**" / pattern), recursive=True)
+        if ".partial." not in os.path.basename(p))
+    frames, skipped = [], []
+    for p in paths:
+        try:
             frames.append(pd.read_parquet(p))
+        except Exception as e:                       # noqa: BLE001
+            skipped.append(f"{os.path.basename(p)}: {type(e).__name__}")
+    if skipped:
+        print(f"[recall] skipped {len(skipped)} unreadable parquet(s): "
+              + "; ".join(skipped)
+              + "\n[recall] (a 'Repetition level histogram size mismatch' here "
+                "means pyarrow is older than the writer -- upgrade to >=21)")
     if not frames:
-        raise FileNotFoundError("No recall_step*.parquet found. Run eval_checkpoints.py first.")
+        raise FileNotFoundError(
+            f"No readable {pattern} under {config.RECALL_DIR}. "
+            "Run eval_checkpoints.py first."
+        )
     return pd.concat(frames, ignore_index=True)
 
 

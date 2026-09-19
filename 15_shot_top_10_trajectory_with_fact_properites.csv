@@ -1,0 +1,1453 @@
+id,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000,550000,600000,658032,ever_learned,never_forgotten,forgetting_events,first_learning_step,category,prop,subject_num_chunks,answer_num_chunks,num_shared_chunks
+6416076,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,occupation,6047,4952,61
+809091,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,occupation,4523,7550,113
+54966,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,occupation,5003,7802,48
+4381377,False,False,False,False,False,False,False,True,False,True,True,True,True,True,False,1,400000,Retained,occupation,1037,9592,75
+1030164,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,place of birth,430,12699,152
+5867034,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,place of birth,71,10744,49
+2065688,True,False,False,False,False,False,True,True,True,True,False,False,False,True,False,2,50000,forgotten,place of birth,5207,1687,1291
+6292892,False,False,False,True,False,False,True,True,True,True,True,True,True,True,False,1,200000,Retained,place of birth,432,230316,166
+2260300,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,place of birth,659,59389,43
+342569,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,place of birth,497,94079,107
+5045805,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,place of birth,891,1509,66
+3730009,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,place of birth,707,27281,225
+1201824,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,place of birth,643,24501,42
+237675,True,False,False,False,False,False,False,False,False,False,True,False,True,True,False,2,50000,Retained,genre,1686,862,90
+349317,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,157,4435,55
+1685874,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,387,2150,50
+2193695,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,177,5840,54
+237677,True,False,False,False,False,False,False,False,False,False,True,False,True,True,False,2,50000,Retained,genre,1686,730,226
+2863305,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,2051,1102,252
+3191295,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,genre,798,1981,80
+1445424,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,1505,875,95
+1664587,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,genre,272,8654,46
+5757802,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,genre,247,1361,74
+1698898,False,True,False,False,False,False,False,True,False,False,False,False,True,True,False,2,100000,Retained,genre,391,30112,75
+3039253,False,True,False,True,False,False,False,True,False,False,True,False,True,True,False,4,100000,Retained,genre,766,2059,80
+1289515,False,False,False,True,False,False,False,False,False,True,False,False,True,True,False,2,200000,Retained,genre,1186,30112,170
+5777300,False,False,False,False,True,False,False,False,False,False,True,False,False,True,False,2,250000,forgotten,genre,4105,30112,278
+794430,True,False,False,False,False,False,False,False,False,False,False,False,False,True,False,1,50000,forgotten,genre,418,17517,92
+5687204,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,199,4117,50
+277549,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,1957,11632,121
+6484182,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,279,2880,85
+698261,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,810,17644,55
+196737,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,1849,7228,484
+3391317,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,644,2880,47
+3441419,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,565,11632,106
+25372,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,260,2055,69
+5671878,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,262,347,54
+5638006,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,genre,149,2255,51
+156556,True,True,False,False,True,False,True,True,False,True,True,False,True,True,False,4,50000,Retained,genre,7013,30112,978
+444180,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,genre,8351,6239,324
+205531,False,False,False,False,True,False,True,False,False,False,False,False,True,True,False,2,250000,Retained,genre,376,30112,48
+6257595,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,117,1154,57
+2377056,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,372,1131,90
+4549798,True,False,False,False,True,False,False,True,True,False,True,False,True,True,False,4,50000,Retained,genre,1394,30112,142
+3313057,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,160,2255,47
+3172724,True,False,False,False,False,False,False,False,False,False,False,False,False,True,False,1,50000,forgotten,genre,5640,737,117
+5777301,False,False,False,False,True,False,False,False,False,False,True,False,False,True,False,2,250000,forgotten,genre,4105,6442,368
+1607405,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,genre,1376,5840,201
+2899239,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,416,25878,163
+4525298,False,False,False,False,False,False,False,False,False,True,False,True,False,True,False,2,500000,forgotten,genre,121,620,44
+4930327,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,221,8265,45
+1504173,False,True,False,True,False,False,False,True,False,True,True,False,False,True,False,4,100000,forgotten,genre,1475,30112,102
+3666683,False,False,False,False,False,True,False,False,False,True,False,True,True,True,False,2,300000,Retained,genre,375,22808,156
+6387031,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,genre,209,10204,63
+1323296,False,False,False,False,False,False,False,False,False,True,True,False,False,True,False,1,500000,forgotten,genre,1030,22808,219
+3039249,False,True,False,True,False,False,False,True,False,False,True,False,True,True,False,4,100000,Retained,genre,766,12778,79
+2606277,True,False,False,False,False,False,False,False,False,False,False,False,False,True,False,1,50000,forgotten,genre,6345,1532,938
+1303570,False,False,False,False,False,False,True,False,False,False,False,False,False,True,False,1,350000,forgotten,genre,308,11525,49
+1392964,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,744,5840,86
+4418588,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,130,22808,57
+3019182,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,147,1310,45
+4549803,True,False,False,False,True,False,False,True,True,False,True,False,True,True,False,4,50000,Retained,genre,1394,1222,43
+1230066,False,False,False,False,False,False,False,False,False,True,False,False,False,True,False,1,500000,forgotten,genre,353,3058,120
+1742649,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,1099,330,115
+2942700,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,1387,17517,106
+1455040,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,1234,5840,407
+6304231,False,False,False,False,True,False,True,False,True,False,True,True,True,True,False,3,250000,Retained,genre,366,30112,52
+6463290,False,False,False,False,False,True,False,False,False,False,False,False,False,True,False,1,300000,forgotten,genre,648,30112,131
+808887,True,False,False,False,False,False,False,False,False,False,False,False,False,True,False,1,50000,forgotten,genre,358,5647,45
+1196168,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,261,3058,107
+42744,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,806,8654,95
+1087089,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,833,7228,136
+2187915,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,717,1320,170
+520438,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,227,11632,42
+3015392,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,637,862,128
+1147160,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,537,914,171
+4991022,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,314,7228,55
+1595711,False,False,False,False,False,False,False,True,False,False,False,False,False,True,False,1,400000,forgotten,genre,8289,17644,564
+599002,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,322,4539,57
+4280000,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,2200,1088,80
+4500453,False,False,False,False,False,False,False,True,False,False,False,False,False,True,False,1,400000,forgotten,genre,449,5432,80
+2373230,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,genre,666,7962,118
+4569398,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,132,17517,42
+6316486,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,189,2898,46
+441972,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,genre,307,7962,56
+4554434,False,False,False,False,False,False,True,False,False,False,False,False,False,True,False,1,350000,forgotten,genre,180,22808,66
+4987163,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,father,378,5207,265
+2142166,False,False,True,True,True,True,True,False,True,True,True,True,True,True,False,1,150000,Retained,father,3679,5497,632
+792663,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,173,497,62
+5690186,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,347,296,127
+2965793,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,896,438,47
+1203961,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,216,1736,81
+1780093,False,False,False,False,False,True,False,False,False,True,True,True,True,True,False,1,300000,Retained,father,220,13788,107
+2797971,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,4147,3607,568
+1364849,False,False,True,False,False,True,False,False,False,True,False,True,True,True,False,3,150000,Retained,father,356,990,81
+6519236,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,796,350,207
+6293446,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,126,777,63
+2281512,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,30952,2766,824
+791540,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,father,2703,9297,1177
+1637715,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,638,279,69
+1762842,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,28306,125,109
+4019380,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,216,1516,43
+2839774,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,1066,438,76
+412570,False,False,False,False,False,False,True,False,True,True,True,True,True,True,False,1,350000,Retained,father,2490,868,310
+1401999,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,1083,1563,112
+6166697,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,6941,399,213
+2391233,False,False,True,False,False,False,False,False,True,True,False,True,True,True,False,2,150000,Retained,father,137,990,55
+1787935,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,370,333,106
+2923537,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,408,433,94
+2155468,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,7872,107,73
+3028806,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,980,1736,300
+2991143,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,375,306,75
+1390922,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,294,3607,49
+1981389,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,186,822,84
+1425603,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,258,1071,95
+2251663,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,172,217,47
+5815001,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,father,24759,71,65
+790696,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,361,393,74
+6297091,False,False,True,False,False,False,False,False,False,False,False,False,False,True,False,1,150000,forgotten,father,4766,967,501
+3148563,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,3621,239,185
+353886,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,640,95,45
+4985526,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,father,740,5207,591
+1809866,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,father,225,5497,72
+695490,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,990,305,76
+2236245,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,137,387,59
+3072581,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,2279,99,65
+3073298,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,1695,99,44
+1822049,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,735,99,92
+1677824,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,380,251,100
+2240375,False,False,False,False,False,False,True,False,True,True,True,True,True,True,False,1,350000,Retained,father,86,967,43
+2350775,False,False,False,False,False,False,False,False,False,False,True,True,False,True,False,1,550000,forgotten,father,256,1700,45
+2820580,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,341,171,49
+1003582,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,958,3607,107
+321759,False,False,False,True,False,True,True,False,True,True,True,True,True,True,False,2,200000,Retained,father,6606,7077,1515
+6297573,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,father,896,1081,244
+2385440,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,639,534,80
+1705692,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,782,383,93
+1780318,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,251,2057,119
+739936,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,father,129,709,69
+1633964,False,False,False,False,False,False,True,False,False,False,True,False,True,True,False,2,350000,Retained,father,17489,6005,1720
+392271,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,2557,2818,533
+6259525,False,False,False,False,False,False,False,False,False,True,False,True,False,True,False,2,500000,forgotten,father,98,12694,72
+706914,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,841,534,214
+3321973,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,409,1081,117
+3181355,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,526,873,76
+2281513,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,30952,983,596
+3641770,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,345,676,190
+2765336,False,False,False,False,False,False,False,False,True,False,True,True,True,True,False,1,450000,Retained,father,725,249,52
+6400080,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,10751,78,66
+2203041,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,1184,891,243
+2245901,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,120,216,42
+351663,True,False,False,False,False,False,True,True,False,False,False,True,False,True,False,3,50000,forgotten,father,281,292,44
+482181,False,False,False,False,True,True,True,False,True,False,True,True,False,True,False,3,250000,forgotten,father,64,10751,51
+406821,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,777,239,71
+1757186,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,120,5131,109
+601478,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,671,1184,183
+695949,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,1855,990,296
+1782512,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,9746,53,47
+6515624,False,False,True,False,False,False,False,False,False,False,False,False,False,True,False,1,150000,forgotten,father,13684,3679,961
+1401026,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,447,170,68
+857874,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,3510,179,135
+4146111,False,False,True,False,False,False,False,False,False,False,False,True,True,True,False,1,150000,Retained,father,313,1043,124
+879565,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,324,905,79
+5736293,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,199,941,76
+1886277,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,139,261,62
+1592681,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,208,189,42
+2930912,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,75,5207,47
+1668604,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,153,1151,42
+2616414,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,850,1035,222
+2985468,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,3289,114,59
+3026511,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,4451,199,149
+2211064,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,251,336,52
+2014345,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,202,670,99
+284841,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,58,587,47
+1695842,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,195,1184,48
+1761959,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,460,822,201
+1820482,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,439,215,57
+1056699,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,301,384,86
+220122,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,376,123,45
+1709277,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,father,270,327,74
+2535927,False,False,True,False,False,False,False,False,False,True,True,False,True,True,False,2,150000,Retained,country,979,995860,310
+1323193,False,False,False,False,False,False,True,False,False,True,True,False,True,True,False,2,350000,Retained,country,2654,995860,1220
+6552986,False,False,True,False,False,False,False,False,False,True,True,False,True,True,False,2,150000,Retained,country,123,995860,54
+5458854,False,False,False,False,False,False,True,False,False,False,False,False,False,True,False,1,350000,forgotten,country,204,995860,49
+2122202,False,False,False,False,False,True,False,False,False,False,False,False,False,True,False,1,300000,forgotten,country,2348,255570,649
+2742951,False,True,False,True,False,False,False,True,False,False,True,False,False,True,False,4,100000,forgotten,country,85,248988,48
+5013812,False,True,True,True,False,False,True,True,False,True,True,True,True,True,False,2,100000,Retained,country,548,62055,349
+6320840,False,False,False,False,False,False,False,False,False,True,False,False,False,True,False,1,500000,forgotten,country,491,532383,144
+508352,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,198,67146,139
+4501838,False,False,False,False,False,False,False,False,True,False,True,True,False,True,False,2,450000,forgotten,country,191,93952,158
+2907983,True,False,False,False,False,False,True,False,False,True,True,True,True,True,False,2,50000,Retained,country,321,199144,209
+30163,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,74,56781,52
+800535,False,False,True,False,False,False,True,False,False,True,False,False,True,True,False,3,150000,Retained,country,450,115625,352
+6547647,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,country,676,995860,196
+185843,True,True,True,True,True,True,False,True,False,True,True,False,False,True,False,3,50000,forgotten,country,630,35635,417
+2331689,True,False,False,False,False,False,True,False,False,False,False,False,True,True,False,2,50000,Retained,country,1334,995860,372
+378940,False,False,True,False,False,False,False,False,False,True,True,False,True,True,False,2,150000,Retained,country,4128,995860,835
+2658183,False,False,False,False,False,False,False,False,False,True,True,False,True,True,False,1,500000,Retained,country,6294,532383,2124
+1549444,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,110,10485,104
+1576368,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,122,995860,43
+77398,False,True,False,True,False,False,True,True,False,False,False,True,True,True,False,3,100000,Retained,country,119,67146,94
+1702752,True,False,True,False,False,False,False,False,False,False,True,False,False,True,False,3,50000,forgotten,country,4451,995860,1509
+1648347,False,True,False,True,False,True,True,False,True,True,True,True,True,True,False,3,100000,Retained,country,247,93952,221
+1884375,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,country,136,381811,92
+4514247,False,False,False,False,False,False,False,False,True,True,True,False,False,True,False,1,450000,forgotten,country,1744,532383,966
+977282,True,False,True,True,False,True,True,True,True,False,True,True,False,True,False,4,50000,forgotten,country,66,20224,54
+1547780,False,False,False,False,False,False,True,False,False,False,False,False,True,True,False,1,350000,Retained,country,119,161085,67
+6423457,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,5282,46211,1194
+909073,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,165,381811,46
+1586993,False,False,False,False,False,False,False,False,False,True,False,True,True,True,False,1,500000,Retained,country,291,62055,222
+1318559,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,66,3864,47
+444026,False,False,True,False,False,True,False,False,False,False,True,False,False,True,False,3,150000,forgotten,country,213,161085,111
+6533248,False,False,False,False,True,False,True,False,False,False,True,True,False,True,False,3,250000,forgotten,country,175,255682,84
+1793340,False,False,False,False,False,False,False,False,False,True,False,False,False,True,False,1,500000,forgotten,country,13805,532383,3147
+3775555,False,False,True,False,False,False,False,False,False,False,True,False,True,True,False,2,150000,Retained,country,613,995860,233
+2819275,False,False,False,False,False,False,True,False,False,True,True,True,True,True,False,1,350000,Retained,country,3884,40138,507
+165529,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,792,995860,214
+3508754,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,6852,995860,1837
+447830,True,False,True,False,True,False,True,False,False,False,True,False,True,True,False,5,50000,Retained,country,490,194331,287
+1404478,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,597,995860,141
+6554942,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,682,995860,193
+437027,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,301,47489,106
+1666876,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,125,56524,51
+6310934,False,False,False,False,True,False,False,False,False,False,False,False,False,True,False,1,250000,forgotten,country,2302,254990,359
+3999864,False,False,False,True,True,True,True,True,False,False,False,False,False,True,False,1,200000,forgotten,country,672,46211,416
+1689760,False,False,False,False,False,False,False,True,False,False,True,False,False,True,False,2,400000,forgotten,country,141,995860,64
+4456410,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,1161,93493,187
+1162532,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,57,255682,47
+1941759,False,False,False,True,False,False,True,False,True,True,True,True,True,True,False,2,200000,Retained,country,1307,1147,174
+5123807,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,country,82,194331,50
+1204499,False,False,False,False,False,False,True,False,False,True,False,False,True,True,False,2,350000,Retained,country,35773,532383,14961
+1811247,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,161,93952,75
+2436436,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,152,17768,88
+1059548,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,142,31258,69
+1394666,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,1786,158211,928
+1660687,True,False,False,False,False,True,True,True,False,False,False,False,False,True,False,2,50000,forgotten,country,58,46211,45
+212190,False,False,False,False,False,False,True,True,True,True,True,True,True,True,True,0,350000,Never forgotten,country,635,255682,292
+6325089,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,94,24731,49
+6320552,False,True,True,False,True,True,True,False,False,False,True,False,True,True,False,3,100000,Retained,country,398,42618,249
+6411342,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,59,31258,49
+1680080,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,3817,254990,2036
+2218396,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,99,255682,53
+6278529,False,False,False,False,False,False,False,False,False,False,True,False,True,True,False,1,550000,Retained,country,469,36698,291
+1348054,False,False,True,False,False,False,False,False,True,True,True,True,True,True,False,1,150000,Retained,country,916,124221,345
+2374633,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,4064,75664,136
+2966185,False,False,False,False,True,False,False,False,False,True,False,False,False,True,False,2,250000,forgotten,country,291,995860,116
+2880301,False,False,True,False,False,False,True,True,False,False,False,False,False,True,False,2,150000,forgotten,country,165,995860,50
+3061472,False,False,False,False,False,False,True,False,False,False,False,True,True,True,False,1,350000,Retained,country,446,93493,336
+6154838,False,False,True,False,True,False,False,False,False,True,True,False,False,True,False,3,150000,forgotten,country,241,995860,98
+4745759,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,69,67146,50
+6075395,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,166,995860,58
+4645372,False,False,False,False,True,True,False,False,True,False,True,True,False,True,False,3,250000,forgotten,country,44,194331,42
+1857599,True,True,True,False,False,False,True,False,False,False,False,False,False,True,False,2,50000,forgotten,country,264,995860,130
+6468445,True,True,True,True,True,True,True,True,False,True,True,True,True,True,False,1,50000,Retained,country,275,995860,143
+82443,True,False,False,False,False,False,False,False,False,False,False,False,False,True,False,1,50000,forgotten,country,457,995860,137
+1567160,False,False,False,False,True,False,False,False,True,False,True,True,True,True,False,2,250000,Retained,country,80,75664,59
+2849913,True,True,True,True,True,False,True,False,False,True,True,True,True,True,False,2,50000,Retained,country,1300,28195,952
+996246,False,False,False,False,False,False,True,False,True,False,True,False,False,True,False,3,350000,forgotten,country,1665,995860,225
+4686489,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,690,995860,131
+5246342,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,country,61,34703,46
+1902925,False,True,False,True,True,False,True,False,False,False,True,True,False,True,False,4,100000,forgotten,country,80,10307,52
+6485353,False,False,False,False,True,False,False,False,False,True,False,False,False,True,False,2,250000,forgotten,country,62887,532383,26338
+332734,True,False,True,False,False,True,True,True,False,False,True,True,False,True,False,4,50000,forgotten,country,2581,995860,737
+1887734,False,False,False,False,False,True,True,False,True,True,True,False,True,True,False,2,300000,Retained,country,151,995860,46
+3009780,False,False,False,False,False,False,False,False,False,False,True,False,True,True,False,1,550000,Retained,country,9816,51923,477
+276747,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,0,550000,Never forgotten,country,1941,995860,1198
+4270058,False,False,True,False,False,False,False,False,False,False,False,False,False,True,False,1,150000,forgotten,country,984,995860,173
+12488,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,country,166,995860,56
+5781520,False,False,False,False,True,False,False,False,False,True,True,True,True,True,False,1,250000,Retained,country,609,66047,323
+1404597,False,False,True,False,False,False,True,True,True,True,True,False,False,True,False,2,150000,forgotten,country,5512,995860,2510
+4663230,False,False,False,False,False,False,False,False,False,True,True,False,False,True,False,1,500000,forgotten,country,160,995860,81
+4544622,False,False,True,False,False,False,False,False,False,True,False,False,False,True,False,2,150000,forgotten,country,1867,995860,559
+3186476,True,True,True,False,False,True,True,True,False,False,False,True,True,True,False,2,50000,Retained,country,187,995860,43
+3003917,False,False,False,False,False,False,False,False,False,True,True,False,False,True,False,1,500000,forgotten,country,87,56524,47
+6404382,False,True,False,True,False,False,False,True,False,True,True,True,True,True,False,3,100000,Retained,country,46764,71589,1673
+778964,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,135,14236,92
+1562438,False,False,False,False,False,False,False,True,True,True,True,False,True,True,False,1,400000,Retained,country,118,995860,42
+5184392,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,130,255682,82
+5782265,False,False,False,False,False,False,False,False,False,True,False,False,True,True,False,1,500000,Retained,country,333,995860,90
+3753833,False,True,True,False,False,False,True,False,False,False,False,False,False,True,False,2,100000,forgotten,country,167,995860,42
+1550705,False,True,True,False,False,False,True,True,False,False,True,True,False,True,False,3,100000,forgotten,country,375,995860,130
+6079629,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,280,995860,53
+816457,False,False,False,False,False,True,False,True,False,False,True,True,False,True,False,3,300000,forgotten,country,291,300448,152
+4521929,False,False,False,False,False,False,True,False,True,False,True,False,False,True,False,3,350000,forgotten,country,316,995860,117
+1397707,True,False,True,False,False,True,True,False,False,False,True,True,True,True,False,3,50000,Retained,country,867,254990,429
+2674978,True,True,True,True,False,False,True,True,False,True,False,True,True,True,False,3,50000,Retained,country,534,88963,219
+4483528,False,False,True,False,True,False,False,False,False,True,False,False,True,True,False,3,150000,Retained,country,434,995860,202
+6452097,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,86,124221,42
+323943,False,False,True,False,False,False,False,False,False,False,False,False,False,True,False,1,150000,forgotten,country,119,532383,88
+2964518,False,False,False,False,False,True,False,True,False,False,True,False,False,True,False,3,300000,forgotten,country,155,995860,43
+2951294,False,False,True,False,False,False,False,False,False,False,False,False,False,True,False,1,150000,forgotten,country,278,995860,125
+3004455,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,117,255682,58
+6312158,False,False,False,False,False,False,True,False,False,False,True,False,True,True,False,2,350000,Retained,country,96,59498,85
+1842654,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,country,67,69765,52
+182485,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,country,268,995860,118
+1283737,False,False,True,True,False,False,False,False,False,False,True,False,True,True,False,2,150000,Retained,country,489,995860,231
+3426219,False,False,False,False,False,False,True,False,True,True,True,True,True,True,False,1,350000,Retained,country,46,93952,44
+5665106,False,False,False,False,True,False,True,True,False,False,False,False,False,True,False,2,250000,forgotten,country,454,93493,120
+3437069,True,False,True,False,False,False,False,False,False,True,True,False,True,True,False,3,50000,Retained,country,61128,995860,19844
+1701001,True,False,True,True,True,True,True,False,False,False,True,False,False,True,False,3,50000,forgotten,country,8907,255682,3417
+686442,True,False,True,False,False,True,True,False,False,False,False,False,True,True,False,3,50000,Retained,country,299,255570,202
+2182232,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,0,550000,Never forgotten,country,199,381811,114
+3311112,False,False,False,True,False,False,False,True,False,False,False,True,False,True,False,3,200000,forgotten,country,344,995860,101
+3440130,False,False,True,False,False,False,True,False,False,False,True,False,False,True,False,3,150000,forgotten,country,89,56524,54
+1153122,False,False,True,False,False,False,False,False,False,False,False,False,True,True,False,1,150000,Retained,country,96,532383,45
+383822,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,producer,385,1432,94
+3980530,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,110,92,54
+2132147,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,75,6091,73
+6477052,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,491,78,54
+6408049,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,658,86,45
+1462605,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,66,1005,53
+1630173,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,114,2611,49
+6152249,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,1548,72,50
+2119118,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,92,7872,86
+5739385,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,125,1649,117
+1673772,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,596,1081,194
+2435550,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,78,9877,42
+2075637,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,111,719,57
+795858,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,55,1568,55
+6312437,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,53,1001,43
+946136,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,98,2093,70
+3084024,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,234,1646,65
+5240646,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,59,1204,46
+3287219,False,False,False,False,False,False,True,False,False,False,True,True,True,True,False,1,350000,Retained,producer,117,3866,59
+1570040,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,247,1102,57
+6152248,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,1548,83,60
+681946,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,414,3848,370
+6442938,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,286,1870,183
+1358514,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,76,1649,73
+9639,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,91,1485,51
+2159710,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,90,389,54
+3078837,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,209,1646,45
+494409,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,212,1148,79
+6286738,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,582,74,46
+4845097,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,126,1383,80
+682849,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,53,3632,44
+1409527,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,559,1800,221
+6398381,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,104,723,62
+4040093,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,102,2559,98
+1661668,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,producer,222,7872,194
+2803048,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,74,2847,63
+1941419,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,71,6475,68
+152398,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,212,3632,164
+1462306,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,235,719,63
+4366394,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,62,2964,56
+2461648,False,False,False,False,False,False,True,False,False,False,True,True,False,True,False,2,350000,forgotten,producer,154,3866,76
+2533507,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,95,5015,94
+470732,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,109,14557,105
+1919208,False,False,False,False,False,False,False,True,False,True,False,False,True,True,False,2,400000,Retained,producer,723,1297,242
+234476,False,False,False,False,False,False,True,False,False,False,True,True,True,True,False,1,350000,Retained,producer,557,3866,192
+3084025,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,234,7872,195
+3093779,False,False,False,False,False,False,False,False,False,False,True,False,True,True,False,1,550000,Retained,producer,987,1297,273
+1824463,False,False,False,True,False,False,False,False,True,True,True,False,False,True,False,2,200000,forgotten,producer,1903,244,181
+205566,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,178,1314,117
+1791490,False,False,False,False,False,False,False,False,True,False,False,False,True,True,False,1,450000,Retained,producer,78,618,54
+96493,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,59,929,56
+3194694,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,101,883,53
+2144779,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,53,7872,43
+5032350,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,44,2847,42
+984715,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,194,586,54
+6385629,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,117,1894,110
+4530578,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,producer,132,643,68
+4877533,False,False,False,False,False,False,False,False,True,False,True,True,True,True,False,1,450000,Retained,producer,3212,506,431
+5559861,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,92,2060,73
+1565960,False,False,False,False,False,False,False,False,True,False,False,True,True,True,False,1,450000,Retained,director,407,1432,66
+3980533,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,110,92,54
+6292997,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,46,471,42
+1919215,False,False,False,False,False,False,False,False,False,True,True,False,True,True,False,1,500000,Retained,director,723,1297,242
+3172727,False,False,True,True,True,True,False,True,True,True,True,True,True,True,False,1,150000,Retained,director,5640,1666,717
+5214915,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,director,168,1081,69
+6408054,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,658,466,66
+4902991,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,141,3866,58
+5262087,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,60,737,48
+1610116,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,135,3632,92
+954388,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,98,1074,43
+4084926,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,64,1095,52
+1914487,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,706,2335,281
+77228,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,305,306,47
+2461657,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,director,154,3866,76
+1630183,False,False,True,False,False,False,False,False,False,False,False,False,False,True,False,1,150000,forgotten,director,114,2611,49
+1735082,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,228,340,47
+682854,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,53,3632,44
+119442,False,False,False,False,False,False,False,False,True,False,True,False,True,True,False,2,450000,Retained,director,1055,484,133
+1728178,False,False,False,False,False,False,True,False,False,False,False,True,False,True,False,2,350000,forgotten,director,128,3866,63
+567269,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,128,1023,86
+6453500,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,101,1074,55
+152402,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,212,3632,164
+1468151,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,director,258,725,86
+119443,False,False,False,False,False,False,False,False,True,False,True,False,True,True,False,2,450000,Retained,director,1055,304,183
+3170152,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,director,109,880,49
+6318740,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,65,1100,52
+3039072,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,53,3866,43
+1441163,False,False,True,False,False,False,False,False,False,False,False,False,False,True,False,1,150000,forgotten,director,64,2611,44
+1824118,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,1319,823,106
+1482020,False,False,False,False,False,False,False,False,True,False,True,True,False,True,False,2,450000,forgotten,director,325,463,60
+6288359,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,736,288,80
+4530581,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,132,643,68
+1726946,False,False,True,False,False,False,False,False,False,False,False,False,False,True,False,1,150000,forgotten,director,163,2611,81
+6397607,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,81,723,49
+1931063,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,director,181,789,102
+234484,False,False,False,False,False,False,True,True,True,False,True,True,True,True,False,1,350000,Retained,director,557,3866,192
+128719,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital of,20586,36698,5917
+2651226,False,False,True,False,False,False,False,False,False,False,True,True,True,True,False,1,150000,Retained,capital of,21186,905,710
+1249365,False,False,True,True,True,True,True,True,True,True,True,True,True,True,True,0,150000,Never forgotten,capital of,24116,621,127
+13600,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,130,646,103
+2141674,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,30073,297,136
+649127,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital of,41907,194331,22612
+3553140,False,False,True,False,True,True,True,False,True,True,True,True,True,True,False,2,150000,Retained,capital of,12699,4973,344
+2909774,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital of,2740,1781,428
+371120,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,371,227,53
+1416438,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,7957,1249,280
+1846416,True,True,True,True,True,False,True,False,True,False,False,False,True,True,False,3,50000,Retained,capital of,540,87885,385
+1380746,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,0,500000,Never forgotten,capital of,7159,12497,2933
+6401522,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,873,167,63
+1188844,False,False,False,False,False,True,False,False,False,True,True,False,False,True,False,2,300000,forgotten,capital of,6474,105,45
+1486222,False,False,True,False,True,False,True,False,True,True,False,True,True,True,False,4,150000,Retained,capital of,17349,254990,9645
+707700,False,False,True,False,True,False,True,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,23267,1187,273
+4123088,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital of,11978,2061,433
+4450696,False,False,False,False,False,False,False,False,False,True,True,False,False,True,False,1,500000,forgotten,capital of,1678,3378,646
+1211753,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,capital of,2643,242,134
+4460459,False,True,False,True,False,True,True,True,False,True,True,True,True,True,False,3,100000,Retained,capital of,5763,532,229
+3492075,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,27197,1841,158
+456429,False,False,True,False,True,False,True,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,59389,995860,22261
+5247241,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,169,687,54
+6491074,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,31884,10180,2162
+4123089,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital of,11978,92689,7938
+394543,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,4076,625,200
+651516,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital of,23737,10705,3663
+2889942,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital of,1444,953,125
+4925873,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,125377,4996,2453
+2539119,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,46753,1101,718
+3294045,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,295,159,50
+2901842,False,False,False,False,False,False,False,True,False,False,False,False,True,True,False,1,400000,Retained,capital of,147,3148,134
+226023,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,29148,14337,3658
+1223424,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,44041,67083,13649
+3492074,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,27197,299,200
+2190574,False,False,False,False,True,False,False,False,False,True,False,True,True,True,False,2,250000,Retained,capital of,6603,32334,3500
+1023183,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,capital of,10056,32131,4452
+707701,False,False,True,False,True,False,True,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,23267,280,162
+2970050,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,1550,510,108
+2871596,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,2580,23895,1360
+1446983,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,330,510,94
+128717,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital of,20586,865,602
+3082150,False,False,False,True,False,True,False,True,True,False,False,True,True,True,False,3,200000,Retained,capital of,777,763,147
+4583461,False,False,False,False,False,False,False,False,True,True,False,False,False,True,False,1,450000,forgotten,capital of,719,343,195
+2898290,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital of,349,1242,163
+1223425,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,44041,1829,902
+5781519,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,609,310,70
+1722402,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,76669,17358,3529
+4548221,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital of,230316,995860,81407
+648489,False,True,True,False,True,False,False,False,True,True,False,True,True,True,False,3,100000,Retained,capital of,21055,115625,12706
+6295667,False,False,True,False,True,False,False,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,316351,532383,101081
+315903,False,True,True,True,False,True,True,True,True,False,True,True,True,True,False,2,100000,Retained,capital of,24068,74,60
+411914,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,286,128,60
+3064464,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,5804,30410,2601
+1289559,False,False,True,True,True,False,True,True,True,True,True,True,True,True,False,1,150000,Retained,capital of,17449,52783,9872
+3596901,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,822,189,92
+6336726,True,False,True,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital of,20675,1871,1089
+2340704,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,359,8712,267
+1361418,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,2230,201,110
+1406197,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,648,230,53
+6491073,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,31884,38823,2467
+5242033,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,348,144,56
+707702,False,False,True,False,True,False,True,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,23267,62055,10634
+2419759,False,False,True,False,True,True,False,False,True,False,True,True,True,True,False,3,150000,Retained,capital of,15514,30921,7583
+1249363,False,False,True,True,True,True,True,True,True,True,True,True,True,True,True,0,150000,Never forgotten,capital of,24116,121942,16022
+1309417,False,False,True,False,False,True,False,False,True,False,False,True,True,True,False,3,150000,Retained,capital of,8302,177148,4241
+469475,False,True,False,True,True,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,18880,18422,4376
+1239340,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,227,342,58
+4590298,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital of,77315,995860,35243
+1207788,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,72,203,45
+4912247,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,capital of,3442,1374,227
+3553139,False,False,True,False,True,True,True,False,True,True,True,True,True,True,False,2,150000,Retained,capital of,12699,1435,337
+1696914,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,3471,3449,995
+1398683,False,True,True,True,True,False,True,False,True,True,True,True,True,True,False,2,100000,Retained,capital of,5218,6275,1466
+2292083,False,False,False,True,False,False,False,False,False,True,False,False,False,True,False,2,200000,forgotten,capital of,706,4171,394
+1803351,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,6731,3105,62
+6334551,False,True,False,False,False,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,8715,951,226
+4986867,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,331,120,59
+2670586,False,True,False,True,True,True,False,True,True,True,True,True,True,True,False,2,100000,Retained,capital of,696,10054,503
+471852,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,19175,224,148
+1249362,False,False,True,True,True,True,True,True,True,True,True,True,True,True,True,0,150000,Never forgotten,capital of,24116,692,319
+1022802,False,False,False,True,False,True,False,False,False,False,False,False,True,True,False,2,200000,Retained,capital of,15875,31406,6810
+1610444,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,192,846,78
+1249364,False,False,True,True,True,True,True,True,True,True,True,True,True,True,True,0,150000,Never forgotten,capital of,24116,294,206
+2180840,False,True,True,True,False,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,8785,34703,6295
+2827630,False,True,True,False,True,False,True,True,True,True,True,True,True,True,False,2,100000,Retained,capital of,2137,8125,1594
+2909775,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital of,2740,13425,1950
+1853188,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,24364,4133,375
+4351837,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,3037,3864,416
+6259363,False,False,False,False,False,True,False,False,False,False,True,False,True,True,False,2,300000,Retained,capital of,1119,601,138
+1223422,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,44041,4796,1047
+1823075,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,33400,724,452
+2909773,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital of,2740,3342,569
+1688690,False,False,False,True,False,True,True,True,False,False,True,True,False,True,False,3,200000,forgotten,capital of,5879,41411,3392
+1611778,False,False,True,True,False,False,True,False,False,True,True,True,True,True,False,2,150000,Retained,capital of,18633,94,60
+1211752,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,capital of,2643,430,76
+2147549,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,2584,22177,1462
+2187694,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,2227,414,154
+315906,False,True,True,True,False,True,True,True,True,False,True,True,True,True,False,2,100000,Retained,capital of,24068,925,384
+1722400,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,76669,2729,1485
+3731897,False,False,False,False,False,True,False,True,True,True,True,False,True,True,False,2,300000,Retained,capital of,16717,22206,7152
+6295673,False,False,True,False,True,False,False,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,316351,773,182
+1611776,False,False,True,True,False,False,True,False,False,True,True,True,True,True,False,2,150000,Retained,capital of,18633,8040,2192
+2133567,False,False,False,False,False,False,False,True,False,False,False,True,True,True,False,1,400000,Retained,capital of,980,443,93
+2370611,False,False,False,False,False,False,False,False,True,True,False,False,True,True,False,1,450000,Retained,capital of,61516,48075,16838
+315905,False,True,True,True,False,True,True,True,True,False,True,True,True,True,False,2,100000,Retained,capital of,24068,3409,675
+1223420,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,44041,8665,870
+2702620,False,True,False,True,False,True,True,True,True,True,False,True,True,True,False,3,100000,Retained,capital of,6085,18087,2545
+3878212,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,692,125,57
+4609638,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,capital of,660,187,152
+1023669,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,0,500000,Never forgotten,capital of,14020,90633,7907
+6295670,False,False,True,False,True,False,False,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,316351,3105,606
+1846415,True,True,True,True,True,False,True,False,True,False,False,False,True,True,False,3,50000,Retained,capital of,540,24364,492
+1847214,False,False,False,False,False,True,False,False,False,True,False,True,False,True,False,3,300000,forgotten,capital of,148,206,47
+1289558,False,False,True,True,True,False,True,True,True,True,True,True,True,True,False,1,150000,Retained,capital of,17449,5038,599
+349904,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,2114,166,68
+471854,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,19175,179,80
+649128,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital of,41907,7361,780
+1260785,False,False,True,True,True,False,True,True,True,True,True,True,True,True,False,1,150000,Retained,capital of,35237,16910,3628
+3492076,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,27197,68,58
+2596512,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,16391,7295,1357
+405356,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,1135,310,182
+707699,False,False,True,False,True,False,True,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,23267,166,86
+6,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital of,64729,445,315
+1416439,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,7957,333,110
+1022989,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,24594,1307,868
+4638747,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,107,629,68
+1722403,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,76669,255570,30201
+2966183,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,291,9454,200
+2580517,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,5455,755,261
+2190575,False,False,False,False,True,False,False,False,False,True,False,True,True,True,False,2,250000,Retained,capital of,6603,357,196
+1211751,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,capital of,2643,2393,272
+1478183,False,False,False,False,False,False,False,False,True,False,False,False,True,True,False,1,450000,Retained,capital of,416,2133,217
+2984189,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,557,768,112
+2381396,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,capital of,46275,32943,12340
+3883746,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,594,238,62
+3553138,False,False,True,False,True,True,True,False,True,True,True,True,True,True,False,2,150000,Retained,capital of,12699,172,72
+4384262,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,3163,166,109
+358134,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,255,597,51
+3753788,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,131,191,50
+471851,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,19175,317,201
+4351838,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,3037,669,288
+7,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital of,64729,48749,16415
+6295674,False,False,True,False,True,False,False,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,316351,1678,545
+2825931,False,False,False,False,True,False,True,False,False,True,True,True,True,True,False,2,250000,Retained,capital of,807,4882,606
+6286838,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,1015,647,86
+1153503,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,4620,520,50
+2180839,False,True,True,True,False,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,8785,938,390
+128720,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital of,20586,18917,3499
+1627734,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,275,130,44
+4851661,False,False,True,False,False,False,False,False,False,True,False,True,True,True,False,2,150000,Retained,capital of,69482,300448,29013
+4966043,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,2217,379,110
+1846414,True,True,True,True,True,False,True,False,True,False,False,False,True,True,False,3,50000,Retained,capital of,540,10004,60
+1223421,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,44041,5211,1308
+4593802,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,19198,829,575
+2651225,False,False,True,False,False,False,False,False,False,False,True,True,True,True,False,1,150000,Retained,capital of,21186,41317,9466
+1853186,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,24364,254,59
+6336725,True,False,True,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital of,20675,93493,11061
+1281223,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital of,6348,14195,3253
+4123087,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital of,11978,3597,938
+1611777,False,False,True,True,False,False,True,False,False,True,True,True,True,True,False,2,150000,Retained,capital of,18633,665,416
+4991459,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,410,326,59
+6491071,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,31884,199144,18888
+1659430,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,109,420,50
+6295671,False,False,True,False,True,False,False,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,316351,319545,73367
+471853,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,19175,1383,691
+1260784,False,False,True,True,True,False,True,True,True,True,True,True,True,True,False,1,150000,Retained,capital of,35237,1075,298
+2087019,False,False,False,False,False,False,False,False,True,False,False,True,True,True,False,1,450000,Retained,capital of,767,2128,366
+2192092,False,True,True,True,False,True,False,False,True,False,True,False,True,True,False,4,100000,Retained,capital of,8624,284,137
+6295666,False,False,True,False,True,False,False,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,316351,154,68
+1853189,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,24364,1431,292
+315908,False,True,True,True,False,True,True,True,True,False,True,True,True,True,False,2,100000,Retained,capital of,24068,69765,8888
+6295669,False,False,True,False,True,False,False,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,316351,5049,1096
+6491072,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,31884,385,195
+2887118,False,False,False,False,False,False,True,False,True,True,True,True,True,True,False,1,350000,Retained,capital of,420,6362,355
+1198269,False,False,False,True,False,False,False,True,False,False,False,False,False,True,False,2,200000,forgotten,capital of,51978,54286,18153
+2141673,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,30073,158211,15870
+3696576,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,30130,1496,811
+1223423,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,44041,15727,3212
+5783749,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,478,216,97
+6547738,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,652,142,66
+4926955,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,1978,1370,311
+3069550,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,1571,29482,1014
+1680078,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,3817,201,83
+320847,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,497,3147,369
+1023390,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,20218,683,404
+1611779,False,False,True,True,False,False,True,False,False,True,True,True,True,True,False,2,150000,Retained,capital of,18633,4973,303
+604988,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital of,15197,67146,10142
+6401521,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,873,5426,248
+5781618,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,264,411,77
+3492073,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,27197,6518,2871
+3553137,False,False,True,False,True,True,True,False,True,True,True,True,True,True,False,2,150000,Retained,capital of,12699,5318,2140
+488891,False,False,False,True,False,False,True,False,True,True,True,True,True,True,False,2,200000,Retained,capital of,9246,11557,1600
+5139851,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,247,1753,108
+371119,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,371,315,52
+1793537,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,capital of,230,125,67
+313396,False,False,False,False,False,False,True,False,False,True,True,False,False,True,False,2,350000,forgotten,capital of,448,228,60
+682895,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,0,600000,Never forgotten,capital of,440,216,52
+6295668,False,False,True,False,True,False,False,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,316351,4093,755
+1686002,False,False,False,False,True,False,True,False,True,True,True,True,True,True,False,2,250000,Retained,capital of,7499,16022,3896
+604986,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital of,15197,808,292
+1853190,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,24364,785,257
+1416437,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,7957,489,161
+2141672,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,30073,3423,1076
+5785486,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,247,276,73
+4966044,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,2217,667,42
+1722399,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,76669,140,94
+6382130,True,False,True,True,False,True,False,True,True,True,True,True,True,True,False,3,50000,Retained,capital of,157342,381811,65184
+28941,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,356,213,59
+1188843,False,False,False,False,False,True,False,False,False,True,True,False,False,True,False,2,300000,forgotten,capital of,6474,811,281
+4607987,False,False,True,True,False,True,False,False,False,False,False,False,False,True,False,2,150000,forgotten,capital of,12831,192,168
+2758759,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,10453,1136,195
+128722,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital of,20586,1756,416
+1722401,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,76669,4846,1617
+1416440,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,7957,40138,5086
+4916721,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,1669,272,113
+103528,True,False,True,False,True,False,True,True,True,True,True,True,True,True,False,3,50000,Retained,capital of,10924,51923,4743
+2917660,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,192,3371,167
+471855,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,19175,251,152
+315907,False,True,True,True,False,True,True,True,True,False,True,True,True,True,False,2,100000,Retained,capital of,24068,1255,606
+16007,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,164,236,57
+2141675,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital of,30073,1177,623
+5783022,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,138,148,44
+6295672,False,False,True,False,True,False,False,True,True,True,True,True,True,True,False,2,150000,Retained,capital of,316351,1633,332
+2527173,False,False,False,False,False,True,False,False,False,False,False,False,False,True,False,1,300000,forgotten,capital of,585,1028,119
+651517,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital of,23737,825,237
+450155,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,20957,1327,802
+1722398,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital of,76669,2199,1092
+3514387,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,371,147,48
+2151993,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital of,2398,14529,1136
+3351032,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital of,190,1202,128
+5032353,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,44,2847,42
+1409534,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,0,550000,Never forgotten,screenwriter,559,1800,221
+342799,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,266,226,54
+4329404,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,90,1100,57
+2131105,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,194,844,78
+5240651,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,59,1204,46
+1409535,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,0,550000,Never forgotten,screenwriter,559,2835,78
+1824121,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,1319,368,183
+1354809,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,344,370,49
+1318614,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,73,1071,44
+6312442,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,53,1001,43
+364869,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,99,909,73
+1728181,False,False,False,False,False,False,True,False,False,False,False,True,False,True,False,2,350000,forgotten,screenwriter,128,3866,63
+412158,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,250,400,49
+1673777,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,596,1081,194
+2075642,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,111,719,57
+4846365,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,69,805,42
+4990162,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,0,550000,Never forgotten,screenwriter,531,280,167
+6408056,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,658,466,66
+6398385,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,screenwriter,104,723,62
+1441165,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,64,2611,44
+205570,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,178,1314,117
+3609879,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,80,1148,60
+4382884,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,126,582,53
+6288361,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,736,288,80
+2923431,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,151,792,84
+252546,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,112,269,47
+773100,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,57,275,42
+2803053,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,74,2847,63
+6292998,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,46,471,42
+5559862,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,92,2060,73
+1454544,False,False,False,False,False,False,False,False,False,False,True,True,False,True,False,1,550000,forgotten,screenwriter,316,883,116
+3194701,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,101,883,53
+3234176,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,104,669,44
+2467784,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,65,737,54
+9646,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,91,1485,51
+5534467,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,75,1148,42
+4530583,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,132,643,68
+5214916,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,screenwriter,168,1081,69
+954389,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,98,1074,43
+1445727,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,screenwriter,389,1237,99
+572292,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,75,2578,68
+3191297,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,0,550000,Never forgotten,composer,798,925,265
+777257,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,197,2204,72
+136172,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,72,911,63
+1550690,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,330,5015,266
+1832156,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,63,1721,53
+1611611,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,74,1029,47
+1728085,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,0,550000,Never forgotten,composer,378,1148,185
+491654,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,66,1938,53
+4212454,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,575,145,86
+245794,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,88,524,61
+1596744,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,295,6475,107
+2562742,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,composer,684,1603,188
+1683241,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,127,858,52
+173697,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,510,1543,169
+1641120,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,1104,4064,920
+2436908,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,746,993,288
+1466919,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,70,2204,67
+3134758,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,100,2847,85
+5228783,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,82,8351,75
+2091113,False,False,False,False,False,False,False,True,False,True,False,False,False,True,False,2,400000,forgotten,composer,489,6682,344
+189299,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,161,14557,144
+1900421,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,708,161,63
+1900422,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,708,162,61
+569228,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,130,6475,61
+1663048,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,composer,196,5015,43
+6553430,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,59,2964,42
+3847580,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,71,415,58
+2218078,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,334,1543,170
+1298407,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,840,4630,533
+1946956,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,0,600000,Never forgotten,composer,300,1543,142
+6397223,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,56,9710,50
+3119918,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,123,1543,49
+5032354,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,44,2847,42
+1631014,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,90,8351,83
+666415,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,64,378,56
+130408,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,84,384,48
+2333790,False,False,False,False,True,False,False,False,False,False,False,False,False,True,False,1,250000,forgotten,composer,340,7872,105
+2606349,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,6345,106,86
+5534469,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,75,1148,42
+2020787,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,72,3128,65
+495897,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,composer,647,774,76
+314286,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,62,164,46
+2803054,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,74,2847,63
+600157,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,115,2101,96
+1596743,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,295,5015,81
+2898331,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,462,1113,85
+991515,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,338,2911,291
+1686087,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,133,7872,113
+470734,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,109,5015,68
+2292839,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,250,629,211
+358526,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,80,4064,64
+6305089,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,113,2582,66
+6507942,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,57,1870,55
+1488536,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,composer,553,598,213
+189200,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,298,1035,54
+1663064,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,167,2889,95
+3609881,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,80,1148,60
+6519720,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,131,2911,86
+998434,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,79,308,50
+614612,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,composer,81,1044,62
+6416078,False,False,False,True,True,True,True,True,False,True,True,True,True,True,False,1,200000,Retained,religion,6047,12979,412
+2166240,False,False,False,True,True,False,True,True,True,True,True,True,True,True,False,1,200000,Retained,religion,1254,28953,272
+1084482,False,False,False,True,False,False,False,False,False,False,False,False,False,True,False,1,200000,forgotten,religion,557,14836,63
+179252,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,13788,13139,78
+3354763,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,religion,67350,59419,22771
+909854,False,False,False,True,True,True,True,False,False,True,True,False,True,True,False,2,200000,Retained,religion,1285,86952,242
+6467337,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,11673,24587,416
+3042621,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,religion,771,59419,217
+2549912,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,207,24587,61
+1021938,False,False,False,False,True,False,False,False,False,False,True,False,True,True,False,2,250000,Retained,religion,1694,86952,354
+2440722,False,False,True,True,False,True,True,False,True,False,True,False,False,True,False,4,150000,forgotten,religion,1104,3892,51
+3509316,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,religion,3213,159468,349
+55383,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,2802,86952,953
+3072580,False,False,False,True,False,False,False,True,True,True,False,False,True,True,False,2,200000,Retained,religion,2279,159468,499
+3099396,False,False,False,False,False,False,False,False,False,True,False,False,False,True,False,1,500000,forgotten,religion,573,159468,81
+6318750,False,False,False,True,False,False,False,True,True,True,True,True,True,True,False,1,200000,Retained,religion,1349,28953,1074
+263922,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,2248,9296,65
+2985450,False,False,False,True,False,False,False,False,True,True,False,True,True,True,False,2,200000,Retained,religion,3289,12979,253
+985722,False,False,False,False,False,False,True,False,True,False,False,False,False,True,False,2,350000,forgotten,religion,2037,8844,67
+5009744,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,2530,14836,171
+5348301,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,181,1746,72
+5828085,False,True,True,True,False,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,religion,1753,59419,273
+1446352,False,False,False,True,True,True,False,True,True,True,True,True,True,True,False,1,200000,Retained,religion,7361,2520,87
+1711457,False,False,False,False,False,False,True,False,True,False,False,False,False,True,False,2,350000,forgotten,religion,277,159468,142
+1305822,False,False,False,True,True,False,False,False,False,False,False,False,False,True,False,1,200000,forgotten,religion,3105,159468,610
+1018668,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,4377,14836,164
+2578545,False,False,False,True,True,False,False,False,False,False,True,False,False,True,False,2,200000,forgotten,religion,5834,86952,1222
+1003806,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,811,14836,70
+6416077,False,False,False,True,True,True,True,True,False,True,True,True,True,True,False,1,200000,Retained,religion,6047,86952,2312
+5769221,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,215,698,118
+751049,False,False,False,True,True,True,False,False,False,False,True,False,True,True,False,2,200000,Retained,religion,1491,86952,438
+1794039,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,886,28953,214
+3044665,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,1977,159468,351
+2522645,False,False,False,False,True,False,False,True,False,False,True,False,True,True,False,3,250000,Retained,religion,297,86952,70
+444181,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,8351,14836,359
+3024446,False,False,False,False,False,True,False,False,False,True,True,False,False,True,False,2,300000,forgotten,religion,1886,86952,541
+3034815,False,False,False,False,True,True,False,False,False,False,True,False,False,True,False,2,250000,forgotten,religion,5089,86952,1322
+857870,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,religion,3510,10432,553
+4718146,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,religion,410,7267,87
+1771692,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,216,28953,188
+6320551,False,False,True,False,False,True,True,True,False,False,False,False,False,True,False,2,150000,forgotten,religion,398,159468,148
+6153126,False,False,False,False,False,False,True,False,False,True,False,True,False,True,False,3,350000,forgotten,religion,14261,1916,1086
+1021937,False,False,False,False,True,False,False,False,False,False,True,False,True,True,False,2,250000,Retained,religion,1694,572,60
+3530151,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,religion,85,59419,60
+6449515,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,2954,24587,154
+6166693,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,religion,6941,24587,289
+2684048,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,religion,37072,86952,3070
+2684047,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,religion,37072,59419,8042
+263646,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,5756,729,53
+2413157,False,False,False,True,False,False,False,False,True,False,False,False,False,True,False,2,200000,forgotten,religion,184,159468,81
+2528777,False,False,False,False,False,True,True,False,False,False,False,False,True,True,False,1,300000,Retained,religion,4289,9605,1562
+6464291,False,False,False,False,False,False,False,False,False,True,True,False,False,True,False,1,500000,forgotten,religion,609,5520,469
+1886272,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,139,2660,51
+6552301,False,False,False,False,False,False,False,False,False,True,True,False,True,True,False,1,500000,Retained,religion,81,86952,56
+6349704,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,535,2873,92
+1365620,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,2257,24587,118
+3782967,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,religion,258,59419,195
+287661,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,religion,1801,24587,119
+1810004,False,False,False,False,True,False,False,False,False,False,True,False,True,True,False,2,250000,Retained,religion,1352,86952,329
+417818,False,False,False,True,False,False,False,False,False,False,False,False,False,True,False,1,200000,forgotten,religion,5211,159468,742
+398096,False,False,False,False,False,True,False,False,False,False,False,False,False,True,False,1,300000,forgotten,religion,3441,39002,662
+368522,False,True,False,True,False,False,True,False,True,False,False,False,False,True,False,4,100000,forgotten,religion,566,159468,273
+2060311,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,religion,524,59419,167
+853848,False,False,False,False,True,True,False,False,False,False,True,False,False,True,False,2,250000,forgotten,religion,464,86952,64
+2630371,True,False,True,True,True,True,False,True,True,True,True,True,True,True,False,2,50000,Retained,religion,4481,12979,1358
+1800833,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,religion,105,159468,51
+2142163,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,religion,3679,24587,76
+5937756,False,False,False,True,False,False,False,False,False,False,False,False,False,True,False,1,200000,forgotten,religion,8197,5273,276
+6400075,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,10751,13139,130
+1620822,True,False,False,False,False,False,False,False,False,False,False,False,False,True,False,1,50000,forgotten,religion,3449,28953,175
+3659052,False,False,False,False,True,False,False,False,True,False,False,False,True,True,False,2,250000,Retained,religion,83,159468,44
+2203037,False,False,False,False,False,True,False,True,True,True,False,False,True,True,False,2,300000,Retained,religion,1184,12979,159
+6166694,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,religion,6941,3770,259
+6515620,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,13684,24587,270
+6298692,False,False,False,False,False,False,False,False,False,True,False,False,False,True,False,1,500000,forgotten,religion,775,159468,115
+1181122,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,180,86952,106
+3010624,False,False,False,True,False,False,False,False,False,False,False,False,False,True,False,1,200000,forgotten,religion,911,159468,52
+2220126,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,12035,86952,1560
+6368178,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,religion,32618,59419,3244
+2731813,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,2080,785,71
+6556572,False,False,False,False,False,False,True,False,False,True,False,False,False,True,False,2,350000,forgotten,religion,1139,159468,92
+3111536,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,religion,6744,159468,3372
+1672993,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,541,86952,71
+3058587,False,True,False,True,True,True,True,False,False,False,True,False,True,True,False,3,100000,Retained,religion,861,86952,176
+2795059,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,310,159468,169
+1635529,False,False,False,True,False,False,True,False,False,True,False,False,False,True,False,3,200000,forgotten,religion,1569,159468,190
+2016203,False,False,False,True,True,False,True,False,True,False,False,False,False,True,False,3,200000,forgotten,religion,706,159468,46
+2925025,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,religion,2256,59419,1271
+1782508,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,9746,9296,200
+857871,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,religion,3510,5520,240
+5220912,False,False,False,True,False,False,False,False,False,False,False,False,False,True,False,1,200000,forgotten,religion,339,159468,109
+2900305,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,265,159468,56
+1093167,True,True,False,True,True,True,False,False,True,True,True,True,True,True,False,2,50000,Retained,religion,734,12979,185
+985724,False,False,False,False,False,False,True,False,True,False,False,False,False,True,False,2,350000,forgotten,religion,2037,159468,845
+2765332,True,False,True,True,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,religion,725,28953,106
+459924,False,False,False,True,False,False,False,False,False,False,False,False,False,True,False,1,200000,forgotten,religion,111,159468,64
+388957,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,709,644,65
+6467772,True,False,False,True,True,True,True,False,True,True,True,True,True,True,False,2,50000,Retained,religion,8046,28953,4594
+2281503,False,False,False,False,False,False,False,False,True,True,False,False,False,True,False,1,450000,forgotten,religion,30952,12979,1315
+6515819,False,False,False,False,True,False,False,False,False,True,True,True,True,True,False,1,250000,Retained,religion,6356,28953,1337
+349950,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,religion,22819,8844,1268
+6471075,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,religion,9100,59419,6082
+1192191,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,4846,723,121
+614789,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,715,8412,45
+2537936,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,religion,6234,159468,590
+1498107,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,159,159468,89
+236969,False,False,False,True,False,False,False,False,False,False,False,False,False,True,False,1,200000,forgotten,religion,569,159468,120
+2780526,False,True,False,False,False,False,False,False,True,False,False,False,False,True,False,2,100000,forgotten,religion,75,159468,56
+2813117,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,1682,39002,819
+4232291,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,religion,1255,159468,190
+2365882,False,False,False,False,True,False,False,False,False,False,True,False,False,True,False,2,250000,forgotten,sport,258,27936,119
+2043873,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,sport,102,3512,80
+3483612,False,False,True,False,True,True,True,True,False,True,False,False,True,True,False,3,150000,Retained,sport,2252,229953,1363
+1363357,False,False,True,False,False,True,True,True,False,True,False,False,True,True,False,3,150000,Retained,sport,287,229953,174
+1505006,False,False,True,False,False,True,False,True,True,True,True,True,True,True,False,2,150000,Retained,sport,5059,229953,2802
+211746,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,sport,5997,26079,3064
+1857340,False,False,False,False,True,False,False,False,False,False,False,True,False,True,False,2,250000,forgotten,sport,74,229953,48
+4639015,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,sport,88,229953,45
+6310330,False,True,True,True,False,True,True,True,False,True,False,True,False,True,False,4,100000,forgotten,sport,423,229953,266
+4821146,True,True,True,True,False,False,False,True,True,False,False,False,False,True,False,2,50000,forgotten,sport,417,1718,197
+728241,False,True,True,False,False,False,False,False,False,True,False,True,False,True,False,3,100000,forgotten,sport,356,29760,242
+6482750,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,sport,2989,26079,453
+2004556,False,False,True,True,False,False,True,True,False,False,False,False,True,True,False,2,150000,Retained,sport,97,229953,70
+1942600,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,sport,266,26079,52
+5918515,False,True,True,False,False,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,sport,112,229953,71
+3922169,False,True,True,False,False,True,False,False,False,False,False,False,True,True,False,2,100000,Retained,sport,6656,54281,4606
+3643589,False,False,False,False,False,False,False,True,True,True,False,True,False,True,False,2,400000,forgotten,sport,495,15978,182
+1892618,True,False,False,False,False,False,False,False,False,False,False,False,True,True,False,1,50000,Retained,sport,141,43055,50
+181017,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,sport,93,29705,53
+3465531,False,False,True,False,True,True,True,True,True,True,False,True,True,True,False,2,150000,Retained,sport,81,229953,51
+3170773,False,False,False,False,False,False,False,False,False,True,False,False,True,True,False,1,500000,Retained,sport,67,43055,42
+1536329,True,False,True,False,False,True,True,False,True,False,False,True,True,True,False,4,50000,Retained,sport,2458,229953,1441
+1611420,False,True,True,False,False,True,False,True,True,True,True,True,True,True,False,2,100000,Retained,sport,1742,229953,846
+373418,False,True,True,False,False,False,True,True,False,False,True,True,True,True,False,2,100000,Retained,sport,435,229953,240
+1632835,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,sport,462,29760,285
+6271105,False,False,False,False,False,False,False,True,True,False,True,True,True,True,False,1,400000,Retained,sport,699,29705,464
+2971100,False,False,False,False,True,True,True,True,False,False,True,True,True,True,False,1,250000,Retained,sport,499,229953,268
+1205536,False,False,False,False,False,False,False,False,True,True,True,True,True,True,True,0,450000,Never forgotten,sport,756,11997,509
+3132061,False,True,False,False,False,False,False,False,True,True,True,False,True,True,False,2,100000,Retained,sport,124,54281,97
+6340617,False,True,True,False,True,True,False,True,True,False,False,True,True,True,False,3,100000,Retained,sport,3260,229953,1827
+1729733,False,False,False,False,False,False,False,False,False,True,False,False,False,True,False,1,500000,forgotten,sport,313,43055,90
+1454116,False,False,False,False,False,False,False,True,True,True,True,True,False,True,False,1,400000,forgotten,sport,2232,3386,122
+2147070,False,False,True,True,True,False,True,True,False,False,False,False,False,True,False,2,150000,forgotten,sport,272,15261,185
+221856,False,True,True,False,True,True,True,False,False,False,False,False,False,True,False,2,100000,forgotten,sport,3358,54281,2454
+3008852,False,True,True,False,False,True,True,False,False,True,False,True,True,True,False,3,100000,Retained,sport,253,229953,171
+1809418,False,False,True,False,False,True,False,True,False,True,False,False,False,True,False,4,150000,forgotten,sport,86,229953,60
+381044,True,False,False,False,False,False,False,False,False,False,False,False,False,True,False,1,50000,forgotten,sport,78,43055,46
+611171,False,True,True,True,False,True,True,False,True,False,False,False,True,True,False,3,100000,Retained,sport,137,10948,103
+3799060,False,False,True,False,False,False,False,True,False,False,False,False,False,True,False,2,150000,forgotten,sport,147,37242,68
+6374500,False,False,True,False,True,True,False,True,True,True,True,True,True,True,False,2,150000,Retained,sport,964,229953,605
+5009738,False,True,True,False,True,False,False,False,False,True,True,True,False,True,False,3,100000,forgotten,sport,95,7787,69
+3064840,False,True,True,False,False,True,True,False,True,False,False,False,False,True,False,3,100000,forgotten,sport,206,229953,99
+887771,False,False,False,True,False,True,True,False,True,False,False,False,True,True,False,3,200000,Retained,sport,138,8413,92
+6440905,False,True,True,False,False,False,False,True,False,False,False,True,True,True,False,2,100000,Retained,sport,65,229953,55
+2317572,False,True,False,True,True,True,True,True,True,False,True,True,True,True,False,2,100000,Retained,sport,218,229953,132
+3482443,True,False,True,False,False,True,True,False,False,True,False,True,False,True,False,5,50000,forgotten,sport,1698,229953,1035
+4993680,False,True,True,False,False,False,False,True,True,True,True,True,True,True,False,1,100000,Retained,sport,472,229953,303
+2654950,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,sport,186,26079,101
+254163,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,sport,84,29705,42
+1200109,False,False,True,False,False,False,False,False,False,False,True,False,False,True,False,2,150000,forgotten,sport,641,43055,238
+2490440,True,True,False,False,True,True,False,True,True,True,True,True,True,True,False,2,50000,Retained,sport,1056,229953,513
+6210701,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,sport,3132,2866,86
+1862399,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,sport,2225,229953,1448
+6490853,False,True,True,False,True,True,True,False,False,True,False,False,True,True,False,3,100000,Retained,sport,571,229953,347
+2105731,True,True,True,True,False,False,True,True,True,True,False,True,True,True,False,2,50000,Retained,sport,1505,15261,897
+1496387,False,False,False,False,False,False,False,True,False,False,True,False,False,True,False,2,400000,forgotten,sport,3356,29760,1490
+1641149,False,True,True,False,False,False,False,False,False,False,False,False,False,True,False,1,100000,forgotten,sport,2770,29760,1321
+2794625,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,sport,304,5194,45
+1527071,False,False,True,False,False,False,True,True,True,True,False,False,True,True,False,2,150000,Retained,sport,3568,229953,2065
+1533806,True,False,False,False,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,sport,1129,229953,563
+1593358,False,False,True,False,False,False,True,True,False,True,True,True,True,True,False,2,150000,Retained,sport,414,27936,144
+3181133,False,False,True,False,True,True,False,True,False,True,True,True,False,True,False,4,150000,forgotten,sport,158,43055,76
+1991283,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,sport,130,1712,60
+2769803,False,True,True,False,False,True,False,True,False,True,False,False,False,True,False,4,100000,forgotten,sport,139,229953,42
+1528050,False,False,True,False,False,True,True,False,True,False,False,False,True,True,False,3,150000,Retained,sport,2712,229953,1665
+4111969,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,sport,109,26079,51
+560768,False,False,False,False,False,False,True,True,True,True,True,True,True,True,True,0,350000,Never forgotten,sport,529,11997,438
+256454,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,sport,185,29760,106
+2354806,False,False,False,False,False,False,False,False,False,True,False,False,False,True,False,1,500000,forgotten,sport,317,43055,78
+224083,False,False,False,False,False,False,False,False,True,False,True,True,False,True,False,2,450000,forgotten,sport,12710,3184,175
+2088053,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,sport,275,1261,136
+3647092,False,False,True,False,True,True,False,False,True,True,False,True,True,True,False,3,150000,Retained,sport,7349,26079,2465
+2314531,False,True,True,False,False,True,False,True,False,True,True,False,True,True,False,4,100000,Retained,sport,65,229953,50
+1528899,False,True,True,False,False,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,sport,2716,229953,1685
+1394968,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,author,582,1734,267
+4557333,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,161,2835,117
+4735194,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,88,942,80
+1310942,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,76,126,50
+1719999,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,author,451,5089,259
+1948711,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,author,307,388,163
+1745955,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,412,2008,192
+1206290,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,378,919,288
+2938138,True,False,True,True,False,True,False,False,True,False,False,True,True,True,False,4,50000,Retained,author,2029,1133,153
+173695,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,510,179,42
+5241281,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,192,6433,179
+5409302,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,142,156,48
+1516720,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,74,1130,61
+1441334,False,False,True,True,False,True,False,False,False,False,True,False,False,True,False,3,150000,forgotten,author,11801,1133,190
+2137484,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,author,175,1132,134
+2562740,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,684,1603,188
+245609,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,83,793,61
+57908,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,461,695,45
+4321617,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,244,1984,209
+2073742,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,155,193,100
+6522266,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,128,622,93
+662552,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,174,2835,113
+2910345,True,False,False,True,False,True,False,True,False,False,False,True,True,True,False,4,50000,Retained,author,2744,861,106
+2480048,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,81,171,60
+4212451,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,575,145,86
+238284,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,64,2569,63
+950404,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,82,136,52
+1648052,False,False,False,False,False,False,False,False,True,True,True,True,True,True,True,0,450000,Never forgotten,author,855,2161,625
+415310,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,204,1117,174
+1558096,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,85,302,77
+1683089,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,1271,135,70
+2044426,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,63,2140,50
+3453821,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,237,4904,212
+2955066,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,171,1086,158
+2288782,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,116,1094,78
+1932836,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,84,1045,83
+2731195,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,160,1779,135
+5817498,False,False,False,False,True,True,False,True,True,True,True,True,True,True,False,1,250000,Retained,author,2451,360,89
+6302289,False,False,True,False,False,True,True,True,True,True,True,True,True,True,False,1,150000,Retained,author,5223,1130,782
+286359,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,66,273,53
+204048,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,117,369,52
+1251752,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,379,699,133
+1340076,False,False,False,False,False,False,True,True,True,True,True,True,True,True,True,0,350000,Never forgotten,author,1687,20082,915
+2747507,False,False,False,False,False,False,False,False,True,False,True,True,False,True,False,2,450000,forgotten,author,137,4833,107
+1466918,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,70,2204,67
+2024715,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,293,547,46
+1723977,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,author,370,1522,257
+4494197,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,100,2086,90
+3629767,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,76,1559,48
+5703523,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,286,993,226
+2533106,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,131,2008,108
+2584513,False,False,False,False,False,False,True,False,True,False,True,True,True,True,False,2,350000,Retained,author,274,336,125
+1995480,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,146,550,125
+6337833,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,128,1074,85
+4979670,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,44,2757,44
+431220,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,115,1259,90
+2795779,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,194,4515,152
+315395,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,162,2140,117
+173694,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,510,1543,169
+1001108,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,68,338,55
+5729702,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,425,2811,391
+2477193,False,False,False,False,False,False,False,False,True,False,True,True,True,True,False,1,450000,Retained,author,163,2871,109
+2838807,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,author,84,147,44
+2797972,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,4147,218,145
+1761960,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,460,153,57
+1981390,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,186,634,69
+1633965,False,False,False,False,False,False,False,False,True,False,False,True,False,True,False,2,450000,forgotten,mother,17489,398,143
+695491,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,990,2764,382
+2142170,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,3679,1526,221
+3026512,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,4451,119,69
+2465832,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,4384,293,131
+2203042,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,1184,493,73
+791541,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,2703,2449,488
+596053,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,241,514,73
+6400081,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,10751,60,52
+6297574,False,False,False,False,False,False,False,False,False,True,True,True,False,True,False,1,500000,forgotten,mother,896,1140,246
+5815002,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,24759,57,55
+5045808,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,891,341,78
+2014346,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,202,334,87
+6515626,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,13684,2203,724
+3148564,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,3621,109,94
+3786129,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,19280,76,65
+1809868,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,225,1526,67
+6284015,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,2031,388,140
+3641771,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,345,221,67
+2281514,False,False,True,True,False,True,False,False,True,True,True,True,True,True,False,2,150000,Retained,mother,30952,20304,4259
+6467777,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,8046,101,81
+5375245,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,71,654,44
+6467349,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,11673,212,183
+1782515,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,9746,70,53
+6297092,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,mother,4766,143,108
+2155469,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,mother,7872,152,75
+2579813,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,18917,20586,3499
+2456508,True,True,True,True,True,False,False,True,True,True,True,True,True,True,False,1,50000,Retained,capital,8714,4595,1864
+392466,False,False,False,False,False,False,True,False,False,True,False,False,False,True,False,2,350000,forgotten,capital,531,164,42
+149440,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,128,583,54
+2949025,True,False,True,True,True,False,False,True,True,True,True,True,True,True,False,2,50000,Retained,capital,272,1669,113
+2634781,False,False,False,True,True,False,True,False,True,True,True,True,True,True,False,2,200000,Retained,capital,3523,430,326
+1981147,True,False,True,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,92689,4771,3485
+1678688,True,True,True,True,True,False,True,True,False,True,True,True,True,True,False,2,50000,Retained,capital,36698,20586,5917
+6033282,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,0,500000,Never forgotten,capital,2537,217,176
+4623097,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,117,504,61
+2763878,False,True,True,True,True,True,True,True,False,True,True,True,True,True,False,1,100000,Retained,capital,32943,46275,12340
+3099941,True,False,True,True,True,False,False,True,False,False,True,False,False,True,False,4,50000,forgotten,capital,540,265,101
+5152223,False,False,True,True,True,False,True,False,False,True,True,True,True,True,False,2,150000,Retained,capital,5564,1044,769
+523639,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,112623,7583,3982
+4232296,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,1255,24068,606
+4420065,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,capital,2379,133,121
+6259248,True,False,False,True,False,False,True,False,True,True,True,True,True,True,False,3,50000,Retained,capital,5424,1068,772
+3545043,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,443,284,77
+5346032,True,True,True,True,False,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,3162,157342,548
+5576523,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,305,1232,53
+2139200,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,52783,17449,9872
+5904820,True,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,48749,64729,16415
+4740507,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,908,11787,313
+279768,True,True,True,True,True,False,True,True,False,False,True,True,True,True,False,2,50000,Retained,capital,704,17121,465
+1118624,False,False,False,False,False,False,True,False,False,True,False,True,False,True,False,3,350000,forgotten,capital,17015,2583,1533
+1297664,False,False,False,False,True,False,False,True,False,False,True,False,False,True,False,3,250000,forgotten,capital,3347,702,469
+6432170,True,True,True,True,True,True,True,True,True,True,True,False,True,True,False,1,50000,Retained,capital,67146,15197,10142
+1939901,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,46211,10254,6551
+6117457,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,88963,10482,7464
+3452990,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,196,138,43
+1579959,True,False,True,True,True,False,True,False,False,True,False,True,True,True,False,4,50000,Retained,capital,529,8715,90
+1466594,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,3066,373,170
+3667148,True,True,True,True,True,True,True,False,True,False,False,False,True,True,False,2,50000,Retained,capital,166,388,56
+1310788,False,False,True,True,False,True,True,True,False,False,True,False,True,True,False,3,150000,Retained,capital,1228,1150,185
+3461643,True,False,True,True,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,246,312,63
+756915,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital,14529,2398,1136
+3713393,False,False,False,False,False,False,False,False,False,True,False,False,False,True,False,1,500000,forgotten,capital,326,1753,136
+6503240,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital,5185,292,207
+1202713,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,4973,76669,1079
+19472,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,13565,962,841
+5183056,False,True,True,True,False,False,False,True,True,False,True,True,False,True,False,3,100000,forgotten,capital,112,422,71
+4165947,False,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,124221,10453,5184
+488408,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,0,600000,Never forgotten,capital,292,1090,89
+6216050,True,False,False,True,True,True,True,False,True,True,True,True,True,True,False,2,50000,Retained,capital,16768,1731,1250
+664514,False,False,True,True,False,False,True,True,True,True,False,True,True,True,False,2,150000,Retained,capital,13770,4383,1507
+217415,False,True,True,True,False,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,18537,3333,2447
+6338836,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,47489,12114,7970
+6269689,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,1940,686,246
+468380,True,False,True,True,False,False,False,True,False,True,True,True,True,True,False,3,50000,Retained,capital,225,300,99
+5978636,False,False,False,True,False,False,False,False,False,True,False,False,True,True,False,2,200000,Retained,capital,27276,6404,2649
+3030578,False,False,True,False,False,False,True,False,True,False,True,True,True,True,False,3,150000,Retained,capital,71589,5644,3916
+2998350,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,34703,8785,6295
+1882504,False,False,False,False,False,False,False,True,False,False,False,True,True,True,False,1,400000,Retained,capital,7574,782,610
+1020335,True,False,True,True,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,3036,537,79
+6309605,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,185,308,48
+6345816,False,False,False,True,False,False,False,False,True,True,True,True,True,True,False,1,200000,Retained,capital,4413,960,683
+1511830,True,False,False,True,False,True,False,True,False,True,True,True,False,True,False,5,50000,forgotten,capital,22868,10099,5308
+1782553,True,False,False,True,False,True,False,True,True,True,True,True,True,True,False,3,50000,Retained,capital,13272,5812,3063
+914053,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,4093,316351,755
+43108,False,False,True,True,True,True,True,True,True,True,True,True,True,True,True,0,150000,Never forgotten,capital,18587,3606,3172
+1763729,True,True,True,True,False,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,16629,7624,4446
+1927140,True,True,True,True,True,True,True,True,True,True,True,True,False,True,False,1,50000,forgotten,capital,51923,10924,4743
+2140014,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,584,128,65
+2611738,False,True,False,False,True,False,True,True,True,True,True,True,True,True,False,2,100000,Retained,capital,15765,5548,2956
+51112,False,True,True,True,False,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,9872,3112,1979
+2051232,True,False,True,False,True,False,False,False,False,False,False,True,True,True,False,3,50000,Retained,capital,940,3809,479
+6268676,True,True,True,True,True,True,True,True,True,False,True,True,True,True,False,1,50000,Retained,capital,166,3163,109
+2203391,True,True,False,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,158211,30073,15870
+2839162,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,255570,76669,30201
+552289,False,False,False,False,False,True,False,False,False,False,False,False,False,True,False,1,300000,forgotten,capital,47318,2776,1327
+1782552,True,False,False,True,False,True,False,True,True,True,True,True,True,True,False,3,50000,Retained,capital,13272,635,417
+5795369,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,1562,159,96
+2941131,False,False,False,False,True,False,True,True,True,True,True,True,True,True,False,1,250000,Retained,capital,1623,952,327
+293318,False,False,False,False,False,False,False,False,False,True,False,True,True,True,False,1,500000,Retained,capital,4504,4618,527
+6133150,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,36999,10697,5886
+1793405,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,12041,1552,820
+1305833,True,True,True,True,False,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,3105,316351,606
+315037,True,True,True,True,False,True,True,True,False,False,True,True,True,True,False,2,50000,Retained,capital,220,7011,130
+6286690,False,False,False,False,False,False,False,True,False,False,False,False,False,True,False,1,400000,forgotten,capital,1753,247,108
+6256826,False,False,True,True,True,True,True,True,False,True,True,True,True,True,False,1,150000,Retained,capital,15890,3021,2176
+2950925,True,True,True,True,True,True,True,True,True,False,True,True,True,True,False,1,50000,Retained,capital,31258,15938,7863
+528873,True,False,True,True,False,True,True,True,False,True,True,True,True,True,False,3,50000,Retained,capital,12497,7159,2933
+282938,False,False,False,False,False,False,False,False,False,True,True,False,True,True,False,1,500000,Retained,capital,3104,4414,354
+2266274,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,995860,77315,35243
+1436355,True,True,True,True,False,True,True,True,False,True,True,True,True,True,False,2,50000,Retained,capital,344,4632,266
+504663,False,True,True,True,False,True,True,False,False,False,True,True,True,True,False,2,100000,Retained,capital,56723,9388,4996
+162940,False,False,False,False,False,False,False,True,False,True,True,False,True,True,False,2,400000,Retained,capital,154,316351,68
+5592430,False,False,True,True,False,False,True,False,True,True,True,True,True,True,False,2,150000,Retained,capital,6702,838,575
+6049645,False,False,True,True,False,False,True,True,True,True,True,True,True,True,False,1,150000,Retained,capital,12421,4128,2286
+2955693,False,False,True,False,False,False,False,False,False,True,True,False,True,True,False,2,150000,Retained,capital,3686,1971,965
+3669311,False,False,True,False,False,False,False,False,False,False,True,True,True,True,False,1,150000,Retained,capital,1230,170,114
+694486,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,126037,53944,20420
+1802332,False,False,False,False,False,True,True,True,False,True,True,True,True,True,False,1,300000,Retained,capital,16283,1506,1268
+6266561,False,False,False,True,True,True,True,True,True,True,True,False,True,True,False,1,200000,Retained,capital,8790,1077,840
+3108719,True,True,True,False,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,60948,14947,8925
+1225029,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,5049,316351,1096
+6531264,True,True,True,True,True,True,False,True,True,True,True,True,True,True,False,1,50000,Retained,capital,2791,321,303
+2806611,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,86,568,43
+1794837,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,8511,431,252
+1033176,False,True,False,False,True,False,False,True,True,False,False,True,False,True,False,4,100000,forgotten,capital,1653,2899,425
+2986069,True,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,69819,20370,13774
+246233,False,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,20224,3839,2920
+6434714,True,False,False,True,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,4243,667,516
+1620826,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,3449,3471,995
+6386307,True,True,False,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,28195,7369,4782
+279081,True,False,True,False,False,False,False,True,False,True,True,True,True,True,False,3,50000,Retained,capital,2037,5365,799
+5467382,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,0,500000,Never forgotten,capital,4695,1978,433
+691526,True,False,True,True,False,True,True,False,False,True,False,True,True,True,False,4,50000,Retained,capital,691,1809,405
+52919,False,False,False,False,False,False,False,True,False,True,True,True,True,True,False,1,400000,Retained,capital,3371,192,167
+20250,False,False,False,False,False,False,False,True,False,False,True,False,True,True,False,2,400000,Retained,capital,6362,420,355
+894483,True,True,True,True,False,True,True,True,False,True,True,True,True,True,False,2,50000,Retained,capital,17935,4267,2239
+6368219,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,32618,5763,4387
+5895914,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,14965,5565,3504
+162371,False,False,False,True,False,True,True,False,True,True,True,True,True,True,False,2,200000,Retained,capital,1763,14651,649
+5806895,False,False,False,False,False,False,True,False,False,True,True,True,True,True,False,1,350000,Retained,capital,14760,1298,637
+58303,False,True,True,True,False,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,9685,2097,1646
+6258460,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,0,600000,Never forgotten,capital,74331,2851,1629
+6083055,True,True,True,True,True,True,False,True,True,True,True,True,True,True,False,1,50000,Retained,capital,11331,2063,1674
+6519044,False,False,False,False,False,False,True,False,True,True,True,True,True,True,False,1,350000,Retained,capital,1794,124,109
+1770493,False,False,True,False,False,True,False,True,False,True,True,False,True,True,False,4,150000,Retained,capital,2650,238,188
+1840196,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,2230,121,112
+1213220,True,True,True,True,True,True,True,True,True,True,True,False,True,True,False,1,50000,Retained,capital,2045,35237,1158
+4976747,False,True,True,False,True,False,False,False,True,True,True,True,True,True,False,2,100000,Retained,capital,4754,585,501
+1740588,False,False,False,True,True,True,True,True,True,True,True,True,True,True,True,0,200000,Never forgotten,capital,8366,477,398
+5788391,False,False,True,False,False,False,False,False,False,True,False,False,True,True,False,2,150000,Retained,capital,893,1922,193
+1727462,True,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,10307,3083,1626
+1140403,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,194331,41907,22612
+2449609,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,48075,61516,16838
+6340564,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital,313,1077,108
+35,False,True,True,True,False,True,True,True,False,True,True,True,True,True,False,2,100000,Retained,capital,4963,627,504
+351031,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,414,2227,154
+2266140,False,True,False,False,False,False,False,True,False,True,True,True,True,True,False,2,100000,Retained,capital,1147,26494,125
+1509169,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,13370,10620,5426
+307727,False,False,False,False,False,False,False,True,False,False,False,False,True,True,False,1,400000,Retained,capital,14352,929,603
+6285203,False,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,40138,7957,5086
+793141,False,False,False,False,False,True,False,False,False,False,False,True,False,True,False,2,300000,forgotten,capital,32694,956,599
+6333374,True,True,True,False,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,38823,6591,4596
+1366262,False,False,False,False,False,False,False,True,True,True,True,True,True,True,True,0,400000,Never forgotten,capital,3815,3084,760
+3474310,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,342,232,69
+6267324,False,False,True,True,False,True,True,True,False,True,True,False,True,True,False,3,150000,Retained,capital,15725,9388,1543
+2468664,True,True,True,False,True,True,True,True,True,True,True,False,True,True,False,2,50000,Retained,capital,3508,10034,1281
+1788690,True,True,True,True,False,True,False,True,False,False,True,True,False,True,False,4,50000,forgotten,capital,4663,2005,421
+1515801,True,False,True,True,True,True,False,True,True,True,True,True,True,True,False,2,50000,Retained,capital,16022,7499,3896
+600223,False,False,True,True,False,False,True,False,False,True,True,False,True,True,False,3,150000,Retained,capital,23895,2580,1360
+5302153,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital,1484,719,247
+1867834,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,4762,165,141
+1734901,False,False,True,True,True,True,True,True,True,True,True,True,True,True,True,0,150000,Never forgotten,capital,15331,2718,2119
+5247805,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,1464,41907,367
+3101183,True,False,True,False,True,False,False,True,False,False,False,False,False,True,False,4,50000,forgotten,capital,763,777,147
+1829094,False,False,True,False,False,False,False,False,False,False,False,False,True,True,False,1,150000,Retained,capital,8712,359,267
+1305830,True,True,True,True,False,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,3105,3488,45
+39178,True,False,True,False,False,True,False,True,True,True,False,True,True,True,False,4,50000,Retained,capital,33662,2245,1693
+28977,True,True,False,True,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,7408,745,575
+1580390,False,False,False,False,False,False,True,False,False,True,False,True,True,True,False,2,350000,Retained,capital,3689,658,430
+1981146,True,False,True,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,92689,1654,1150
+3149189,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,50851,7109,371
+5046329,False,False,True,True,False,False,False,True,True,False,True,True,True,True,False,2,150000,Retained,capital,1750,488,375
+6224331,False,False,False,True,True,False,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital,10243,1366,1155
+375943,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital,660,3365,112
+2342140,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,87885,540,385
+5180420,False,False,False,True,False,True,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital,3278,470,383
+6291315,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,21316,3713,2777
+357926,False,False,True,True,False,False,True,False,True,False,True,True,True,True,False,3,150000,Retained,capital,2245,8295,656
+546090,False,False,False,True,False,False,False,False,False,True,False,False,True,True,False,2,200000,Retained,capital,62952,3214,1764
+2939807,True,True,True,False,True,False,False,True,True,True,True,True,True,True,False,2,50000,Retained,capital,67083,44041,13649
+6270851,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,24731,9011,5421
+987936,True,True,False,True,True,False,True,True,False,True,False,False,True,True,False,4,50000,Retained,capital,128,286,60
+2802665,True,False,True,False,True,False,True,True,True,True,True,True,True,True,False,3,50000,Retained,capital,294,1915,169
+2972379,True,True,True,False,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,62055,23267,10634
+1685298,True,False,True,False,True,True,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,22154,4527,2532
+1446356,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,7361,41907,780
+5844314,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,0,500000,Never forgotten,capital,1301,228,115
+6549760,False,False,False,False,True,True,True,False,True,True,True,True,True,True,False,1,250000,Retained,capital,4444,727,529
+5210420,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,10332,1989,1006
+4995155,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,124927,13440,9387
+3038698,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,647,173,116
+7986,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,9656,141,126
+280280,True,False,False,True,False,False,False,False,True,False,False,False,True,True,False,3,50000,Retained,capital,390,205,74
+1812763,True,False,True,True,True,False,False,False,False,True,False,False,True,True,False,3,50000,Retained,capital,951,8715,226
+1826568,False,False,True,True,True,False,True,False,True,True,False,False,True,True,False,3,150000,Retained,capital,10536,1313,943
+1449028,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,18453,3354,2358
+349957,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,22819,14594,4957
+570749,False,False,True,False,True,False,True,False,False,False,False,False,False,True,False,3,150000,forgotten,capital,40346,33400,10719
+636616,True,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,199144,31884,18888
+2534092,False,False,False,False,False,False,True,False,False,False,True,False,True,True,False,2,350000,Retained,capital,313,469,55
+1936197,True,True,False,True,True,True,True,True,True,False,True,True,True,True,False,2,50000,Retained,capital,338,9624,152
+30821,True,True,False,False,True,False,True,True,False,False,True,True,True,True,False,3,50000,Retained,capital,27995,2113,1685
+745100,False,False,False,False,False,False,False,False,False,True,False,True,False,True,False,2,500000,forgotten,capital,21766,3853,1909
+2326192,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,80,15637,55
+6306597,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,584,679,113
+1665931,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,14195,6348,3253
+1660531,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,319545,316351,73367
+2880818,False,False,False,False,False,False,False,False,False,True,False,False,True,True,False,1,500000,Retained,capital,226,459,50
+6184067,True,True,True,False,False,False,False,True,False,True,True,True,True,True,False,2,50000,Retained,capital,69765,24068,8888
+1022353,False,False,False,False,False,False,True,False,False,True,True,True,True,True,False,1,350000,Retained,capital,14920,638,428
+2072804,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,148,257,66
+451808,True,True,False,False,False,True,True,False,False,False,False,False,True,True,False,2,50000,Retained,capital,4030,5349,524
+988372,True,True,True,True,True,False,True,True,False,True,True,True,True,True,False,2,50000,Retained,capital,172,12699,72
+1941761,False,False,False,True,False,False,False,False,False,True,True,False,True,True,False,2,200000,Retained,capital,1307,379,101
+3678471,False,True,True,True,False,False,False,False,False,False,False,True,True,True,False,1,100000,Retained,capital,187,555,75
+2254982,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,35635,8624,5685
+5146418,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital,474,3013,81
+1860029,False,True,True,True,True,False,False,True,True,True,True,True,True,True,False,1,100000,Retained,capital,32033,9553,6385
+635851,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,859,7567,168
+25674,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,3857,396,348
+2068848,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,2569,89,73
+1635532,False,False,False,False,False,False,True,True,False,False,True,True,False,True,False,2,350000,forgotten,capital,1569,157342,762
+1592930,False,False,False,False,True,False,False,True,True,True,True,True,True,True,False,1,250000,Retained,capital,3045,445,332
+861082,False,False,True,False,False,False,False,False,False,False,False,True,True,True,False,1,150000,Retained,capital,28640,923,667
+1672868,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,capital,1961,170,153
+4516392,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,147,381,56
+2485455,False,False,False,False,False,False,False,False,True,False,False,False,True,True,False,1,450000,Retained,capital,552,1456,103
+598694,False,True,False,True,True,True,False,True,False,True,True,True,True,True,False,3,100000,Retained,capital,39077,5123,2624
+6298839,False,False,True,True,True,False,True,True,True,True,True,True,True,True,False,1,150000,Retained,capital,7223,1474,966
+2776008,False,False,True,True,True,False,False,True,False,True,True,True,True,True,False,2,150000,Retained,capital,16243,5085,2364
+2070124,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,16910,35237,3628
+6317793,True,False,True,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,33770,6495,4476
+1853198,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,24364,540,492
+534816,False,True,False,False,False,False,False,False,False,True,False,True,False,True,False,3,100000,forgotten,capital,35063,3785,1519
+6313411,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,24431,3381,2602
+2583275,True,True,False,False,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,121942,24116,16022
+3514599,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,602,15637,135
+66107,False,True,True,True,True,True,True,True,False,True,True,True,True,True,False,1,100000,Retained,capital,13333,2534,1860
+4394181,False,True,False,False,True,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,4031,715,605
+907670,True,True,True,False,True,False,True,False,True,False,True,True,True,True,False,4,50000,Retained,capital,214,1626,141
+6515820,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,6356,1978,966
+4604569,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,278,4267,176
+6257858,False,False,True,True,True,True,True,True,False,True,True,True,True,True,False,1,150000,Retained,capital,10485,1101,966
+3064330,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,484,180,93
+6145054,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital,22768,1224,871
+2967643,True,False,True,False,True,False,False,True,True,True,True,True,True,True,False,3,50000,Retained,capital,255682,10034,6182
+6026411,False,False,False,True,True,True,True,True,True,True,True,True,True,True,True,0,200000,Never forgotten,capital,9702,836,743
+5467381,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,0,500000,Never forgotten,capital,4695,336,127
+761251,False,False,False,False,False,False,False,False,False,True,False,True,True,True,False,1,500000,Retained,capital,21696,2182,1138
+2943491,False,False,False,False,False,False,False,True,False,True,True,True,True,True,False,1,400000,Retained,capital,1179,782,326
+435227,True,True,False,True,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,4172,14651,1057
+715797,False,True,True,False,False,False,False,False,False,True,True,True,True,True,False,1,100000,Retained,capital,32334,6603,3500
+5175831,True,False,False,True,True,False,False,True,False,True,True,True,True,True,False,3,50000,Retained,capital,6353,569,455
+6409891,False,False,False,True,True,False,False,True,True,True,True,True,True,True,False,1,200000,Retained,capital,5282,428,377
+3435929,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,844,221,181
+6499110,True,True,True,True,True,True,True,False,True,True,True,True,True,True,False,1,50000,Retained,capital,115625,21055,12706
+3013107,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,capital,420,116,68
+1646462,False,False,False,True,True,False,True,False,False,False,False,True,True,True,False,2,200000,Retained,capital,1073,2859,223
+681897,True,False,True,True,False,False,True,True,False,True,True,True,True,True,False,3,50000,Retained,capital,29649,22014,6647
+701352,False,False,False,False,False,False,False,True,False,True,True,True,True,True,False,1,400000,Retained,capital,21777,3915,2021
+581753,True,False,True,True,False,True,True,True,False,True,True,True,True,True,False,3,50000,Retained,capital,90633,14020,7907
+1151837,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,570,497,100
+2904226,False,False,True,False,False,False,False,False,True,True,True,True,True,True,False,1,150000,Retained,capital,4477,1763,774
+2036135,True,True,False,False,True,False,True,True,False,True,True,True,True,True,False,3,50000,Retained,capital,9238,3372,1770
+975583,False,False,True,True,True,True,True,True,False,True,True,True,True,True,False,1,150000,Retained,capital,4443,6658,937
+1789286,True,True,True,True,True,True,True,True,True,False,False,False,True,True,False,1,50000,Retained,capital,8285,3029,1032
+2920105,False,False,False,False,False,False,False,True,False,True,True,True,True,True,False,1,400000,Retained,capital,1521,1268,330
+1993670,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,25356,13452,5305
+258682,True,False,False,False,False,False,False,False,True,False,True,False,True,True,False,3,50000,Retained,capital,3124,1612,443
+1537651,False,True,False,True,True,False,False,False,False,True,True,True,True,True,False,2,100000,Retained,capital,8958,1285,890
+1259497,False,True,True,False,True,True,False,True,False,False,False,False,False,True,False,3,100000,forgotten,capital,41411,5879,3392
+1014859,False,True,True,True,True,True,True,True,True,True,True,True,False,True,False,1,100000,forgotten,capital,22026,5593,2540
+3741171,True,False,False,True,True,True,False,False,True,False,False,False,False,True,False,3,50000,forgotten,capital,146,822,48
+6418167,False,False,True,True,True,True,True,False,True,True,True,True,True,True,False,1,150000,Retained,capital,5969,694,606
+1288919,True,True,False,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,3423,30073,1076
+1733532,False,False,False,False,True,True,False,False,False,False,False,False,True,True,False,1,250000,Retained,capital,274,46,42
+1944925,False,True,False,False,False,False,False,False,True,True,True,True,True,True,False,1,100000,Retained,capital,2739,379,306
+2899839,False,False,True,False,False,False,True,True,False,False,True,True,True,True,False,2,150000,Retained,capital,110248,5365,3981
+6263500,True,True,True,True,True,True,True,True,True,True,True,True,False,True,False,1,50000,forgotten,capital,10054,696,503
+6317794,True,False,True,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,33770,186,144
+1722391,True,False,True,True,True,True,True,True,False,True,True,True,True,True,False,2,50000,Retained,capital,117538,30440,15865
+2612485,False,False,False,False,False,False,False,False,False,False,True,True,False,True,False,1,550000,forgotten,capital,7585,1027,648
+6098623,True,True,True,True,False,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,8759,1501,1033
+1464242,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,54286,51978,18153
+6513436,False,False,False,True,False,False,False,False,False,False,True,True,True,True,False,1,200000,Retained,capital,4485,582,496
+2440723,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,capital,1104,1917,243
+56722,True,True,True,True,True,True,False,True,True,True,True,True,True,True,False,1,50000,Retained,capital,8125,2137,1594
+6300717,False,False,True,False,False,True,True,True,True,True,True,True,False,True,False,2,150000,forgotten,capital,51304,3948,3028
+2166241,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,1254,461,154
+355719,True,True,True,True,False,True,True,True,False,True,True,True,True,True,False,2,50000,Retained,capital,31406,15875,6810
+1812640,False,False,True,False,False,True,False,False,False,False,False,True,True,True,False,2,150000,Retained,capital,1208,312,254
+2510882,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,1678,316351,545
+287593,False,False,False,False,True,False,True,True,False,True,True,True,True,True,False,2,250000,Retained,capital,4677,6474,660
+6262109,True,True,True,True,True,True,False,True,False,True,True,True,True,True,False,2,50000,Retained,capital,32131,10056,4452
+909246,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,1,50000,forgotten,capital,94,18633,60
+6543416,False,False,False,False,False,False,True,True,True,True,True,True,True,True,True,0,350000,Never forgotten,capital,2802,319,237
+2791111,True,False,True,True,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,5330,8715,1705
+1448499,False,False,False,True,False,True,True,False,False,False,False,True,True,True,False,2,200000,Retained,capital,175,5763,139
+2507186,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,59498,11787,7915
+1981148,True,False,True,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,92689,11978,7938
+6290863,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,694,234,110
+5015775,False,False,True,True,False,True,True,False,True,True,True,True,False,True,False,3,150000,forgotten,capital,248988,13134,9067
+5748842,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,16450,413,320
+103951,False,False,False,False,False,False,True,False,False,False,True,False,True,True,False,2,350000,Retained,capital,156,619,64
+6408743,False,True,True,True,True,False,True,True,False,True,True,True,True,True,False,2,100000,Retained,capital,11596,1556,1238
+1576431,True,True,True,True,False,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,7571,3242,1399
+6267323,False,False,True,True,False,True,True,True,False,True,True,False,True,True,False,3,150000,Retained,capital,15725,3220,277
+6351301,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,18935,4632,2333
+1798218,True,False,False,True,True,False,True,True,True,False,True,True,False,True,False,4,50000,forgotten,capital,240,574,129
+6495030,False,False,False,False,True,False,False,True,True,True,True,True,True,True,False,1,250000,Retained,capital,4521,764,570
+562847,True,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,381811,157342,65184
+2584594,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,1068,65,51
+1494758,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,2061,4771,196
+2984079,True,False,True,False,False,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,4964,69482,1815
+5547087,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,5112,871,691
+3640232,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,443,158,82
+1802180,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,20854,1843,1045
+2821000,False,False,False,True,True,False,False,True,True,True,True,True,True,True,False,1,200000,Retained,capital,3752,721,421
+330731,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,capital,558,278,101
+1790487,False,False,False,False,False,True,True,True,False,False,False,False,False,True,False,1,300000,forgotten,capital,10493,5725,1906
+3008151,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,14838,2495,1927
+6330613,False,False,False,True,True,True,True,True,True,True,True,True,True,True,True,0,200000,Never forgotten,capital,5151,858,639
+5864218,True,False,True,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,18964,3177,2493
+1494759,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,2061,11978,433
+361044,False,False,False,False,False,False,False,False,False,False,False,True,False,True,False,1,600000,forgotten,capital,1374,3442,227
+2725932,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,138019,20868,13546
+527593,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,347,336,134
+6359560,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,56524,16246,9171
+1717233,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,29354,7567,4853
+1363778,True,False,True,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,300448,69482,29013
+2569888,False,True,False,True,True,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,5423,1275,870
+728749,False,True,True,True,False,True,True,True,False,True,True,True,True,True,False,2,100000,Retained,capital,30410,5804,2601
+1305832,True,True,True,True,False,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,3105,6731,62
+1797712,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,6567,1043,497
+6355626,False,False,True,False,True,True,False,False,True,True,False,True,True,True,False,3,150000,Retained,capital,35717,3939,2663
+1468996,False,False,True,True,True,True,True,True,True,True,True,True,True,True,True,0,150000,Never forgotten,capital,19166,6333,4215
+1207361,False,False,False,False,False,False,True,False,False,True,True,True,True,True,False,1,350000,Retained,capital,25563,3220,1746
+1746524,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,26707,8965,4853
+203437,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,28390,6445,4695
+1032898,False,False,False,False,False,False,True,False,False,True,True,True,False,True,False,2,350000,forgotten,capital,2427,525,342
+392039,True,False,False,True,False,False,False,False,False,False,True,True,False,True,False,3,50000,forgotten,capital,9702,19430,1065
+1720737,True,True,True,True,True,False,True,True,True,False,True,True,True,True,False,2,50000,Retained,capital,132,242,54
+512880,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,628,226,127
+122728,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,861,723,97
+4978804,True,False,True,True,True,True,True,False,True,True,True,True,True,True,False,2,50000,Retained,capital,337,253,72
+265754,True,True,True,True,False,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,24057,4544,2855
+1475379,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,489,1118,80
+4077985,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,capital,2513,1096,452
+607803,True,True,True,True,False,True,True,True,True,True,False,False,True,True,False,2,50000,Retained,capital,808,15197,292
+5776395,True,False,True,False,False,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,6945,1493,897
+6273545,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,29482,1571,1014
+302854,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,0,550000,Never forgotten,capital,8405,775,440
+15805,False,False,True,True,True,True,True,True,True,True,True,True,True,True,True,0,150000,Never forgotten,capital,12781,3395,1902
+13046,False,True,False,False,True,False,False,False,False,True,True,True,True,True,False,2,100000,Retained,capital,2841,271,232
+37500,False,False,False,False,False,False,True,False,True,True,True,True,True,True,False,1,350000,Retained,capital,4787,629,500
+6256473,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,0,658032,Never forgotten,capital,1438,487,180
+3924452,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,4133,24364,375
+6526129,True,True,True,False,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,16551,2560,1882
+417829,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,5211,44041,1308
+1003808,True,True,False,False,False,True,True,True,False,True,True,True,True,True,False,2,50000,Retained,capital,811,6474,281
+5925,False,False,True,False,True,False,True,True,False,True,True,True,True,True,False,3,150000,Retained,capital,4073,531,445
+486119,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,166,23267,86
+6374051,True,True,True,True,True,True,True,True,True,False,True,False,True,True,False,2,50000,Retained,capital,85,679,49
+176654,False,False,False,False,False,False,False,False,True,False,False,False,False,True,False,1,450000,forgotten,capital,2545,38616,435
+1775298,True,True,True,False,False,True,True,True,False,True,True,True,True,True,False,2,50000,Retained,capital,18710,1690,1337
+5932260,False,False,True,True,True,True,False,True,False,True,True,True,True,True,False,2,150000,Retained,capital,13053,1525,1149
+6475333,True,True,True,True,True,True,True,True,True,False,True,True,True,True,False,1,50000,Retained,capital,14236,4429,2124
+1478869,True,True,True,True,False,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,232,2169,80
+499672,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,382,798,120
+6528624,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,752,1334,120
+1691938,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,19708,4364,2391
+1712488,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,42618,10744,7057
+145561,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,475,501,83
+557793,True,True,False,True,True,True,True,True,False,True,True,True,True,True,False,2,50000,Retained,capital,29540,12067,4820
+6083018,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,56781,15637,8920
+2712847,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,100000,Never forgotten,capital,22206,16717,7152
+3020359,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,543,133,75
+13998,False,False,True,True,True,True,True,True,False,True,True,True,True,True,False,1,150000,Retained,capital,7767,1209,1000
+239951,False,False,False,False,False,False,False,True,False,False,False,False,False,True,False,1,400000,forgotten,capital,41713,1920,1087
+2339584,False,False,False,False,False,True,True,True,True,False,True,True,True,True,False,1,300000,Retained,capital,2344,543,294
+1592046,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,1613,470,183
+6242848,True,False,False,True,False,False,True,True,False,False,False,True,False,True,False,4,50000,forgotten,capital,4473,30073,331
+5815032,False,False,False,False,False,False,False,False,False,False,True,True,False,True,False,1,550000,forgotten,capital,2868,223,201
+2513496,True,False,False,True,False,False,True,True,True,False,True,False,False,True,False,4,50000,forgotten,capital,90,1030,64
+5967265,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,3314,4865,122
+2658151,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,75664,20849,13171
+6260898,False,False,False,True,True,False,False,True,False,True,False,True,False,True,False,4,200000,forgotten,capital,385,31884,195
+2438406,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,30921,15514,7583
+1388910,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,15869,4865,2642
+1146607,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,3299,211,189
+1672533,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,66047,14651,8933
+5421647,False,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,26189,5234,3834
+376088,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,1856,1748,335
+1505834,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,92,168,53
+6041536,True,False,False,False,False,False,False,False,False,False,False,False,False,True,False,1,50000,forgotten,capital,394,5379,147
+367189,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,1892,335,152
+6505231,False,False,False,True,True,True,True,True,False,True,True,True,False,True,False,2,200000,forgotten,capital,6027,713,598
+1752279,True,False,False,True,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,17768,5507,2849
+4617076,False,False,True,True,True,False,True,True,True,True,True,True,True,True,False,1,150000,Retained,capital,192,12831,168
+5895957,False,False,False,False,False,False,False,False,False,False,True,True,False,True,False,1,550000,forgotten,capital,1975,845,258
+6279762,True,False,True,True,False,True,True,True,False,True,True,True,True,True,False,3,50000,Retained,capital,21560,10094,4715
+1202714,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,4973,12699,344
+6322925,True,True,True,False,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,29862,8644,4633
+6604,False,False,False,True,False,False,False,False,True,True,True,True,True,True,False,1,200000,Retained,capital,5695,709,561
+5347843,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,1428,92,74
+351597,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,332,754,76
+1347439,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,0,600000,Never forgotten,capital,1961,639,318
+4073090,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,922,559,179
+44382,False,False,False,True,False,False,True,True,True,True,True,True,True,True,False,1,200000,Retained,capital,8173,1266,1088
+1706834,True,False,True,True,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,7648,2142,1238
+804606,True,True,False,False,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,161085,53944,20715
+3447901,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,215,139,44
+3587971,False,False,False,False,False,False,False,False,False,True,False,False,False,True,False,1,500000,forgotten,capital,993,1205,175
+282751,True,False,False,False,False,False,True,True,False,False,True,False,True,True,False,3,50000,Retained,capital,212,5218,89
+1793343,False,False,False,False,False,False,True,True,False,False,True,True,True,True,False,1,350000,Retained,capital,13805,5262,1749
+336967,True,True,True,True,True,False,True,False,False,False,True,True,True,True,False,2,50000,Retained,capital,1096,9246,525
+2600825,False,False,True,False,False,True,False,False,False,True,True,True,True,True,False,2,150000,Retained,capital,22229,28476,4025
+168423,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,200,1949,117
+4577192,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,186,155,43
+5623381,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,17658,2485,1735
+6015165,True,True,True,True,False,False,True,True,False,True,False,True,True,True,False,3,50000,Retained,capital,31175,8087,4756
+1573571,True,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,93952,16748,12205
+451809,True,True,False,False,False,True,True,False,False,False,False,False,True,True,False,2,50000,Retained,capital,4030,31884,873
+225131,False,False,False,False,False,False,True,False,True,True,True,True,True,True,False,1,350000,Retained,capital,180,20675,129
+248641,False,False,False,False,False,False,False,False,False,False,True,False,False,True,False,1,550000,forgotten,capital,7122,545,445
+593981,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,532383,316351,101081
+306840,False,False,False,False,False,False,False,False,False,True,True,False,True,True,False,1,500000,Retained,capital,9454,291,200
+2328856,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,723,260,92
+3716123,True,True,True,True,True,False,True,True,True,True,True,True,False,True,False,2,50000,forgotten,capital,375,1107,144
+297952,False,False,False,False,False,False,False,False,False,True,False,False,True,True,False,1,500000,Retained,capital,51691,1990,1147
+1785792,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,599,253,42
+6402884,True,False,True,True,True,False,True,True,True,True,True,True,True,True,False,2,50000,Retained,capital,7961,1123,921
+5467380,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,0,500000,Never forgotten,capital,4695,1917,457
+10956,False,False,False,True,False,False,True,True,True,True,True,True,False,True,False,2,200000,forgotten,capital,4948,567,427
+5660051,True,True,True,True,False,True,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,32449,5842,4046
+2970947,False,False,True,True,False,False,False,True,False,False,True,True,True,True,False,2,150000,Retained,capital,2158,1694,584
+6554019,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,0,,Never learned,capital,177148,8302,4241
+2940712,False,False,False,False,False,False,False,True,True,True,True,True,True,True,True,0,400000,Never forgotten,capital,3440,2037,842
+832908,False,False,True,True,True,True,False,False,False,True,True,True,True,True,False,1,150000,Retained,capital,254990,17349,9645
+1303276,True,True,True,True,True,True,True,False,False,False,True,True,True,True,False,1,50000,Retained,capital,111,177,54
+6305992,False,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,12934,4971,3127
+34246,True,True,True,True,True,False,True,True,True,True,True,True,True,True,False,1,50000,Retained,capital,9676,1379,1095
+2935548,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,14482,4054,2775
+542552,False,False,True,False,False,False,True,True,False,True,True,True,True,True,False,2,150000,Retained,capital,51785,8972,4298
+1202712,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,4973,18633,303
+1924631,False,False,False,False,False,False,False,True,False,True,False,True,True,True,False,2,400000,Retained,capital,604,1354,176
+2158825,True,True,True,True,False,True,True,True,False,False,True,False,True,True,False,3,50000,Retained,capital,264,3543,112
+318560,False,True,True,False,False,False,True,True,False,True,True,True,True,True,False,2,100000,Retained,capital,12078,2603,1302
+654471,True,True,True,True,False,True,True,True,False,True,True,True,True,True,False,2,50000,Retained,capital,22177,2584,1462
+1192195,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0,50000,Never forgotten,capital,4846,76669,1617
+287919,False,False,True,False,False,False,False,False,False,False,False,False,True,True,False,1,150000,Retained,capital,1017,323,98
+307811,True,False,True,True,True,False,False,True,False,True,False,True,True,True,False,4,50000,Retained,capital,403,2448,129
+4165948,False,True,True,False,True,True,True,True,True,True,True,True,True,True,False,1,100000,Retained,capital,124221,26494,11413
+2617063,True,True,True,True,False,True,True,True,False,False,True,True,True,True,False,2,50000,Retained,capital,45,549,43
+471864,False,False,False,False,False,False,True,False,False,False,False,True,True,True,False,1,350000,Retained,capital,19175,13134,2727
+2965573,False,True,False,False,False,False,False,False,False,False,False,False,False,True,False,1,100000,forgotten,capital,2046,24068,520
+802449,False,False,True,True,False,False,False,False,False,False,True,False,True,True,False,2,150000,Retained,capital,28890,4220,2200
