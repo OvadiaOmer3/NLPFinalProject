@@ -25,7 +25,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import config
 
-import re
 
 # --------------------------------------------------------------------------- #
 # Dataset
@@ -33,12 +32,6 @@ import re
 def load_popqa(split: str = "train"):
     """Return the PopQA-KAS split as a HuggingFace Dataset."""
     return load_dataset(config.POPQA_DATASET_ID, split=split)
-
-def get_words(x):
-        remove = set(['film','movie', 'game' , 'story', 'song', 'novel', 'series', 'video', 'short' ])
-        x = str(x).lower()
-        x = re.sub(r'[(),]', ' ', x)  # remove parentheses and commas
-        return set(x.split()) - remove
     
 def load_popqa_df(split: str = "train"):
     """Same data as a pandas DataFrame (convenient for feature joins).
@@ -49,13 +42,6 @@ def load_popqa_df(split: str = "train"):
     them here -> 14264 rows.
     """
     df = load_popqa(split).to_pandas().dropna(subset=["subj", "obj"]).reset_index(drop=True)
-    # df['possible_answers'] = df['possible_answers'].apply(tuple)
-    # df = df.drop_duplicates(['question', 'possible_answers'])
-    # df['possible_answers'] = df['possible_answers'].apply(list)
-    # dup_mask = df.duplicated('question', keep=False)
-    # df.loc[dup_mask, 'subj'] = df.loc[dup_mask, 's_wiki_title']
-    # answer_in_mask = df.apply(lambda row: bool(get_words(row['subj']) & get_words(row['obj'])),axis=1)
-    # df = df[~(answer_in_mask & dup_mask)]
     return df
 
 # --------------------------------------------------------------------------- #
