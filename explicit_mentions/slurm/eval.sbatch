@@ -6,13 +6,13 @@
 #   sbatch slurm/eval.sbatch --model dhgottesman/LMEnt-170M-1E --steps 109672 \
 #       --run-tag baseline_170M_1E --num-shots 5 --fewshot-mode only-same-prop
 #SBATCH --job-name=eval_explicit
-#SBATCH --partition=killable
+#SBATCH --partition=gpu-mol
 #SBATCH --time=24:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64000
+#SBATCH --mem=128000
 #SBATCH --signal=USR1@120
 #SBATCH --output=logs/eval_%A.out
 #SBATCH --error=logs/eval_%A.err
