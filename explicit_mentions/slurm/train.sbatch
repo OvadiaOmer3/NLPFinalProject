@@ -1,10 +1,10 @@
 #!/bin/bash
 # Train on a (rewritten) corpus with OLMo-core.
 # First generate a config: python make_train_config.py --run-name ... --corpus ...
-# Then, from the explicit_mentions directory:
-#   sbatch slurm/train.sbatch <EXPLICIT_ROOT>/runs/<run-name>/config.json
+# Then submit FROM the explicit_mentions directory (log paths are relative):
+#   sbatch slurm/train.sbatch <repo>/data/runs/<run-name>/config.json
 #
-# Uses the lment_train conda env (see README "Environment"). The 24h killable
+# Uses the lment_train_cu126 conda env (see README "Environment"). The 24h killable
 # limit is shorter than a full epoch; just resubmit the same command -- the
 # trainer auto-resumes from the latest checkpoint in its save_folder.
 #

@@ -4,6 +4,7 @@
 # once with peer-to-peer disabled -- so a single ~6 minute job tells you which
 # setting works on the node you were given.
 #
+# Submit FROM the explicit_mentions directory (log paths are relative):
 #   sbatch slurm/nccl_test.sbatch          # 4 GPUs, matches the training run
 #   sbatch --gpus=2 slurm/nccl_test.sbatch # or any other count
 #SBATCH --job-name=nccl_test

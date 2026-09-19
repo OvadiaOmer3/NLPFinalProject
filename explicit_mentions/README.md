@@ -6,12 +6,18 @@ aliases, descriptors found only by coreference) in the pretraining corpus with
 the entity's explicit canonical name, retrain, and measure whether factual
 learning improves.**
 
-This directory is self-contained (nothing here imports the parent repo). It
+This directory holds the corpus-rewrite / training / conversion stages. It
 reads the LMEnt corpus in place from the authors' lab directory
-(`/home/morg/students/gottesman3/LMEnt`, read-only) and reuses their OLMo-core
-fork as a library for training — all outputs go to `EXPLICIT_ROOT`
-(default `/home/morg/NLP_2526b/shaharmayo/explicit_mentions_data`, override
-via env var).
+(`/home/morg/students/gottesman3/LMEnt`, read-only; `LMENT_SRC_ROOT`) and
+reuses their OLMo-core fork as a library for training (`OLMO_CORE_PATH`).
+Prompts and evaluation are the repo's shared code: `../src/`,
+`../feature_extraction/build_prompts.py` and
+`../feature_extraction/eval_checkpoints.py`, which loads the converted
+checkpoints straight from a local directory. Every constant lives in the
+root `../config.py` (section "Explicit-mentions training pipeline"), and all
+outputs go under the repo's `data/` (`config.DATA_ROOT`, override with
+`LMENT_DATA_ROOT`): bulk corpora / runs / HF checkpoints beside `artifacts/`
+(gitignored), recall parquets under `data/artifacts/recall/<run-tag>/`.
 
 ## What the input looks like
 
@@ -193,32 +199,30 @@ Two-phase training ("1 epoch original, then explicit") is a *training* flag:
 build_explicit_corpus.py  ->  inspect_rewrites.py  ->  make_train_config.py +
    (slurm array, CPU)          (verify + eyeball)      train_explicit.py (GPU)
                                                               |
-eval_explicit.py  <-  convert_checkpoints.py  <---------------+
-   (GPU, PopQA)          (OLMo-core -> HF)
+../feature_extraction/eval_checkpoints.py  <-  convert_checkpoints.py  <--+
+   --model ../data/hf/<name> --no-internal        (OLMo-core -> HF)
       ^
-build_prompts.py   (once: the frozen prompt file every model is scored on)
+../feature_extraction/build_prompts.py   (once: the frozen prompt file every
+                                          model is scored on)
 ```
 
 ### 0. Environment
 
-Commands below use `$EXPLICIT_ROOT` for the output root. It is **not** set for
-you — either substitute the literal path
-`/home/morg/NLP_2526b/shaharmayo/explicit_mentions_data`, or set it in your
-shell first (this lab's default shell is tcsh):
+All commands below are run **from this directory** (`cd explicit_mentions`;
+the sbatch files write their logs to the relative `logs/`, so `mkdir -p logs`
+once). Paths are written relative to it: `../data/...` is the repo's
+`data/` tree (`config.DATA_ROOT`). `make_train_config.py` prints absolute
+paths in the commands it suggests, so copying from its output also works.
 
-```tcsh
-setenv EXPLICIT_ROOT /home/morg/NLP_2526b/shaharmayo/explicit_mentions_data
-```
-```bash
-export EXPLICIT_ROOT=/home/morg/NLP_2526b/shaharmayo/explicit_mentions_data   # bash/zsh
-```
+Conda environments, per stage (the sbatch files activate the right one):
 
-`make_train_config.py` prints absolute paths in the commands it suggests, so
-copying from its output avoids the variable entirely.
+* Corpus rewrite and evaluation: the repo's **`esm_env`** (torch 2.6,
+  transformers 4.57, datasets 4.8).
+* Checkpoint conversion, cache pre-build, NCCL test: **`lment_train`**.
+* Training (`slurm/train.sbatch`): **`lment_train_cu126`**, the same recipe
+  built against CUDA 12.6 for the H100 partition.
 
-
-* Rewriting + eval run in the existing **`esm_env`** conda env.
-* Training + checkpoint conversion need OLMo-core's deps in a new env (once):
+Training / conversion need OLMo-core's deps in a separate env (once):
 
 ```bash
 conda create -n lment_train python=3.12 -y
@@ -252,8 +256,8 @@ for p in 0 1 2 3 4 5 6 7; do
     python inspect_rewrites.py verify --corpus-tag explicit_all --part $p --n-docs 20000
 done
 # read the per-part stats + audit the guards:
-cat $EXPLICIT_ROOT/corpora/explicit_all/stats_part-*.json
-head $EXPLICIT_ROOT/corpora/explicit_all/skipped_part-0-00000.jsonl
+cat ../data/corpora/explicit_all/stats_part-*.json
+head ../data/corpora/explicit_all/skipped_part-0-00000.jsonl
 ```
 
 ### Cost (measured, single core per part)
@@ -294,7 +298,7 @@ first training job, with the GPUs idle. Do it on CPU instead:
 
 ```bash
 python make_train_config.py --run-name explicit_170M_1E --corpus explicit_all
-sbatch slurm/prebuild_cache.sbatch $EXPLICIT_ROOT/runs/explicit_170M_1E/config.json
+sbatch slurm/prebuild_cache.sbatch ../data/runs/explicit_170M_1E/config.json
 ```
 
 It writes into the corpus's own `dataset-cache/`, keyed by a hash of the
@@ -324,10 +328,10 @@ sweep.
 ```bash
 # explicit corpus:
 python make_train_config.py --run-name explicit_170M_1E --corpus explicit_all
-sbatch slurm/train.sbatch $EXPLICIT_ROOT/runs/explicit_170M_1E/config.json
+sbatch slurm/train.sbatch ../data/runs/explicit_170M_1E/config.json
 # optional control on the original corpus:
 python make_train_config.py --run-name original_170M_1E --corpus original
-sbatch slurm/train.sbatch $EXPLICIT_ROOT/runs/original_170M_1E/config.json
+sbatch slurm/train.sbatch ../data/runs/original_170M_1E/config.json
 ```
 
 The killable partition's 24 h limit is shorter than an epoch: **resubmit the
@@ -337,51 +341,58 @@ Two-phase schedule (original then explicit):
 
 ```bash
 python make_train_config.py --run-name phase2_170M --corpus explicit_all \
-    --load-path $EXPLICIT_ROOT/runs/original_170M_1E/olmo2_170M_*/step109000
+    --load-path ../data/runs/original_170M_1E/olmo2_170M_*/step109000
 ```
 
 ### 4. Convert checkpoints to HF format
 
 ```bash
 sbatch slurm/convert_to_hf.sbatch \
-    --run-dir $EXPLICIT_ROOT/runs/explicit_170M_1E/olmo2_170M_0.0003_32768_0.01_1 \
+    --run-dir ../data/runs/explicit_170M_1E/olmo2_170M_0.0003_32768_0.01_1 \
     --name explicit_170M_1E
 ```
 
 ### 5. Evaluate PopQA recall
 
-Same prompts/scoring as the main project (olmes cloze, held-out few-shot
-pool), so results are comparable with existing artifacts.
+The evaluator is the repo's `feature_extraction/eval_checkpoints.py` — the
+same code path, prompts and scoring (olmes cloze, held-out few-shot pool) as
+every other recall artifact in the repo, so the numbers are comparable by
+construction. `--model` accepts a local directory of converted checkpoints
+(`../data/hf/<name>`, steps discovered from its `stepN/` dirs) as well as a
+published repo id; `--no-internal` skips the internal-feature pass (one greedy
+decode per fact); `--run-tag` picks the output subdirectory. `slurm/eval.sbatch`
+adds `--no-internal` and forwards everything else.
 
 Build the prompts **once** first and hand the file to every model. The
 comparison here is model-vs-model, so the prompts must not be re-derived per
 run: the file fixes the prompt strings, the fact set and its order, and carries
 a `prompt_hash` you can compare across runs to prove they matched (see
-`emlib/prompt_set.py`).
+`../src/prompt_set.py`). This experiment uses 5 shots in `only-same-prop`
+mode; pass both flags, the shared default is 15-shot `drop-same-prop`.
 
 ```bash
-python build_prompts.py --num-shots 5            # mode defaults to only-same-prop
-# -> $EXPLICIT_ROOT/artifacts/prompts/prompts_5shot_onlysameprop.parquet (+ .meta.json)
-python build_prompts.py --inspect $EXPLICIT_ROOT/artifacts/prompts/prompts_5shot_onlysameprop.parquet
+python ../feature_extraction/build_prompts.py --num-shots 5 --fewshot-mode only-same-prop
+# -> ../data/artifacts/prompts/prompts_5shot_onlysameprop.parquet (+ .meta.json)
+python ../feature_extraction/build_prompts.py --inspect ../data/artifacts/prompts/prompts_5shot_onlysameprop.parquet
 ```
 
 ```bash
-setenv P $EXPLICIT_ROOT/artifacts/prompts/prompts_5shot_onlysameprop.parquet
-sbatch slurm/eval.sbatch --model $EXPLICIT_ROOT/hf/explicit_170M_1E \
-    --run-tag explicit_170M_1E --prompts $P
+setenv P ../data/artifacts/prompts/prompts_5shot_onlysameprop.parquet
+sbatch slurm/eval.sbatch --model ../data/hf/explicit_170M_1E \
+    --run-tag translated_corpus/explicit_170M_1E --prompts $P
 # baseline (published model):
 sbatch slurm/eval.sbatch --model dhgottesman/LMEnt-170M-1E --steps 109672 \
-    --run-tag baseline_170M_1E --prompts $P
+    --run-tag original_corpus/LMEnt_HF_models/Baseline/170M --prompts $P
 ```
 
-Without `--prompts` the prompts are still rendered from `--num-shots` /
-`--fewshot-mode` at run time, exactly as before (`--prompts` is incompatible
-with those flags — the file already answers them).
+Without `--prompts` the prompts are rendered from `--num-shots 5
+--fewshot-mode only-same-prop` at run time (`--prompts` is incompatible with
+those flags — the file already answers them).
 
-Outputs land in `$EXPLICIT_ROOT/artifacts/<run-tag>/recall_step{N}_*.parquet`
-with the same schema as the main repo's recall parquets
+Outputs land in `../data/artifacts/recall/<run-tag>/recall_step{N}_*_recallonly.parquet`
+with the same schema as every other recall parquet in the repo
 (`id, step, num_shots, correct, excluded, prompt, generation`), so the
-existing analysis notebooks apply. The headline comparison: accuracy binned by
+existing analysis notebooks apply (see `../analysis/compare_results/`). The headline comparison: accuracy binned by
 the fact's `num_shared_chunks` (and, per §6.2, by the fraction of explicit
 co-mentions in the *original* data — facts that used to co-occur implicitly
 are where the explicit corpus should help most).
@@ -390,15 +401,15 @@ are where the explicit corpus should help most).
 
 | File | Purpose |
 |---|---|
-| `config.py` | all paths/constants; env-var overridable |
+| `../config.py` | all paths/constants (section "Explicit-mentions training pipeline"); env-var overridable |
 | `build_explicit_corpus.py` | **the mentions script** — rewrites a corpus part |
 | `inspect_rewrites.py` | before/after samples + structural verification |
 | `train_explicit.py` | OLMo-core training (patched copy of authors' `kas/train.py`: config-controlled wandb/eval, `load_path` for two-phase) |
 | `make_train_config.py` | generates training config JSONs |
 | `convert_checkpoints.py` | OLMo-core checkpoints → HF `stepN/` layout |
-| `build_prompts.py` | renders the few-shot prompts once to a parquet (the eval's `--prompts` input), so every model is scored on identical inputs |
-| `eval_explicit.py` | PopQA recall sweep (recall-only port of the main repo's `eval_checkpoints.py`) |
-| `emlib/` | copies of the main repo's prompt/recall/few-shot modules (self-contained) |
+| `../feature_extraction/build_prompts.py` | renders the few-shot prompts once to a parquet (the eval's `--prompts` input), so every model is scored on identical inputs |
+| `../feature_extraction/eval_checkpoints.py` | PopQA recall sweep; `--model ../data/hf/<name> --no-internal --run-tag <dir>` for the models trained here |
+| `../src/` | shared library (prompts, few-shot pool, scoring, model loading — `src/data.py` loads local checkpoint dirs) |
 | `prebuild_dataset_cache.py` | builds OLMo-core's index/chunk/VSL caches on CPU before training |
 | `slurm/` | sbatch wrappers for each stage |
 

@@ -1,7 +1,8 @@
 #!/bin/bash
 # Convert OLMo-core checkpoints to HF format (CPU job).
-# From the explicit_mentions directory:
-#   sbatch slurm/convert_to_hf.sbatch --run-dir <runs/...>/olmo2_170M_... --name explicit_170M_1E
+# Submit FROM the explicit_mentions directory (log paths are relative):
+#   sbatch slurm/convert_to_hf.sbatch --run-dir <repo>/data/runs/<run>/olmo2_170M_... --name explicit_170M_1E
+# -> <repo>/data/hf/<name>/stepN/
 #SBATCH --job-name=convert_hf
 #SBATCH --partition=cpu-killable
 #SBATCH --time=12:00:00

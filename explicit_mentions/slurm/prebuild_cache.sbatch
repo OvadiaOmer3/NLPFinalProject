@@ -1,6 +1,7 @@
 #!/bin/bash
 # Build OLMo-core's dataset caches on CPU, before requesting GPUs.
-#   sbatch slurm/prebuild_cache.sbatch <EXPLICIT_ROOT>/runs/<name>/config.json
+# Submit FROM the explicit_mentions directory (log paths are relative):
+#   sbatch slurm/prebuild_cache.sbatch <repo>/data/runs/<name>/config.json
 # Needs many cores: _write_document_indices fans out one process per corpus part.
 #SBATCH --job-name=prebuild_cache
 #SBATCH --partition=cpu-killable
