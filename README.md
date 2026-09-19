@@ -56,7 +56,8 @@ feature_extraction/        # PRODUCES artifacts
 tests/                     # test_strain_features, test_neuron_dump, test_fewshot_internals
 docs/                      # the LMEnt paper (+ Gottesman et al. final version), the proposal, project.bib
 data/artifacts/            # committed results: recall/ features/ expermints/ prompts/ popqa/
-                           #   (bulk outputs data/{corpora,hf,runs} are gitignored)
+                           #   bulk outputs data/{corpora,hf,runs} (~940 GB) are gitignored and live on the
+                           #   lab filesystem -- see explicit_mentions/README.md "Where the bulk data lives"
 
 frequency_forgetting/      # sub-project: notebooks + the two trajectory CSVs
 neuron_forgetting/         # sub-project: notebook + the internal-features docs

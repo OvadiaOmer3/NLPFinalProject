@@ -19,6 +19,25 @@ outputs go under the repo's `data/` (`config.DATA_ROOT`, override with
 `LMENT_DATA_ROOT`): bulk corpora / runs / HF checkpoints beside `artifacts/`
 (gitignored), recall parquets under `data/artifacts/recall/<run-tag>/`.
 
+### Where the bulk data lives
+
+The gitignored outputs are too large for GitHub (~940 GB) and stay on the lab
+filesystem, world-readable, under the repo checkout at
+
+```
+/home/morg/NLP_2526b/shaharmayo/NLPFinalProject/data/
+  corpora/   828 GB   rewritten corpora, OLMo-core layout: explicit_all/ explicit_half/ explicit_popqa/
+  runs/       82 GB   OLMo-core training runs (config.json + final checkpoint) for the 9 trained models
+  hf/         27 GB   the same models converted to HF: <name>/stepN/  -- what eval_checkpoints.py --model reads
+```
+
+`hf/` holds `explicit_170M_1E`, `explicit_170M_2E`, `explicit_600M_1E`,
+`half_600M_1E`, `only_popqa_600M_1E`, `original_170M_1E`, `original_600M_1E`.
+Nothing in the repo's committed results depends on these being present: the
+recall parquets they produced are in `data/artifacts/recall/`. They are needed
+only to re-run an evaluation (`--model data/hf/<name>`) or to resume training.
+Regenerate any of them with the pipeline below.
+
 ## What the input looks like
 
 One row of `dataset-cache/dataset-metadata/part-N-00000.csv` = one Wikipedia
