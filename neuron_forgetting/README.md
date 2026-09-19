@@ -18,7 +18,7 @@ Shared code this uses: `src/features/internal.py` (extractor, `NeuronDump`), run
 through `feature_extraction/eval_checkpoints.py`; tests in
 `tests/test_neuron_dump.py` and `tests/test_fewshot_internals.py`.
 
-**Data read:** `data/artifacts/recall/rotemab_15shot_top10_internal/` (committed),
+**Data read:** `data/artifacts/recall/original_corpus/LMEnt_HF_models/15shot_top10pct_trajectory_1B-6E/internal/` (committed),
 `frequency_forgetting/15_shot_top_10_trajectory_with_fact_properites.csv` (committed),
 and `data/artifacts/expermints/15shot_trajectory_top10_internal_with_neurons/`
 (gitignored, ~5 GB of neuron dumps). Regenerate the latter with

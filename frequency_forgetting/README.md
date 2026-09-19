@@ -15,8 +15,8 @@ notebook.
 | `15_shot_top_10_trajectory.csv` | wide per-fact correctness matrix (id × checkpoint), written by the companion notebook |
 | `15_shot_top_10_trajectory_with_fact_properites.csv` | per-fact `prop` (relation) and `num_shared_chunks` (exposure); also read by `neuron_forgetting/02_internal_paper_figures.ipynb` |
 
-**Data read** (committed): `data/artifacts/recall/rotemab_15shot_top10_internal/`
-(`01`) and `data/artifacts/recall/rotemab_15shot_top10/` (the companion).
+**Data read** (committed): `data/artifacts/recall/original_corpus/LMEnt_HF_models/15shot_top10pct_trajectory_1B-6E/internal/`
+(`01`) and `data/artifacts/recall/original_corpus/LMEnt_HF_models/15shot_top10pct_trajectory_1B-6E/recall_only/` (the companion).
 
 **Regenerate the sweep** (GPU): `feature_extraction/eval_checkpoints.py --num-shots 15
 --top-shared-chunks-pct 10 --steps ...`; the exact command is in the notebook's first

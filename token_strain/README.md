@@ -39,7 +39,7 @@ Run everything from the repo root.
 #    are dropped, the same ids as the committed parquets. --no-hidden skips the
 #    hidden-state dump, which token strain does not use.
 #    Decoding is not bit-reproducible across reruns: a second run of this sweep
-#    (recall/rotemab_15shot_top10) gives identical prompts but flips `correct`
+#    (recall/original_corpus/LMEnt_HF_models/15shot_top10pct_trajectory_1B-6E/recall_only) gives identical prompts but flips `correct`
 #    for a small fraction of facts, which shifts the strain estimates slightly. The
 #    paper's exact numbers therefore come from the committed parquets, not a rerun.
 STEPS="50000 100000 150000 200000 250000 300000 350000 400000 450000 500000 550000 600000 658032"
